@@ -13,9 +13,27 @@ const ContactPage = () => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    setSubmitted(true);
+    
+    try {
+      const response = await fetch("https://klmsd.app.n8n.cloud/webhook/invest-decide-form", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(form),
+      });
+
+      if (response.ok) {
+        setSubmitted(true);
+        setForm({ name: "", email: "", description: "" });
+      } else {
+        console.error("Webhook request failed");
+      }
+    } catch (error) {
+      console.error("Error submitting form:", error);
+    }
   };
 
   return (
