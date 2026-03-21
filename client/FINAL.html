@@ -1,0 +1,760 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BURG Partner Hub – Enterprise Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        * { font-family: 'Inter', sans-serif; }
+        body { background: #f5f7fb; }
+        .sidebar {
+            background: linear-gradient(180deg, #0B1E33 0%, #0A253B 100%);
+        }
+        .nav-item {
+            transition: all 0.2s;
+            border-radius: 0.75rem;
+            margin: 0.25rem 0.5rem;
+            padding: 0.75rem 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            cursor: pointer;
+        }
+        .nav-item:hover { background: rgba(255,255,255,0.1); }
+        .nav-item.active { background: rgba(255,255,255,0.15); border-left: 3px solid #fbbf24; }
+        .kpi-card {
+            background: white;
+            border-radius: 1rem;
+            padding: 1.5rem;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+            transition: transform 0.2s;
+            border: 1px solid rgba(0,0,0,0.02);
+        }
+        .kpi-card:hover { transform: translateY(-2px); box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1); }
+        .badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+        }
+        .badge-blue { background: #dbeafe; color: #1e40af; }
+        .badge-green { background: #d1fae5; color: #065f46; }
+        .badge-yellow { background: #fef3c7; color: #92400e; }
+        .badge-red { background: #fee2e2; color: #b91c1c; }
+        .badge-purple { background: #ede9fe; color: #5b21b6; }
+        .table-header { background: #f9fafb; font-size: 0.75rem; font-weight: 600; color: #6b7280; text-transform: uppercase; }
+        .table-row { border-bottom: 1px solid #f3f4f6; transition: background 0.1s; cursor: pointer; }
+        .table-row:hover { background: #f9fafb; }
+        .modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.5);
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            backdrop-filter: blur(4px);
+        }
+        .modal.active { display: flex; }
+        .modal-content {
+            background: white;
+            border-radius: 2rem;
+            max-width: 600px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            padding: 2rem;
+            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25);
+        }
+        .message-bubble {
+            background: #f3f4f6;
+            border-radius: 1rem 1rem 1rem 0;
+            padding: 0.75rem;
+            max-width: 80%;
+            margin-bottom: 0.5rem;
+            display: flex;
+            gap: 0.75rem;
+            align-items: flex-start;
+        }
+        .footer-powered {
+            text-align: center;
+            padding: 1rem;
+            font-size: 0.75rem;
+            color: #9ca3af;
+            border-top: 1px solid #e5e7eb;
+            margin-top: 2rem;
+        }
+        .integration-card {
+            background: white;
+            border-radius: 1rem;
+            padding: 1.5rem;
+            border: 1px solid #e5e7eb;
+            transition: all 0.2s;
+        }
+        .integration-card:hover { border-color: #fbbf24; }
+        .file-upload-area {
+            border: 2px dashed #d1d5db;
+            border-radius: 1rem;
+            padding: 2rem;
+            text-align: center;
+            transition: border 0.2s;
+            cursor: pointer;
+        }
+        .file-upload-area:hover { border-color: #fbbf24; }
+        .file-list-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem;
+            background: #f9fafb;
+            border-radius: 0.75rem;
+            margin-bottom: 0.5rem;
+        }
+        .settings-icon {
+            margin-top: auto;
+            padding: 1rem 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            color: #9ca3af;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+        .settings-icon:hover { color: white; }
+        .meeting-item {
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .meeting-item:hover { background: #e5e7eb; }
+        .message-icon {
+            color: #9ca3af;
+            transition: color 0.2s;
+            cursor: pointer;
+        }
+        .message-icon:hover { color: #fbbf24; }
+    </style>
+</head>
+<body>
+
+<!-- Client Detail Modal -->
+<div id="clientDetailModal" class="modal">
+    <div class="modal-content">
+        <div class="flex justify-between items-start mb-4">
+            <div class="flex items-center gap-2">
+                <h2 class="text-2xl font-bold" id="modalClientName">Client Name</h2>
+                <i class="fas fa-comment-dots message-icon text-xl" onclick="openMessageCompose(currentClientId)" title="Send message"></i>
+            </div>
+            <i class="fas fa-times cursor-pointer text-gray-400 hover:text-black" onclick="closeModal('clientDetailModal')"></i>
+        </div>
+        <div class="grid grid-cols-3 gap-4 mb-4 text-sm">
+            <div><span class="text-gray-500">Email:</span> <span id="modalClientEmail" class="font-medium"></span></div>
+            <div><span class="text-gray-500">Phone:</span> <span id="modalClientPhone" class="font-medium"></span></div>
+            <div><span class="text-gray-500">City:</span> <span id="modalClientCity" class="font-medium"></span></div>
+            <div><span class="text-gray-500">Investment:</span> <span id="modalClientInvestment" class="font-medium"></span></div>
+            <div><span class="text-gray-500">Property Type:</span> <span id="modalClientProperty" class="font-medium"></span></div>
+            <div><span class="text-gray-500">Stage:</span> <span id="modalClientStage" class="font-medium"></span></div>
+            <div><span class="text-gray-500">Source:</span> <span id="modalClientSource" class="font-medium"></span></div>
+            <div><span class="text-gray-500">Enquiry Date:</span> <span id="modalClientEnquiryDate" class="font-medium"></span></div>
+            <div><span class="text-gray-500">Last Contact:</span> <span id="modalClientLastContact" class="font-medium"></span></div>
+        </div>
+        <!-- Requested Meeting -->
+        <div class="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+            <p class="text-sm"><span class="font-medium">Requested Meeting:</span> <span id="modalRequestedMeeting">Not scheduled</span></p>
+        </div>
+        <div class="mb-4"><span class="text-gray-500">Notes:</span> <p id="modalClientNotes" class="text-sm mt-1 bg-gray-50 p-2 rounded"></p></div>
+        <div class="bg-gray-50 rounded-xl p-4 mb-4">
+            <h3 class="font-semibold mb-3 flex items-center gap-2"><i class="fas fa-comments text-yellow-600"></i> Client Messages</h3>
+            <div id="messageThread" class="space-y-2 max-h-60 overflow-y-auto p-2"></div>
+        </div>
+        <div class="flex gap-3 mt-4">
+            <button class="bg-green-600 text-white px-5 py-2 rounded-lg text-sm flex items-center gap-1" onclick="acceptEnquiry()"><i class="fas fa-check"></i> Accept Enquiry</button>
+            <button class="bg-yellow-500 text-white px-5 py-2 rounded-lg text-sm flex items-center gap-1" onclick="rescheduleFromClient()"><i class="fas fa-exchange-alt"></i> Reschedule</button>
+            <button class="bg-red-500 text-white px-5 py-2 rounded-lg text-sm flex items-center gap-1" onclick="rejectEnquiry()"><i class="fas fa-times"></i> Reject</button>
+        </div>
+    </div>
+</div>
+
+<!-- Meeting Action Modal -->
+<div id="meetingActionModal" class="modal">
+    <div class="modal-content">
+        <div class="flex justify-between items-start mb-4">
+            <h2 class="text-2xl font-bold" id="meetingClientName">Client Name</h2>
+            <i class="fas fa-times cursor-pointer text-gray-400 hover:text-black" onclick="closeModal('meetingActionModal')"></i>
+        </div>
+        <p class="text-gray-600 mb-2" id="meetingCurrentTime">Current meeting: ...</p>
+        
+        <!-- Reschedule options -->
+        <div id="rescheduleOptions" class="hidden">
+            <h3 class="font-semibold mb-2">Select new date & time</h3>
+            <div class="grid grid-cols-2 gap-4 mb-4">
+                <div>
+                    <label class="block text-sm font-medium mb-1">Date</label>
+                    <input type="date" id="newMeetingDate" class="w-full border p-2 rounded-lg" value="2026-03-21">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-1">Time</label>
+                    <input type="time" id="newMeetingTime" class="w-full border p-2 rounded-lg" value="16:00">
+                </div>
+            </div>
+            <div class="flex gap-2">
+                <button class="bg-green-600 text-white px-4 py-2 rounded-lg" onclick="confirmReschedule()">Confirm</button>
+                <button class="bg-gray-300 px-4 py-2 rounded-lg" onclick="hideReschedule()">Cancel</button>
+            </div>
+        </div>
+
+        <!-- Action buttons -->
+        <div id="meetingActionButtons" class="flex gap-3 mt-4">
+            <button class="bg-yellow-500 text-white px-5 py-2 rounded-lg text-sm flex items-center gap-1" onclick="showReschedule()"><i class="fas fa-exchange-alt"></i> Reschedule</button>
+            <button class="bg-red-500 text-white px-5 py-2 rounded-lg text-sm flex items-center gap-1" onclick="cancelMeeting()"><i class="fas fa-times"></i> Cancel Meeting</button>
+        </div>
+    </div>
+</div>
+
+<!-- Compose Message Modal -->
+<div id="composeMessageModal" class="modal">
+    <div class="modal-content">
+        <div class="flex justify-between items-start mb-4">
+            <h2 class="text-2xl font-bold">Send Message</h2>
+            <i class="fas fa-times cursor-pointer text-gray-400 hover:text-black" onclick="closeModal('composeMessageModal')"></i>
+        </div>
+        <p class="text-sm text-gray-600 mb-4" id="composeRecipient">To: </p>
+        <div class="mb-4">
+            <label class="block text-sm font-medium mb-1">Channel</label>
+            <select id="messageChannel" class="w-full border p-2 rounded-lg">
+                <option value="whatsapp">WhatsApp</option>
+                <option value="email">Email</option>
+            </select>
+        </div>
+        <div class="mb-4">
+            <label class="block text-sm font-medium mb-1">Message</label>
+            <textarea id="messageText" rows="4" class="w-full border p-2 rounded-lg" placeholder="Type your message..."></textarea>
+        </div>
+        <div class="flex gap-2">
+            <button class="bg-yellow-400 px-5 py-2 rounded-lg" onclick="sendMessage()">Send</button>
+            <button class="bg-gray-300 px-5 py-2 rounded-lg" onclick="closeModal('composeMessageModal')">Cancel</button>
+        </div>
+    </div>
+</div>
+
+<!-- Main Layout -->
+<div class="flex h-screen">
+    <!-- Sidebar -->
+    <aside class="sidebar w-72 text-white flex flex-col">
+        <div class="px-6 py-8">
+            <div class="flex items-center gap-2">
+                <div class="w-10 h-10 bg-yellow-400 rounded-xl flex items-center justify-center">
+                    <span class="text-black font-bold text-xl">B</span>
+                </div>
+                <span class="text-xl font-bold">BURG<span class="text-yellow-400">Hub</span></span>
+            </div>
+        </div>
+        <nav class="flex-1">
+            <div class="nav-item active" data-section="overview">
+                <i class="fas fa-chart-pie w-6 text-yellow-400"></i>
+                <span>Executive Overview</span>
+            </div>
+            <div class="nav-item" data-section="clients">
+                <i class="fas fa-users w-6 text-gray-400"></i>
+                <span>Clients Details</span>
+            </div>
+            <div class="nav-item" data-section="meetings">
+                <i class="fas fa-calendar-check w-6 text-gray-400"></i>
+                <span>Meetings</span>
+            </div>
+            <div class="nav-item" data-section="datahub">
+                <i class="fas fa-database w-6 text-gray-400"></i>
+                <span>Data Hub</span>
+            </div>
+            <div class="nav-item" data-section="integrations">
+                <i class="fas fa-plug w-6 text-gray-400"></i>
+                <span>Integrations</span>
+            </div>
+        </nav>
+        <div class="settings-icon" onclick="alert('Settings panel would open here.')">
+            <i class="fas fa-cog"></i>
+            <span>Settings</span>
+        </div>
+        <div class="border-t border-white/10 p-6">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-yellow-400 rounded-xl flex items-center justify-center text-black font-bold">VG</div>
+                <div>
+                    <div class="font-medium">Vatika Group</div>
+                    <div class="text-xs text-gray-400">Enterprise Partner</div>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <div class="flex-1 flex flex-col overflow-hidden">
+        <header class="bg-white border-b px-8 py-4 flex items-center justify-between">
+            <div class="relative w-96">
+                <i class="fas fa-search absolute left-4 top-3.5 text-gray-400"></i>
+                <input type="text" placeholder="Search clients, meetings..." class="w-full pl-12 pr-4 py-3 bg-gray-50 border rounded-xl focus:ring-2 focus:ring-yellow-400">
+            </div>
+            <div class="flex items-center gap-4">
+                <button class="p-2 hover:bg-gray-100 rounded-xl"><i class="fas fa-bell text-gray-600 text-xl"></i></button>
+            </div>
+        </header>
+
+        <div class="flex-1 overflow-y-auto p-8 relative" id="mainContent">
+            <!-- Executive Overview -->
+            <div id="overviewSection" class="section">
+                <div class="flex justify-between items-center mb-6">
+                    <h1 class="text-3xl font-bold">Executive Overview</h1>
+                    <div class="flex items-center gap-2 bg-white px-4 py-2 rounded-xl border">
+                        <i class="fas fa-calendar-alt text-yellow-500"></i>
+                        <span id="currentDateDisplay">20 Mar 2026</span>
+                    </div>
+                </div>
+                <div class="grid grid-cols-4 gap-6 mb-6">
+                    <div class="kpi-card"><div class="text-gray-500">Connected Clients</div><div class="text-3xl font-bold mt-2">247</div><div class="text-sm text-green-600">+12 this week</div></div>
+                    <div class="kpi-card"><div class="text-gray-500">Meetings Done (Mar)</div><div class="text-3xl font-bold mt-2" id="meetingsDoneCount">86</div><div class="text-sm text-green-600">↑ 8% vs Feb</div></div>
+                    <div class="kpi-card"><div class="text-gray-500">Active Opportunities</div><div class="text-3xl font-bold mt-2">43</div><div class="text-sm text-gray-500">₹12.8Cr pipeline</div></div>
+                    <div class="kpi-card"><div class="text-gray-500">Conversion Rate</div><div class="text-3xl font-bold mt-2">23.8%</div><div class="text-sm text-gray-500">Avg: 18.2%</div></div>
+                </div>
+                <div class="bg-gradient-to-r from-purple-50 to-blue-50 rounded-xl p-4 mb-6 border border-purple-200">
+                    <div class="flex items-center gap-2 text-purple-700 mb-2"><i class="fas fa-robot"></i><span class="font-semibold">AI Insight</span></div>
+                    <p class="text-sm text-gray-700">5 new enquiries this week. Follow up with Rohan, Sneha, and Vikram.</p>
+                </div>
+                <!-- Today's Meetings (dynamic) -->
+                <div class="bg-white rounded-xl p-6 border mb-6">
+                    <h3 class="font-semibold text-lg mb-3">Today's Meetings</h3>
+                    <ul id="todayMeetingsList" class="space-y-3"></ul>
+                </div>
+                <!-- Recent Clients with message icons -->
+                <div class="bg-white rounded-xl border overflow-hidden">
+                    <div class="px-6 py-4 border-b flex justify-between">
+                        <h3 class="font-semibold">Recent Clients</h3>
+                        <button class="text-yellow-600 text-sm" onclick="switchSection('clients')">View all</button>
+                    </div>
+                    <table class="w-full">
+                        <thead class="table-header"><tr><th class="px-6 py-3 text-left">Client</th><th>Contact</th><th>Source</th><th>Value</th><th>Stage</th><th>Last Contact</th><th>Next Meeting</th><th></th></tr></thead>
+                        <tbody id="recentClientsBody"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Clients Details Section -->
+            <div id="clientsSection" class="section hidden">
+                <h2 class="text-2xl font-bold mb-6">Clients Details</h2>
+                <div class="bg-white rounded-xl border overflow-hidden">
+                    <table class="w-full">
+                        <thead class="table-header"><tr><th class="px-6 py-3 text-left">Client</th><th>Contact</th><th>Source</th><th>Type</th><th>Value</th><th>Stage</th><th>Probability</th><th>Enquiry Date</th><th>Last Contact</th><th>Next Meeting</th><th></th></tr></thead>
+                        <tbody id="clientsTableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Meetings Section -->
+            <div id="meetingsSection" class="section hidden">
+                <h2 class="text-2xl font-bold mb-6">Meetings</h2>
+                <div class="grid grid-cols-2 gap-6">
+                    <div class="bg-white rounded-xl p-6 border">
+                        <h3 class="font-semibold text-lg mb-4">Today's Meetings</h3>
+                        <ul id="todayMeetingsFullList" class="space-y-3"></ul>
+                    </div>
+                    <div class="bg-white rounded-xl p-6 border">
+                        <h3 class="font-semibold text-lg mb-4">Upcoming Meetings</h3>
+                        <ul id="upcomingMeetingsList" class="space-y-3"></ul>
+                    </div>
+                </div>
+                <div class="mt-6 bg-white rounded-xl p-6 border">
+                    <h3 class="font-semibold mb-4">March 2026</h3>
+                    <div class="grid grid-cols-7 gap-1 text-center text-xs mb-2">
+                        <div>M</div><div>T</div><div>W</div><div>T</div><div>F</div><div>S</div><div>S</div>
+                    </div>
+                    <div class="grid grid-cols-7 gap-1 text-center">
+                        <div class="p-2 text-gray-400">16</div><div class="p-2 text-gray-400">17</div><div class="p-2 text-gray-400">18</div><div class="p-2 text-gray-400">19</div>
+                        <div class="p-2 bg-yellow-200 rounded-full">20</div>
+                        <div class="p-2 bg-yellow-100 rounded-full">21</div>
+                        <div class="p-2 bg-yellow-100 rounded-full">22</div>
+                        <div class="p-2">23</div><div class="p-2">24</div><div class="p-2">25</div><div class="p-2">26</div><div class="p-2">27</div><div class="p-2">28</div><div class="p-2">29</div>
+                        <div class="p-2">30</div><div class="p-2">31</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Data Hub Section -->
+            <div id="datahubSection" class="section hidden">
+                <h2 class="text-2xl font-bold mb-6">Data Hub</h2>
+                <div class="bg-white rounded-xl p-6 border mb-6">
+                    <h3 class="font-semibold mb-4">Upload Existing Client Files</h3>
+                    <div class="file-upload-area" onclick="document.getElementById('fileInput').click()">
+                        <i class="fas fa-cloud-upload-alt text-4xl text-gray-400 mb-2"></i>
+                        <p class="text-gray-600">Drag & drop or click to upload</p>
+                        <p class="text-xs text-gray-400 mt-1">Supports CSV, Excel, Sheets</p>
+                        <input type="file" id="fileInput" class="hidden" multiple accept=".csv,.xlsx,.xls,.ods">
+                    </div>
+                    <div class="mt-6">
+                        <h4 class="font-medium mb-2">Recently Uploaded</h4>
+                        <div class="file-list-item"><span><i class="fas fa-file-excel text-green-600 mr-2"></i> clients_march_2026.xlsx</span><span class="text-xs text-gray-400">2.4 MB · 20 Mar</span></div>
+                        <div class="file-list-item"><span><i class="fas fa-file-csv text-blue-600 mr-2"></i> existing_portfolio.csv</span><span class="text-xs text-gray-400">1.1 MB · 19 Mar</span></div>
+                        <div class="file-list-item"><span><i class="fas fa-file-excel text-green-600 mr-2"></i> nri_clients.xlsx</span><span class="text-xs text-gray-400">3.5 MB · 18 Mar</span></div>
+                    </div>
+                </div>
+                <div class="bg-white rounded-xl p-6 border">
+                    <h3 class="font-semibold mb-2 flex items-center gap-2"><i class="fas fa-robot text-purple-600"></i> AI Mapping Preview</h3>
+                    <p class="text-sm text-gray-600 mb-3">When you upload files, our AI automatically maps fields to your client database.</p>
+                    <div class="bg-gray-50 p-4 rounded-lg text-sm">
+                        <p>✅ Customer Name → clientName</p>
+                        <p>✅ Email Address → primaryEmail</p>
+                        <p>✅ Phone → contactPhone</p>
+                        <p>✅ Investment → dealValue</p>
+                        <p class="mt-2 text-green-600"><i class="fas fa-check-circle"></i> 247 records ready to import</p>
+                        <button class="mt-3 bg-black text-white px-4 py-2 rounded-lg text-sm" onclick="simulateImport()">Process Import</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Integrations Section -->
+            <div id="integrationsSection" class="section hidden">
+                <h2 class="text-2xl font-bold mb-6">Integrations</h2>
+                <div class="grid grid-cols-2 gap-6">
+                    <div class="integration-card">
+                        <div class="flex items-center gap-3 mb-4"><i class="fab fa-whatsapp text-3xl text-green-500"></i><h3 class="text-lg font-semibold">WhatsApp</h3></div>
+                        <p class="text-sm text-gray-500 mb-4">Connect your WhatsApp Business account to receive messages directly.</p>
+                        <div class="flex items-center gap-2"><input type="text" placeholder="+91 98765 43210" class="flex-1 border p-2 rounded-lg"><button class="bg-green-600 text-white px-4 py-2 rounded-lg text-sm">Connect</button></div>
+                        <p class="text-xs text-gray-400 mt-2">Already connected? <span class="text-green-600">Active</span></p>
+                    </div>
+                    <div class="integration-card">
+                        <div class="flex items-center gap-3 mb-4"><i class="fas fa-envelope text-3xl text-blue-500"></i><h3 class="text-lg font-semibold">Email</h3></div>
+                        <p class="text-sm text-gray-500 mb-4">Integrate your professional email to sync all client conversations.</p>
+                        <div class="flex items-center gap-2"><input type="email" placeholder="partner@vatika.com" class="flex-1 border p-2 rounded-lg"><button class="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm">Connect</button></div>
+                        <p class="text-xs text-gray-400 mt-2">IMAP/SMTP settings available.</p>
+                    </div>
+                </div>
+                <div class="mt-6 bg-white rounded-xl p-6 border">
+                    <h3 class="font-semibold mb-2">How it works</h3>
+                    <p class="text-sm text-gray-600">Once connected, all incoming WhatsApp messages and emails from your clients will appear here. You can reply directly from the dashboard.</p>
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <div class="footer-powered">Powered by BURG</div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Enhanced client data with at least 10 clients. All new clients have a preferred meeting time.
+    const clients = [
+        { id: 1, name: 'Rajesh Sharma', email: 'rajesh.s@example.com', phone: '+91 98765 43210', city: 'Gurugram', investment: '₹2.4Cr', property: 'Residential', stage: 'Negotiation', probability: 85, meeting: { date: '2026-03-20', time: '16:00', mode: 'Video call' }, source: 'Landing Page', enquiryDate: '15 Mar 2026', lastContact: '20 Mar 2026', notes: 'Interested in Golf Course road properties. Budget flexible.', messages: [
+            { from: 'client', text: 'Hi, I\'m interested in the luxury properties in Gurugram. When can we discuss?', time: '10:30 AM' },
+            { from: 'client', text: 'Also, do you have any options near the golf course?', time: '10:32 AM' }
+        ]},
+        { id: 2, name: 'Priya Singh', email: 'priya.s@example.com', phone: '+91 98765 22222', city: 'Mumbai', investment: '₹3.8Cr', property: 'Commercial', stage: 'Proposal', probability: 72, meeting: { date: '2026-03-21', time: '11:00', mode: 'In-office' }, source: 'Landing Page', enquiryDate: '16 Mar 2026', lastContact: '19 Mar 2026', notes: 'Looking for office space in Bandra. Need 2000 sq ft.', messages: [
+            { from: 'client', text: 'I need a commercial space in Bandra. Do you have any options?', time: 'Yesterday' }
+        ]},
+        { id: 3, name: 'Amit Verma', email: 'amit.v@example.com', phone: '+91 98765 11111', city: 'Delhi', investment: '₹85L', property: 'Residential', stage: 'Qualified', probability: 45, meeting: { date: '2026-03-25', time: '15:00', mode: 'Phone call' }, source: 'Referral', enquiryDate: '14 Mar 2026', lastContact: '18 Mar 2026', notes: 'First-time buyer. Prefers Noida extension.', messages: [
+            { from: 'client', text: 'Looking for a 3BHK in Noida. Budget around 80L.', time: '2 days ago' }
+        ]},
+        { id: 4, name: 'Neha Kapoor', email: 'neha.k@example.com', phone: '+91 98765 55555', city: 'Bangalore', investment: '₹1.2Cr', property: 'Luxury', stage: 'New', probability: 20, meeting: { date: '2026-03-23', time: '10:00', mode: 'Video call' }, source: 'Landing Page', enquiryDate: '17 Mar 2026', lastContact: '19 Mar 2026', notes: 'Interested in villas near Whitefield. Has visited site once.', messages: [
+            { from: 'client', text: 'Interested in a villa near Whitefield.', time: '1 day ago' }
+        ]},
+        // New clients – all have a preferred meeting time
+        { id: 5, name: 'Rohan Gupta', email: 'rohan.g@example.com', phone: '+91 98765 12345', city: 'Lucknow', investment: '₹1.5Cr', property: 'Residential', stage: 'Enquiry', probability: 10, meeting: { date: '2026-03-24', time: '14:00', mode: 'Video call' }, source: 'Landing Page', enquiryDate: '19 Mar 2026', lastContact: '19 Mar 2026', notes: 'Looking for 4BHK in Gomti Nagar.', messages: [] },
+        { id: 6, name: 'Sneha Reddy', email: 'sneha.r@example.com', phone: '+91 98765 67890', city: 'Hyderabad', investment: '₹2.2Cr', property: 'Commercial', stage: 'Enquiry', probability: 15, meeting: { date: '2026-03-24', time: '11:30', mode: 'Phone call' }, source: 'Landing Page', enquiryDate: '19 Mar 2026', lastContact: '19 Mar 2026', notes: 'Needs office space in Hitec City.', messages: [] },
+        { id: 7, name: 'Vikram Mehta', email: 'vikram.m@example.com', phone: '+91 98765 11223', city: 'Ahmedabad', investment: '₹95L', property: 'Residential', stage: 'Enquiry', probability: 8, meeting: { date: '2026-03-25', time: '16:00', mode: 'Video call' }, source: 'Referral', enquiryDate: '18 Mar 2026', lastContact: '18 Mar 2026', notes: 'First-time buyer, prefers new launch.', messages: [] },
+        { id: 8, name: 'Pooja Desai', email: 'pooja.d@example.com', phone: '+91 98765 44556', city: 'Pune', investment: '₹3Cr', property: 'Luxury', stage: 'Enquiry', probability: 12, meeting: { date: '2026-03-26', time: '12:00', mode: 'In-office' }, source: 'Landing Page', enquiryDate: '18 Mar 2026', lastContact: '18 Mar 2026', notes: 'Interested in villas near Kalyani Nagar.', messages: [] },
+        { id: 9, name: 'Karan Malhotra', email: 'karan.m@example.com', phone: '+91 98765 77889', city: 'Chandigarh', investment: '₹1.8Cr', property: 'Residential', stage: 'Enquiry', probability: 5, meeting: { date: '2026-03-27', time: '10:00', mode: 'Phone call' }, source: 'Landing Page', enquiryDate: '17 Mar 2026', lastContact: '17 Mar 2026', notes: 'Looking for 3BHK in Mohali.', messages: [] },
+        { id: 10, name: 'Anjali Nair', email: 'anjali.n@example.com', phone: '+91 98765 99001', city: 'Kochi', investment: '₹2.5Cr', property: 'Commercial', stage: 'Enquiry', probability: 7, meeting: { date: '2026-03-28', time: '15:30', mode: 'Video call' }, source: 'Referral', enquiryDate: '17 Mar 2026', lastContact: '17 Mar 2026', notes: 'Interested in retail space.', messages: [] },
+        { id: 11, name: 'Siddharth Jain', email: 'sid.j@example.com', phone: '+91 98765 23456', city: 'Indore', investment: '₹1.2Cr', property: 'Residential', stage: 'Enquiry', probability: 9, meeting: { date: '2026-03-29', time: '09:30', mode: 'Video call' }, source: 'Landing Page', enquiryDate: '16 Mar 2026', lastContact: '16 Mar 2026', notes: 'Looking for 2BHK in Vijay Nagar.', messages: [] },
+        { id: 12, name: 'Ritu Sharma', email: 'ritu.s@example.com', phone: '+91 98765 34567', city: 'Jaipur', investment: '₹2Cr', property: 'Luxury', stage: 'Enquiry', probability: 6, meeting: { date: '2026-03-30', time: '17:00', mode: 'Phone call' }, source: 'Landing Page', enquiryDate: '16 Mar 2026', lastContact: '16 Mar 2026', notes: 'Interested in villas near Amer.', messages: [] }
+    ];
+
+    const todayStr = '2026-03-20'; // fixed for demo
+    let currentClientId = null; // for client detail modal
+
+    // Render functions
+    function renderClientsTable() {
+        const tbody = document.getElementById('clientsTableBody');
+        if (!tbody) return;
+        tbody.innerHTML = '';
+        clients.forEach(c => {
+            const row = document.createElement('tr');
+            row.className = 'table-row';
+            row.onclick = (e) => {
+                if (e.target.classList.contains('message-icon') || e.target.closest('.message-icon')) return;
+                openClientDetail(c.id);
+            };
+            row.innerHTML = `
+                <td class="px-6 py-3"><div class="font-medium">${c.name}</div><div class="text-xs text-gray-500">${c.city}</div></td>
+                <td class="px-6 py-3">${c.email}<br><span class="text-xs">${c.phone}</span></td>
+                <td class="px-6 py-3"><span class="badge badge-blue">${c.source}</span></td>
+                <td class="px-6 py-3">${c.property}</td>
+                <td class="px-6 py-3">${c.investment}</td>
+                <td class="px-6 py-3"><span class="badge ${c.stage === 'Negotiation' ? 'badge-yellow' : c.stage === 'Proposal' ? 'badge-blue' : c.stage === 'Qualified' ? 'badge-green' : c.stage === 'Enquiry' ? 'badge-purple' : 'badge-purple'}">${c.stage}</span></td>
+                <td class="px-6 py-3">
+                    <div class="flex items-center gap-2">
+                        <span>${c.probability}%</span>
+                        <div class="progress-bar w-16"><div class="progress-fill" style="width:${c.probability}%"></div></div>
+                    </div>
+                </td>
+                <td class="px-6 py-3">${c.enquiryDate}</td>
+                <td class="px-6 py-3">${c.lastContact}</td>
+                <td class="px-6 py-3">${c.meeting ? `${c.meeting.date} ${c.meeting.time}` : 'Not scheduled'}</td>
+                <td class="px-6 py-3"><i class="fas fa-comment-dots message-icon" onclick="openMessageCompose(${c.id})"></i></td>
+            `;
+            tbody.appendChild(row);
+        });
+    }
+
+    function renderRecentClients() {
+        const tbody = document.getElementById('recentClientsBody');
+        if (!tbody) return;
+        tbody.innerHTML = '';
+        clients.slice(0, 5).forEach(c => {
+            const row = document.createElement('tr');
+            row.className = 'table-row';
+            row.onclick = (e) => {
+                if (e.target.classList.contains('message-icon') || e.target.closest('.message-icon')) return;
+                openClientDetail(c.id);
+            };
+            row.innerHTML = `
+                <td class="px-6 py-3"><div class="font-medium">${c.name}</div><div class="text-xs text-gray-500">${c.city}</div></td>
+                <td class="px-6 py-3">${c.email}</td>
+                <td class="px-6 py-3"><span class="badge badge-blue">${c.source}</span></td>
+                <td class="px-6 py-3">${c.investment}</td>
+                <td class="px-6 py-3"><span class="badge ${c.stage === 'Negotiation' ? 'badge-yellow' : c.stage === 'Proposal' ? 'badge-blue' : c.stage === 'Qualified' ? 'badge-green' : c.stage === 'Enquiry' ? 'badge-purple' : 'badge-purple'}">${c.stage}</span></td>
+                <td class="px-6 py-3">${c.lastContact}</td>
+                <td class="px-6 py-3">${c.meeting ? `${c.meeting.date} ${c.meeting.time}` : '-'}</td>
+                <td class="px-6 py-3"><i class="fas fa-comment-dots message-icon" onclick="openMessageCompose(${c.id})"></i></td>
+            `;
+            tbody.appendChild(row);
+        });
+    }
+
+    function renderMeetings() {
+        const todayListOverview = document.getElementById('todayMeetingsList');
+        const todayListFull = document.getElementById('todayMeetingsFullList');
+        const upcomingList = document.getElementById('upcomingMeetingsList');
+        if (!todayListOverview || !todayListFull || !upcomingList) return;
+
+        const todayMeetings = clients.filter(c => c.meeting && c.meeting.date === todayStr);
+        const upcomingMeetings = clients.filter(c => c.meeting && c.meeting.date > todayStr);
+
+        document.getElementById('meetingsDoneCount').innerText = todayMeetings.length + 5; // just for demo
+
+        todayListOverview.innerHTML = '';
+        todayMeetings.forEach(c => {
+            const li = document.createElement('li');
+            li.className = 'flex justify-between items-center p-3 bg-gray-50 rounded meeting-item';
+            li.onclick = () => openMeetingAction(c.id);
+            li.innerHTML = `<span><span class="font-medium">${c.name}</span><span class="text-xs block">${c.meeting.time} · ${c.meeting.mode}</span></span><span class="badge badge-green">confirmed</span>`;
+            todayListOverview.appendChild(li);
+        });
+
+        todayListFull.innerHTML = '';
+        todayMeetings.forEach(c => {
+            const li = document.createElement('li');
+            li.className = 'flex justify-between items-center p-3 bg-gray-50 rounded meeting-item';
+            li.onclick = () => openMeetingAction(c.id);
+            li.innerHTML = `<span><span class="font-medium">${c.name}</span><span class="text-xs block">${c.meeting.time} · ${c.meeting.mode}</span></span><span class="badge badge-green">confirmed</span>`;
+            todayListFull.appendChild(li);
+        });
+
+        upcomingList.innerHTML = '';
+        upcomingMeetings.forEach(c => {
+            const li = document.createElement('li');
+            li.className = 'flex justify-between items-center p-3 bg-gray-50 rounded meeting-item';
+            li.onclick = () => openMeetingAction(c.id);
+            li.innerHTML = `<span><span class="font-medium">${c.name}</span><span class="text-xs block">${c.meeting.date} ${c.meeting.time} · ${c.meeting.mode}</span></span><span class="badge badge-green">scheduled</span>`;
+            upcomingList.appendChild(li);
+        });
+    }
+
+    // Client detail modal
+    function openClientDetail(id) {
+        const client = clients.find(c => c.id === id);
+        if (!client) return;
+        currentClientId = id;
+        document.getElementById('modalClientName').innerText = client.name;
+        document.getElementById('modalClientEmail').innerText = client.email;
+        document.getElementById('modalClientPhone').innerText = client.phone;
+        document.getElementById('modalClientCity').innerText = client.city;
+        document.getElementById('modalClientInvestment').innerText = client.investment;
+        document.getElementById('modalClientProperty').innerText = client.property;
+        document.getElementById('modalClientStage').innerText = client.stage;
+        document.getElementById('modalClientSource').innerText = client.source;
+        document.getElementById('modalClientEnquiryDate').innerText = client.enquiryDate;
+        document.getElementById('modalClientLastContact').innerText = client.lastContact;
+        document.getElementById('modalClientNotes').innerText = client.notes || 'No notes';
+        // Display requested meeting
+        const meetingSpan = document.getElementById('modalRequestedMeeting');
+        if (client.meeting) {
+            meetingSpan.innerText = `${client.meeting.date} at ${client.meeting.time} (${client.meeting.mode})`;
+        } else {
+            meetingSpan.innerText = 'Not scheduled';
+        }
+        const thread = document.getElementById('messageThread');
+        thread.innerHTML = '';
+        if (client.messages && client.messages.length) {
+            client.messages.forEach(msg => {
+                if (msg.from === 'client') {
+                    const bubble = document.createElement('div');
+                    bubble.className = 'message-bubble';
+                    bubble.innerHTML = `<i class="fas fa-user-circle text-gray-500 text-xl"></i><div><p class="text-sm">${msg.text}</p><span class="text-xs text-gray-400">${msg.time}</span></div>`;
+                    thread.appendChild(bubble);
+                }
+            });
+        } else {
+            thread.innerHTML = '<p class="text-sm text-gray-400">No messages from client.</p>';
+        }
+        openModal('clientDetailModal');
+    }
+
+    // Accept Enquiry: accept the client's preferred meeting and go to meetings page.
+    function acceptEnquiry() {
+        const client = clients.find(c => c.id === currentClientId);
+        if (!client) return;
+        if (client.meeting) {
+            // Mark as accepted (update stage)
+            client.stage = 'Meeting Accepted';
+            renderAll();
+            switchSection('meetings');
+            closeModal('clientDetailModal');
+        } else {
+            alert('No meeting requested by client.');
+        }
+    }
+
+    // Reschedule from client detail: open the meeting action modal with reschedule options
+    function rescheduleFromClient() {
+        const client = clients.find(c => c.id === currentClientId);
+        if (!client || !client.meeting) {
+            alert('No existing meeting to reschedule.');
+            return;
+        }
+        openMeetingAction(currentClientId);
+        setTimeout(() => {
+            showReschedule();
+        }, 100);
+    }
+
+    function rejectEnquiry() {
+        if (confirm('Reject this enquiry?')) {
+            alert('Enquiry rejected.');
+            closeModal('clientDetailModal');
+        }
+    }
+
+    // Meeting action modal (for reschedule/cancel)
+    let currentMeetingClientId = null;
+
+    function openMeetingAction(clientId) {
+        const client = clients.find(c => c.id === clientId);
+        if (!client || !client.meeting) return;
+        currentMeetingClientId = clientId;
+        document.getElementById('meetingClientName').innerText = client.name;
+        document.getElementById('meetingCurrentTime').innerText = `Current meeting: ${client.meeting.date} at ${client.meeting.time} (${client.meeting.mode})`;
+        document.getElementById('rescheduleOptions').classList.add('hidden');
+        document.getElementById('meetingActionButtons').classList.remove('hidden');
+        document.getElementById('newMeetingDate').value = client.meeting.date;
+        document.getElementById('newMeetingTime').value = client.meeting.time;
+        openModal('meetingActionModal');
+    }
+
+    function showReschedule() {
+        document.getElementById('meetingActionButtons').classList.add('hidden');
+        document.getElementById('rescheduleOptions').classList.remove('hidden');
+    }
+
+    function hideReschedule() {
+        document.getElementById('rescheduleOptions').classList.add('hidden');
+        document.getElementById('meetingActionButtons').classList.remove('hidden');
+    }
+
+    function confirmReschedule() {
+        const newDate = document.getElementById('newMeetingDate').value;
+        const newTime = document.getElementById('newMeetingTime').value;
+        if (!newDate || !newTime) return;
+        const client = clients.find(c => c.id === currentMeetingClientId);
+        if (client && client.meeting) {
+            client.meeting.date = newDate;
+            client.meeting.time = newTime;
+            renderAll();
+            switchSection('meetings');
+            closeModal('meetingActionModal');
+        }
+    }
+
+    function cancelMeeting() {
+        if (confirm('Cancel this meeting?')) {
+            const client = clients.find(c => c.id === currentMeetingClientId);
+            if (client) {
+                client.meeting = null;
+                renderAll();
+                switchSection('meetings');
+                closeModal('meetingActionModal');
+            }
+        }
+    }
+
+    // Message compose
+    function openMessageCompose(clientId) {
+        const client = clients.find(c => c.id === clientId);
+        if (!client) return;
+        document.getElementById('composeRecipient').innerText = `To: ${client.name} (${client.email})`;
+        document.getElementById('composeMessageModal').dataset.clientId = clientId;
+        openModal('composeMessageModal');
+    }
+
+    function sendMessage() {
+        const channel = document.getElementById('messageChannel').value;
+        const message = document.getElementById('messageText').value;
+        const clientId = document.getElementById('composeMessageModal').dataset.clientId;
+        const client = clients.find(c => c.id == clientId);
+        if (client && message) {
+            alert(`Message sent via ${channel} to ${client.name}: "${message}"`);
+            if (!client.messages) client.messages = [];
+            client.messages.push({ from: 'me', text: message, time: 'Just now' });
+            closeModal('composeMessageModal');
+            document.getElementById('messageText').value = '';
+        }
+    }
+
+    // Modal helpers
+    function openModal(id) { document.getElementById(id).classList.add('active'); }
+    function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+
+    // Navigation
+    const sections = { overview: 'overviewSection', clients: 'clientsSection', meetings: 'meetingsSection', datahub: 'datahubSection', integrations: 'integrationsSection' };
+    function switchSection(sectionKey) {
+        Object.values(sections).forEach(id => document.getElementById(id).classList.add('hidden'));
+        document.getElementById(sections[sectionKey]).classList.remove('hidden');
+        document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+        document.querySelector(`.nav-item[data-section="${sectionKey}"]`).classList.add('active');
+        if (sectionKey === 'meetings') renderMeetings();
+        if (sectionKey === 'overview') renderRecentClients();
+    }
+
+    function renderAll() {
+        renderClientsTable();
+        renderRecentClients();
+        renderMeetings();
+    }
+
+    document.querySelectorAll('.nav-item').forEach(item => {
+        item.addEventListener('click', () => switchSection(item.dataset.section));
+    });
+
+    // File upload simulation
+    document.getElementById('fileInput')?.addEventListener('change', function(e) {
+        if (e.target.files.length > 0) alert(`Uploaded ${e.target.files.length} file(s). In a real implementation, they would be processed.`);
+    });
+    function simulateImport() { alert('247 client records imported via AI mapping.'); }
+
+    // Initial render
+    window.onload = function() {
+        renderAll();
+        switchSection('overview');
+    };
+</script>
+</body>
+</html>

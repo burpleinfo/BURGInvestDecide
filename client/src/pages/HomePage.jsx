@@ -151,7 +151,7 @@ const HomePage = () => {
               filteredFirms.map((firm) => (
                 <div
                   key={firm.name}
-                  className={`transition duration-200 transform hover:-translate-y-1 hover:shadow-xl border border-[#f0f0f0] ${firm.path ? 'cursor-pointer' : ''} bg-white/90 backdrop-blur-md p-6 rounded-2xl shadow-sm`}
+                  className={`transition duration-200 transform hover:-translate-y-1 hover:shadow-2xl border border-white/60 ${firm.path ? 'cursor-pointer' : ''} bg-white/35 backdrop-blur-xl p-6 rounded-2xl shadow-[0_12px_34px_rgba(0,0,0,0.14)]`}
                   onClick={() => firm.path && navigate(firm.path)}
                 >
                   <div className="flex justify-between items-start mb-4">

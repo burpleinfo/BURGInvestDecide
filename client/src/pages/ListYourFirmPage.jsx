@@ -1,6 +1,9 @@
 import React, { useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import bgImage from "../assets/Background.png";
 
 const ListYourFirmPage = () => {
+  const navigate = useNavigate();
   const logoInputRef = useRef(null);
   const certInputRef = useRef(null);
   const heroInputRef = useRef(null);
@@ -26,6 +29,23 @@ const ListYourFirmPage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     const form = e.target;
+
+    const selectedServices = form.querySelectorAll('input[name="services"]:checked');
+    if (selectedServices.length === 0) {
+      alert("Please select at least one service.");
+      return;
+    }
+
+    if (!logoInputRef.current?.files[0]) {
+      alert("Please upload Firm Logo.");
+      return;
+    }
+
+    if (!certInputRef.current?.files[0]) {
+      alert("Please upload Company Registration Certificate.");
+      return;
+    }
+
     const pwd = form.password.value;
     const confirm = form.confirmPassword.value;
     if (pwd !== confirm) {
@@ -49,25 +69,38 @@ const ListYourFirmPage = () => {
         body: formData,
       });
       if (response.ok) {
-        alert("Application submitted! Our team will verify and contact you soon.");
         form.reset();
         setLogoFile(null);
         setCertFile(null);
         setHeroFile(null);
+        navigate("/list-your-firm/success");
       } else {
         alert("Submission failed. Please try again later.");
       }
-    } catch (error) {
+    } catch {
       alert("An error occurred. Please try again later.");
     }
   };
 
   return (
-    <div className="min-h-screen bg-[#f5f7fb]">
-      
+    <div className="min-h-screen bg-[#eef3ff] relative overflow-hidden">
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 h-full w-full z-0"
+        style={{
+          backgroundImage: `url(${bgImage})`,
+          backgroundRepeat: "no-repeat",
+          backgroundPosition: "center",
+          backgroundSize: "cover",
+          opacity: 0.9,
+        }}
+      />
+      <div className="pointer-events-none absolute -top-24 -left-24 h-72 w-72 rounded-full bg-yellow-300/35 blur-3xl" />
+      <div className="pointer-events-none absolute top-40 -right-24 h-80 w-80 rounded-full bg-blue-300/25 blur-3xl" />
+      <div className="pointer-events-none absolute bottom-10 left-1/3 h-72 w-72 rounded-full bg-emerald-300/20 blur-3xl" />
 
       {/* Main Form Container */}
-      <div className="form-container max-w-[900px] mx-auto px-4 py-10">
+      <div className="form-container max-w-[900px] mx-auto px-4 py-10 relative z-10">
         <div className="text-center mb-8">
           <h1 className="text-3xl md:text-4xl font-bold mb-2">Join BURG InvestDecide</h1>
           <p className="text-gray-600">Become a verified partner and get your premium wlanding page + dashboard.</p>
@@ -75,12 +108,12 @@ const ListYourFirmPage = () => {
 
         <form id="firmRegistrationForm" onSubmit={handleSubmit} className="space-y-8">
           {/* 1. Basic Information */}
-          <div className="section-card bg-white rounded-3xl p-7 mb-8 shadow-md border border-gray-200">
+          <div className="section-card bg-white/40 backdrop-blur-2xl rounded-3xl p-7 mb-8 shadow-[0_12px_34px_rgba(0,0,0,0.12)] border border-white/60">
             <h2 className="section-title text-2xl font-bold mb-4 text-[#1e1e1e] border-l-4 border-yellow-400 pl-4">Basic Information</h2>
             <div className="grid md:grid-cols-2 gap-6">
               <div>
                 <label className="form-label font-medium mb-2 block text-gray-700">Firm Name <span className="text-red-500">*</span></label>
-                <input type="text" name="firmName" className="form-input w-full p-3 border border-gray-200 rounded-xl focus:border-yellow-400 focus:ring-2 focus:ring-yellow-400 transition" placeholder="e.g., Vatika Group" />
+                <input type="text" name="firmName" required className="form-input w-full p-3 border border-gray-200 rounded-xl focus:border-yellow-400 focus:ring-2 focus:ring-yellow-400 transition" placeholder="e.g., Vatika Group" />
               </div>
               <div>
                 <label className="form-label font-medium mb-2 block text-gray-700">Year Established</label>
@@ -95,7 +128,7 @@ const ListYourFirmPage = () => {
                 <div className="file-upload-area border-2 border-dashed border-gray-200 rounded-xl p-6 text-center cursor-pointer transition hover:border-yellow-400 hover:bg-yellow-50" onClick={handleLogoClick}>
                   <i className="fas fa-cloud-upload-alt text-2xl text-gray-400 mb-2"></i>
                   <p className="text-sm text-gray-500">Click to upload logo (PNG, JPG)</p>
-                  <input type="file" ref={logoInputRef} name="logo" className="hidden" accept="image/*" onChange={handleLogoChange} />
+                  <input type="file" ref={logoInputRef} name="logo" required className="hidden" accept="image/*" onChange={handleLogoChange} />
                   {logoFile && (
                     <p className="text-xs text-green-600 mt-2">Selected: {logoFile.name}</p>
                   )}
@@ -103,26 +136,26 @@ const ListYourFirmPage = () => {
               </div>
               <div className="md:col-span-2">
                 <label className="form-label font-medium mb-2 block text-gray-700">Full Description <span className="text-red-500">*</span></label>
-                <textarea name="description" rows={4} className="form-textarea w-full p-3 border border-gray-200 rounded-xl focus:border-yellow-400 focus:ring-2 focus:ring-yellow-400 transition" placeholder="Describe your firm's history, expertise, and what makes you unique..."></textarea>
+                <textarea name="description" rows={4} required className="form-textarea w-full p-3 border border-gray-200 rounded-xl focus:border-yellow-400 focus:ring-2 focus:ring-yellow-400 transition" placeholder="Describe your firm's history, expertise, and what makes you unique..."></textarea>
               </div>
             </div>
           </div>
 
           {/* 2. Contact & Location */}
-          <div className="section-card bg-white rounded-3xl p-7 mb-8 shadow-md border border-gray-200">
+          <div className="section-card bg-white/40 backdrop-blur-2xl rounded-3xl p-7 mb-8 shadow-[0_12px_34px_rgba(0,0,0,0.12)] border border-white/60">
             <h2 className="section-title text-2xl font-bold mb-4 text-[#1e1e1e] border-l-4 border-yellow-400 pl-4">Contact & Location</h2>
             <div className="grid md:grid-cols-2 gap-6">
               <div>
                 <label className="form-label font-medium mb-2 block text-gray-700">Primary Contact Email <span className="text-red-500">*</span></label>
-                <input type="email" name="contactEmail" className="form-input w-full p-3 border border-gray-200 rounded-xl focus:border-yellow-400 focus:ring-2 focus:ring-yellow-400 transition" />
+                <input type="email" name="contactEmail" required className="form-input w-full p-3 border border-gray-200 rounded-xl focus:border-yellow-400 focus:ring-2 focus:ring-yellow-400 transition" />
               </div>
               <div>
                 <label className="form-label font-medium mb-2 block text-gray-700">Phone Number <span className="text-red-500">*</span></label>
-                <input type="tel" name="phone" className="form-input w-full p-3 border border-gray-200 rounded-xl focus:border-yellow-400 focus:ring-2 focus:ring-yellow-400 transition" />
+                <input type="tel" name="phone" required className="form-input w-full p-3 border border-gray-200 rounded-xl focus:border-yellow-400 focus:ring-2 focus:ring-yellow-400 transition" />
               </div>
               <div>
                 <label className="form-label font-medium mb-2 block text-gray-700">City <span className="text-red-500">*</span></label>
-                <input type="text" name="city" className="form-input w-full p-3 border border-gray-200 rounded-xl focus:border-yellow-400 focus:ring-2 focus:ring-yellow-400 transition" />
+                <input type="text" name="city" required className="form-input w-full p-3 border border-gray-200 rounded-xl focus:border-yellow-400 focus:ring-2 focus:ring-yellow-400 transition" />
               </div>
               <div>
                 <label className="form-label font-medium mb-2 block text-gray-700">State / Region</label>
@@ -140,13 +173,13 @@ const ListYourFirmPage = () => {
           </div>
 
           {/* 3. Credentials & Verification */}
-          <div className="section-card bg-white rounded-3xl p-7 mb-8 shadow-md border border-gray-200">
+          <div className="section-card bg-white/40 backdrop-blur-2xl rounded-3xl p-7 mb-8 shadow-[0_12px_34px_rgba(0,0,0,0.12)] border border-white/60">
             <h2 className="section-title text-2xl font-bold mb-4 text-[#1e1e1e] border-l-4 border-yellow-400 pl-4">Credentials & Verification</h2>
             <div className="space-y-4">
               <div className="grid md:grid-cols-2 gap-6">
                 <div>
                   <label className="form-label font-medium mb-2 block text-gray-700">Company Registration Number (CIN / LLPIN) <span className="text-red-500">*</span></label>
-                  <input type="text" name="companyRegNumber" className="form-input w-full p-3 border border-gray-200 rounded-xl focus:border-yellow-400 focus:ring-2 focus:ring-yellow-400 transition" placeholder="e.g., U70100MH2015PTC123456" />
+                  <input type="text" name="companyRegNumber" required className="form-input w-full p-3 border border-gray-200 rounded-xl focus:border-yellow-400 focus:ring-2 focus:ring-yellow-400 transition" placeholder="e.g., U70100MH2015PTC123456" />
                 </div>
                 <div>
                   <label className="form-label font-medium mb-2 block text-gray-700">Date of Incorporation</label>
@@ -158,7 +191,7 @@ const ListYourFirmPage = () => {
                 <div className="file-upload-area border-2 border-dashed border-gray-200 rounded-xl p-6 text-center cursor-pointer transition hover:border-yellow-400 hover:bg-yellow-50" onClick={handleCertClick}>
                   <i className="fas fa-file-pdf text-2xl text-gray-400 mb-2"></i>
                   <p className="text-sm text-gray-500">Click to upload (PDF / Image)</p>
-                  <input type="file" ref={certInputRef} name="companyCertificate" className="hidden" accept=".pdf,.jpg,.png" onChange={handleCertChange} />
+                  <input type="file" ref={certInputRef} name="companyCertificate" required className="hidden" accept=".pdf,.jpg,.png" onChange={handleCertChange} />
                   {certFile && (
                     <p className="text-xs text-green-600 mt-2">Selected: {certFile.name}</p>
                   )}
@@ -188,7 +221,7 @@ const ListYourFirmPage = () => {
           </div>
 
           {/* 4. Branding & Appearance */}
-          <div className="section-card bg-white rounded-3xl p-7 mb-8 shadow-md border border-gray-200">
+          <div className="section-card bg-white/40 backdrop-blur-2xl rounded-3xl p-7 mb-8 shadow-[0_12px_34px_rgba(0,0,0,0.12)] border border-white/60">
             <h2 className="section-title text-2xl font-bold mb-4 text-[#1e1e1e] border-l-4 border-yellow-400 pl-4">Branding & Appearance</h2>
             <div className="grid md:grid-cols-2 gap-6">
               <div>
@@ -221,12 +254,12 @@ const ListYourFirmPage = () => {
           </div>
 
           {/* 5. Services & Specialization */}
-          <div className="section-card bg-white rounded-3xl p-7 mb-8 shadow-md border border-gray-200">
+          <div className="section-card bg-white/40 backdrop-blur-2xl rounded-3xl p-7 mb-8 shadow-[0_12px_34px_rgba(0,0,0,0.12)] border border-white/60">
             <h2 className="section-title text-2xl font-bold mb-4 text-[#1e1e1e] border-l-4 border-yellow-400 pl-4">Services & Specialization</h2>
             <div>
               <label className="form-label font-medium mb-2 block text-gray-700">What services do you offer? (Select all that apply) <span className="text-red-500">*</span></label>
               <div className="checkbox-group flex flex-wrap gap-4 mt-2">
-                <label className="checkbox-item flex items-center gap-2"><input type="checkbox" name="services" value="Investment advisory" /> Investment advisory</label>
+                <label className="checkbox-item flex items-center gap-2"><input type="checkbox" name="services" value="Investment advisory" required /> Investment advisory</label>
                 <label className="checkbox-item flex items-center gap-2"><input type="checkbox" name="services" value="Property acquisition" /> Property acquisition</label>
                 <label className="checkbox-item flex items-center gap-2"><input type="checkbox" name="services" value="Portfolio structuring" /> Portfolio structuring</label>
                 <label className="checkbox-item flex items-center gap-2"><input type="checkbox" name="services" value="NRI advisory" /> NRI advisory</label>
@@ -258,7 +291,7 @@ const ListYourFirmPage = () => {
           </div>
 
           {/* 6. Client Preferences */}
-          <div className="section-card bg-white rounded-3xl p-7 mb-8 shadow-md border border-gray-200">
+          <div className="section-card bg-white/40 backdrop-blur-2xl rounded-3xl p-7 mb-8 shadow-[0_12px_34px_rgba(0,0,0,0.12)] border border-white/60">
             <h2 className="section-title text-2xl font-bold mb-4 text-[#1e1e1e] border-l-4 border-yellow-400 pl-4">Client Management Preferences</h2>
             <div>
               <label className="form-label font-medium mb-2 block text-gray-700">Preferred meeting modes (select all that apply)</label>
@@ -283,20 +316,20 @@ const ListYourFirmPage = () => {
           </div>
 
           {/* 7. Account Setup */}
-          <div className="section-card bg-white rounded-3xl p-7 mb-8 shadow-md border border-gray-200">
+          <div className="section-card bg-white/40 backdrop-blur-2xl rounded-3xl p-7 mb-8 shadow-[0_12px_34px_rgba(0,0,0,0.12)] border border-white/60">
             <h2 className="section-title text-2xl font-bold mb-4 text-[#1e1e1e] border-l-4 border-yellow-400 pl-4">Dashboard Account</h2>
             <div className="grid md:grid-cols-2 gap-6">
               <div>
                 <label className="form-label font-medium mb-2 block text-gray-700">Admin Email (for dashboard login) <span className="text-red-500">*</span></label>
-                <input type="email" name="adminEmail" className="form-input w-full p-3 border border-gray-200 rounded-xl focus:border-yellow-400 focus:ring-2 focus:ring-yellow-400 transition" />
+                <input type="email" name="adminEmail" required className="form-input w-full p-3 border border-gray-200 rounded-xl focus:border-yellow-400 focus:ring-2 focus:ring-yellow-400 transition" />
               </div>
               <div>
                 <label className="form-label font-medium mb-2 block text-gray-700">Admin Name (full name) <span className="text-red-500">*</span></label>
-                <input type="text" name="adminName" className="form-input w-full p-3 border border-gray-200 rounded-xl focus:border-yellow-400 focus:ring-2 focus:ring-yellow-400 transition" />
+                <input type="text" name="adminName" required className="form-input w-full p-3 border border-gray-200 rounded-xl focus:border-yellow-400 focus:ring-2 focus:ring-yellow-400 transition" />
               </div>
               <div>
                 <label className="form-label font-medium mb-2 block text-gray-700">Password <span className="text-red-500">*</span></label>
-                <input type="password" name="password" className="form-input w-full p-3 border border-gray-200 rounded-xl focus:border-yellow-400 focus:ring-2 focus:ring-yellow-400 transition" />
+                <input type="password" name="password" required className="form-input w-full p-3 border border-gray-200 rounded-xl focus:border-yellow-400 focus:ring-2 focus:ring-yellow-400 transition" />
               </div>
               <div>
                 <label className="form-label font-medium mb-2 block text-gray-700">Confirm Password</label>
@@ -308,14 +341,34 @@ const ListYourFirmPage = () => {
           {/* Submit Section with note */}
           <div className="text-center">
             <button type="submit" className="btn-submit bg-[#1e1e1e] text-white p-4 rounded-full font-semibold w-full transition hover:bg-yellow-400 hover:text-black">Submit Application <i className="fas fa-arrow-right ml-2"></i></button>
-            <p className="text-sm text-gray-500 mt-4">The entire process will take 2‑3 days. Once completed, BURG will inform you at the given email.</p>
+            <div className="mt-4 rounded-2xl border border-yellow-300/70 bg-yellow-100/70 backdrop-blur-md px-4 py-3 shadow-[0_8px_20px_rgba(251,191,36,0.20)]">
+              <p className="text-sm font-semibold text-yellow-900">
+                <i className="fas fa-circle-info mr-2" />
+                The entire process will take 2-3 days. Once completed, BURG will inform you at the given email.
+              </p>
+            </div>
           </div>
         </form>
       </div>
 
       {/* Footer */}
-      <footer className="bg-black text-gray-400 py-8 px-6 mt-12">
-        <div className="max-w-7xl mx-auto text-center text-sm">
+      <footer className="relative z-10 bg-black/70 backdrop-blur-md text-gray-200 py-8 px-6 mt-12 border-t border-white/15">
+        <div className="max-w-7xl mx-auto grid gap-6 md:grid-cols-3 text-sm">
+          <div>
+            <h3 className="text-white font-semibold mb-2">BURG InvestDecide</h3>
+            <p className="text-gray-300">Helping firms connect with serious real estate investors through trusted digital presence.</p>
+          </div>
+          <div>
+            <h3 className="text-white font-semibold mb-2">Support</h3>
+            <p className="text-gray-300">Email: support@burginvestdecide.com</p>
+            <p className="text-gray-300">Hours: Mon - Sat, 10:00 AM - 7:00 PM</p>
+          </div>
+          <div className="md:text-right">
+            <h3 className="text-white font-semibold mb-2">Need Help?</h3>
+            <p className="text-gray-300">If you face any issue while submitting your form, contact us and our team will assist you.</p>
+          </div>
+        </div>
+        <div className="max-w-7xl mx-auto mt-6 pt-4 border-t border-white/15 text-center text-xs text-gray-300">
           <p>© 2026 BURG InvestDecide. All rights reserved.</p>
         </div>
       </footer>

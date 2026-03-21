@@ -1,12 +1,17 @@
 import React, { useContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Menu, X } from "lucide-react";
+import { Menu, X, User, LogOut, Settings } from "lucide-react";
 import { SearchContext } from "../../contexts/SearchContext";
+import { getStoredUserEmail, clearUserData } from "../../utils/cookieUtils";
 
 const Navbar = () => {
   const navigate = useNavigate();
   const { isHomeSearchVisible, searchQuery, updateSearchQuery } = useContext(SearchContext);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [profileOpen, setProfileOpen] = useState(false);
+  const storedEmail = getStoredUserEmail();
+  const [isLoggedIn, setIsLoggedIn] = useState(Boolean(storedEmail));
+  const [userEmail, setUserEmail] = useState(storedEmail || "");
 
   useEffect(() => {
     document.body.style.overflow = menuOpen ? "hidden" : "";
@@ -15,8 +20,16 @@ const Navbar = () => {
     };
   }, [menuOpen]);
 
+  const handleLogout = () => {
+    clearUserData();
+    setIsLoggedIn(false);
+    setUserEmail("");
+    setProfileOpen(false);
+    navigate("/");
+  };
+
   return (
-    <nav className="sticky top-0 z-50 w-full border-b border-yellow-400 bg-white/95 shadow-[0_4px_24px_0_rgba(0,0,0,0.18)] backdrop-blur-sm">
+    <nav className="sticky top-0 z-50 w-full border-b border-white/40 bg-white/35 shadow-[0_8px_30px_rgba(0,0,0,0.12)] backdrop-blur-xl backdrop-saturate-150">
       <div className="flex w-full items-center gap-3 px-3 py-2 sm:px-4 lg:px-2 xl:px-2">
         <div
           className="flex min-w-max shrink-0 cursor-pointer select-none items-center text-xl  font-bold transition-opacity hover:opacity-80 sm:text-2xl"
@@ -50,12 +63,63 @@ const Navbar = () => {
 
         <div className="ml-auto flex min-w-max shrink-0 items-center gap-3 sm:gap-4 lg:gap-6 xl:gap-8">
           <div className="hidden items-center gap-4 md:flex lg:gap-6 xl:gap-8">
-            <span
-              className="cursor-pointer text-base font-bold text-black transition hover:rounded hover:border hover:border-black hover:p-2 hover:text-yellow-600 sm:text-sm"
-              onClick={() => navigate('/signup')}
-            >
-              SignUp
-            </span>
+            {!isLoggedIn ? (
+              <>
+                <button
+                  className="rounded-full bg-yellow-400 px-5 py-2 font-bold text-black shadow-md transition hover:bg-yellow-500 sm:text-sm xl:px-6 xl:py-2.5"
+                  onClick={() => navigate('/dashboard')}
+                >
+                  Dashboard
+                </button>
+                <span
+                  className="cursor-pointer text-base font-bold text-black transition hover:rounded hover:border hover:border-black hover:p-2 hover:text-yellow-600 sm:text-sm"
+                  onClick={() => navigate('/register')}
+                >
+                  SignUp
+                </span>
+              </>
+            ) : (
+              <div className="relative">
+                <button
+                  onClick={() => setProfileOpen(!profileOpen)}
+                  className="inline-flex items-center justify-center h-10 w-10 rounded-full bg-yellow-400 text-black font-bold transition hover:bg-yellow-500 shadow-md"
+                  title={userEmail}
+                >
+                  <User className="h-5 w-5" />
+                </button>
+
+                {profileOpen && (
+                  <div className="absolute right-0 mt-2 w-56 rounded-xl border border-gray-200 bg-white shadow-lg z-50 flex flex-col py-2 animate-fade-in">
+                    <div className="px-4 py-3 border-b border-gray-100">
+                      <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Account</p>
+                      <p className="text-sm font-medium text-gray-900 mt-1 truncate">{userEmail}</p>
+                    </div>
+                    <button
+                      className="w-full px-4 py-2 text-left text-base font-medium text-gray-800 hover:bg-yellow-50 transition flex items-center gap-2"
+                      onClick={() => { setProfileOpen(false); navigate('/dashboard'); }}
+                    >
+                      <User className="h-4 w-4" />
+                      Dashboard
+                    </button>
+                    <button
+                      className="w-full px-4 py-2 text-left text-base font-medium text-gray-800 hover:bg-yellow-50 transition flex items-center gap-2"
+                      onClick={() => { setProfileOpen(false); navigate('/profile'); }}
+                    >
+                      <Settings className="h-4 w-4" />
+                      Profile Settings
+                    </button>
+                    <divider className="border-b border-gray-100 my-1" />
+                    <button
+                      className="w-full px-4 py-2 text-left text-base font-medium text-red-600 hover:bg-red-50 transition flex items-center gap-2"
+                      onClick={handleLogout}
+                    >
+                      <LogOut className="h-4 w-4" />
+                      Logout
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
             <button
               className="rounded-full bg-zinc-950 px-5 py-2 font-bold text-white shadow-md transition hover:bg-zinc-600 sm:text-sm xl:px-6 xl:py-2.5"
               onClick={() => navigate('/list-your-firm')}
@@ -83,6 +147,29 @@ const Navbar = () => {
             </button>
             {menuOpen && (
               <div className="absolute right-0 mt-2 w-56 rounded-xl border border-gray-200 bg-white shadow-lg z-50 flex flex-col py-2 animate-fade-in">
+                {isLoggedIn && (
+                  <>
+                    <div className="px-4 py-3 border-b border-gray-100">
+                      <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Account</p>
+                      <p className="text-sm font-medium text-gray-900 mt-1 truncate">{userEmail}</p>
+                    </div>
+                    <button
+                      className="w-full px-4 py-2 text-left text-base font-medium text-gray-800 hover:bg-yellow-50 transition flex items-center gap-2"
+                      onClick={() => { setMenuOpen(false); navigate('/dashboard'); }}
+                    >
+                      <User className="h-4 w-4" />
+                      Dashboard
+                    </button>
+                    <button
+                      className="w-full px-4 py-2 text-left text-base font-medium text-gray-800 hover:bg-yellow-50 transition flex items-center gap-2"
+                      onClick={() => { setMenuOpen(false); navigate('/profile'); }}
+                    >
+                      <Settings className="h-4 w-4" />
+                      Profile Settings
+                    </button>
+                    <divider className="border-b border-gray-100 my-1" />
+                  </>
+                )}
                 <span className="px-4 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">Quick Links</span>
                 <button
                   className="w-full px-4 py-2 text-left text-base font-medium text-gray-800 hover:bg-yellow-50 transition"
@@ -108,6 +195,18 @@ const Navbar = () => {
                 >
                   Contact
                 </button>
+                {isLoggedIn && (
+                  <>
+                    <divider className="border-b border-gray-100 my-1" />
+                    <button
+                      className="w-full px-4 py-2 text-left text-base font-medium text-red-600 hover:bg-red-50 transition flex items-center gap-2"
+                      onClick={() => { setMenuOpen(false); handleLogout(); }}
+                    >
+                      <LogOut className="h-4 w-4" />
+                      Logout
+                    </button>
+                  </>
+                )}
               </div>
             )}
           </div>
