@@ -1,8 +1,12 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import Footer from "../widgets/Footer/Footer";
+// Import background image
+import bgImage from "../assets/Background.png";
+import { ShieldCheck, FileSearch, Star } from "lucide-react";
 
-import { useState } from "react";
+import { useState, useContext, useEffect, useRef } from "react";
+import { SearchContext } from "../contexts/SearchContext";
 
 const featuredFirms = [
   {
@@ -43,8 +47,33 @@ const featuredFirms = [
 const HomePage = () => {
   const navigate = useNavigate();
   const [search, setSearch] = useState("");
+  const { updateHomeSearchVisibility, searchQuery, updateSearchQuery } = useContext(SearchContext);
+  const searchBarRef = useRef(null);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (searchBarRef.current) {
+        const rect = searchBarRef.current.getBoundingClientRect();
+        const isVisible = rect.top >= 0 && rect.bottom <= window.innerHeight;
+        updateHomeSearchVisibility(isVisible);
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [updateHomeSearchVisibility]);
+
+  // Sync context searchQuery back to local state when navbar search is used
+  useEffect(() => {
+    setSearch(searchQuery);
+  }, [searchQuery]);
+
+  const handleSearchChange = (value) => {
+    updateSearchQuery(value);
+  };
+
   const filteredFirms = featuredFirms.filter(firm => {
-    const q = search.toLowerCase();
+    const q = searchQuery.toLowerCase();
     return (
       firm.name.toLowerCase().includes(q) ||
       firm.city.toLowerCase().includes(q) ||
@@ -56,70 +85,73 @@ const HomePage = () => {
     <div className="bg-white">
       {/* NAVBAR is handled globally */}
       {/* HERO SECTION */}
-      <section className="relative overflow-hidden bg-gradient-to-b from-white to-gray-50 px-6 py-16 md:py-20">
-        <div className="max-w-5xl mx-auto text-center">
-          <h1 className="text-6xl md:text-7xl font-black leading-tight mt-4 mb-6">
-            BURG    <br />
-            <span className="text-yellow-600">InvestDecide</span>
-          </h1>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto mb-10">
-            Find verified, premium real estate advisory firms. We vet them. You choose with confidence.
-          </p>
-          {/* SEARCH BAR */}
-          <div className="max-w-3xl mx-auto mb-8">
-            <form
-              className="bg-gradient-to-br from-white to-gray-50 border border-gray-200 transition-all duration-200 focus-within:border-yellow-400 focus-within:shadow-[0_4px_12px_rgba(251,191,36,0.15)] flex items-center p-2 rounded-full shadow-lg"
-              onSubmit={e => e.preventDefault()}
-            >
-              <span className="ml-4 mr-2 text-gray-400">
-                <i className="fas fa-search" />
-              </span>
-              <input
-                type="text"
-                placeholder="Search by firm name, city, specialty..."
-                className="flex-1 py-4 outline-none text-gray-700 bg-transparent"
-                id="searchInput"
-                value={search}
-                onChange={e => setSearch(e.target.value)}
-                autoComplete="off"
-              />
-              <button
-                type="submit"
-                className="bg-gradient-to-br from-yellow-400 to-yellow-500 hover:from-yellow-500 hover:to-yellow-600 text-black font-semibold px-8 py-3 rounded-full hover:shadow-lg transition mx-2"
-                tabIndex={-1}
-              >
-                Search
-              </button>
-            </form>
-            <p className="text-sm text-gray-500 mt-3 flex items-center justify-center gap-4">
-              <span>
-                <i className="fas fa-check-circle text-yellow-500" /> 50+ verified firms
-              </span>
-              <span>
-                <i className="fas fa-map-marker-alt text-yellow-500" /> 12 cities
-              </span>
-              <span>
-                <i className="fas fa-shield-alt text-yellow-500" /> SEBI registered only
-              </span>
+      <section className="relative overflow-hidden bg-linear-to-b from-white to-gray-50 px-3 py-8 sm:px-4 md:py-20 lg:px-6">
+        {/* Background image absolutely positioned behind hero and featured firms */}
+        <div
+          aria-hidden="true"
+          className="pointer-events-none select-none absolute inset-0 w-full h-full z-0"
+          style={{
+            backgroundImage: `url(${bgImage})`,
+            backgroundRepeat: 'no-repeat',
+            backgroundPosition: 'center',
+            backgroundSize: 'cover',
+            opacity: 1,
+          }}
+        />
+        <div className="relative z-10">
+          <div className="mx-auto max-w-5xl text-center">
+            <h1 className="mb-5 text-4xl font-black leading-tight sm:text-5xl md:text-7xl">
+              <span className="text-black">BURG</span><br />
+              <span className="bg-linear-to-r from-yellow-400 via-yellow-500 to-yellow-600 bg-clip-text text-transparent drop-shadow-lg">InvestDecide</span>
+            </h1>
+            <p className="mx-auto mb-8 max-w-3xl text-lg font-bold text-yellow-400 drop-shadow-md sm:text-xl md:text-3xl">
+              Find verified, premium real estate advisory firms. <span className="text-white">We vet them. You choose with confidence.</span>
             </p>
+            {/* SEARCH BAR */}
+            <div className="mx-auto mb-6 max-w-3xl" ref={searchBarRef}>
+              <form
+                className="flex flex-col gap-3 rounded-3xl border border-gray-200 bg-linear-to-br from-white to-gray-50 p-3 shadow-lg transition-all duration-200 focus-within:border-yellow-400 focus-within:shadow-[0_4px_12px_rgba(251,191,36,0.15)] sm:flex-row sm:items-center sm:rounded-full sm:p-2"
+                onSubmit={e => e.preventDefault()}
+              >
+                <span className="ml-4 mr-2 text-gray-400 sm:ml-4">
+                  <i className="fas fa-search" />
+                </span>
+                <input
+                  type="text"
+                  placeholder="Search by firm name, city, specialty..."
+                  className="flex-1 bg-transparent py-2.5 text-gray-700 outline-none sm:py-3"
+                  id="searchInput"
+                  value={search}
+                  onChange={e => handleSearchChange(e.target.value)}
+                  autoComplete="off"
+                />
+                <button
+                  type="submit"
+                  className="rounded-full bg-linear-to-br from-yellow-400 to-yellow-500 px-6 py-3 font-semibold text-black transition hover:from-yellow-500 hover:to-yellow-600 hover:shadow-lg sm:mx-2 sm:py-2"
+                  tabIndex={-1}
+                >
+                  Search
+                </button>
+              </form>
+            </div>
           </div>
         </div>
         {/* FEATURED FIRMS */}
-        <div className="max-w-6xl mx-auto mt-16" id="firms">
-          <div className="flex justify-between items-center mb-6">
-            <h2 className="text-2xl font-bold">Featured advisory firms</h2>
+        <div className="mx-auto mt-12 max-w-6xl px-1 sm:mt-16 sm:px-0" id="firms">
+          <div className="mb-6 flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
+            <h2 className="text-2xl font-bold sm:text-3xl">Featured advisory firms</h2>
             <a href="#firms" className="text-yellow-600 font-medium flex items-center gap-1">
               View all <i className="fas fa-arrow-right text-sm" />
             </a>
           </div>
-          <div className="grid md:grid-cols-3 gap-6">
+          <div className="grid gap-6 md:grid-cols-3">
             {filteredFirms.length === 0 ? (
               <div className="col-span-3 text-center text-gray-400 py-12 text-lg">No firms found.</div>
             ) : (
-              filteredFirms.map((firm, idx) => (
+              filteredFirms.map((firm) => (
                 <div
                   key={firm.name}
-                  className={`transition duration-200 transform hover:-translate-y-1 hover:shadow-xl border border-[#f0f0f0] ${firm.path ? 'cursor-pointer' : ''} bg-white p-6 rounded-2xl shadow-sm`}
+                  className={`transition duration-200 transform hover:-translate-y-1 hover:shadow-xl border border-[#f0f0f0] ${firm.path ? 'cursor-pointer' : ''} bg-white/90 backdrop-blur-md p-6 rounded-2xl shadow-sm`}
                   onClick={() => firm.path && navigate(firm.path)}
                 >
                   <div className="flex justify-between items-start mb-4">
@@ -153,7 +185,7 @@ const HomePage = () => {
               Most investors lose money because they don't know who to trust.
             </p>
           </div>
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-4">
             <div className="bg-white/10 backdrop-blur-sm p-6 rounded-2xl border border-white/20 hover:border-yellow-400 transition">
               <i className="fas fa-user-tie text-yellow-400 text-3xl mb-4" />
               <h3 className="text-2xl font-bold">Unverified advisors</h3>
@@ -197,10 +229,10 @@ const HomePage = () => {
               A platform that connects you with thoroughly vetted real estate advisory firms.
             </p>
           </div>
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
             <div className="border border-gray-200 p-8 rounded-3xl shadow-xl hover:shadow-2xl transition bg-white">
               <div className="w-14 h-14 bg-yellow-400 rounded-2xl flex items-center justify-center mb-6">
-                <i className="fas fa-shield-alt text-black text-2xl" />
+                <ShieldCheck className="text-black w-8 h-8" />
               </div>
               <h3 className="text-2xl font-bold">Verified only</h3>
               <p className="text-gray-600 mt-2">
@@ -209,7 +241,7 @@ const HomePage = () => {
             </div>
             <div className="border border-gray-200 p-8 rounded-3xl shadow-xl hover:shadow-2xl transition bg-white">
               <div className="w-14 h-14 bg-yellow-400 rounded-2xl flex items-center justify-center mb-6">
-                <i className="fas fa-magnifying-glass-chart text-black text-2xl" />
+                <FileSearch className="text-black w-8 h-8" />
               </div>
               <h3 className="text-2xl font-bold">Detailed profiles</h3>
               <p className="text-gray-600 mt-2">
@@ -218,7 +250,7 @@ const HomePage = () => {
             </div>
             <div className="border border-gray-200 p-8 rounded-3xl shadow-xl hover:shadow-2xl transition bg-white">
               <div className="w-14 h-14 bg-yellow-400 rounded-2xl flex items-center justify-center mb-6">
-                <i className="fas fa-star text-black text-2xl" />
+                <Star className="text-black w-8 h-8" />
               </div>
               <h3 className="text-2xl font-bold">Client reviews</h3>
               <p className="text-gray-600 mt-2">
@@ -228,13 +260,67 @@ const HomePage = () => {
           </div>
         </div>
       </section>
+      {/* HOW IT WORKS SECTION */}
+      <section className="py-20 px-6 bg-gray-50">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-16">
+            <span className="text-yellow-600 font-bold text-sm uppercase tracking-widest">simple & transparent</span>
+            <h2 className="text-4xl md:text-5xl font-bold mt-3">
+              How BURG InvestDecide works
+            </h2>
+          </div>
+          <div className="grid gap-8 md:grid-cols-3">
+            {/* Step 1 */}
+            <div className="relative">
+              <div className="flex flex-col items-center text-center">
+                <div className="w-20 h-20 bg-yellow-400 rounded-full flex items-center justify-center mb-6 font-bold text-2xl text-black">
+                  1
+                </div>
+                <h3 className="text-2xl font-bold mb-3">Search & filter</h3>
+                <p className="text-gray-600">
+                  Find firms by city, specialty, or minimum track record.
+                </p>
+              </div>
+              {/* Connecting line for desktop */}
+             
+            </div>
+            {/* Step 2 */}
+            <div className="relative">
+              <div className="flex flex-col items-center text-center">
+                <div className="w-20 h-20 bg-yellow-400 rounded-full flex items-center justify-center mb-6 font-bold text-2xl text-black">
+                  2
+                </div>
+                <h3 className="text-2xl font-bold mb-3">Review profiles</h3>
+                <p className="text-gray-600">
+                  Deep-dive into credentials, past work, and client feedback.
+                </p>
+              </div>
+              {/* Connecting line for desktop */}
+             
+            </div>
+            {/* Step 3 */}
+            <div>
+              <div className="flex flex-col items-center text-center">
+                <div className="w-20 h-20 bg-yellow-400 rounded-full flex items-center justify-center mb-6 font-bold text-2xl text-black">
+                  3
+                </div>
+                <h3 className="text-2xl font-bold mb-3">Connect directly</h3>
+                <p className="text-gray-600">
+                  Reach out to the firm through their profile. No middleman.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
       {/* LIST YOUR FIRM BUTTON */}
-      <div className="w-full flex justify-center py-10 bg-white border-t border-gray-100">
+      <div className="flex w-full flex-col items-center justify-center border-t border-gray-100 bg-yellow-500/10 px-4 py-10 text-center">
+        <h2 className="mb-7 text-3xl font-bold text-zinc-900 sm:text-4xl md:text-5xl">Are you a real estate advisory firm?</h2>
         <button
-          className="bg-yellow-500 hover:bg-yellow-600 text-white font-bold px-8 py-4 rounded-full text-lg shadow-lg transition"
+          className="rounded-full bg-zinc-950 px-8 py-4 text-lg font-bold text-white shadow-lg transition hover:bg-zinc-600"
           onClick={() => navigate('/contact')}
         >
-          List Your Firm
+          List Your Firm Today
         </button>
       </div>
       <Footer />
