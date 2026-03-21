@@ -318,7 +318,7 @@ const HomePage = () => {
         <h2 className="mb-7 text-3xl font-bold text-zinc-900 sm:text-4xl md:text-5xl">Are you a real estate advisory firm?</h2>
         <button
           className="rounded-full bg-zinc-950 px-8 py-4 text-lg font-bold text-white shadow-lg transition hover:bg-zinc-600"
-          onClick={() => navigate('/contact')}
+          onClick={() => navigate('/list-your-firm')}
         >
           List Your Firm Today
         </button>

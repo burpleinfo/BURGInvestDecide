@@ -82,24 +82,31 @@ const Navbar = () => {
               </span>
             </button>
             {menuOpen && (
-              <div className="absolute right-0 mt-2 w-48 rounded-xl border border-gray-200 bg-white shadow-lg z-50 flex flex-col py-2 animate-fade-in">
+              <div className="absolute right-0 mt-2 w-56 rounded-xl border border-gray-200 bg-white shadow-lg z-50 flex flex-col py-2 animate-fade-in">
+                <span className="px-4 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">Quick Links</span>
                 <button
                   className="w-full px-4 py-2 text-left text-base font-medium text-gray-800 hover:bg-yellow-50 transition"
                   onClick={() => { setMenuOpen(false); navigate('/about'); }}
                 >
-                  About
+                  About Us
+                </button>
+                <button
+                  className="w-full px-4 py-2 text-left text-base font-medium text-gray-800 hover:bg-yellow-50 transition"
+                  onClick={() => { setMenuOpen(false); navigate('/team'); }}
+                >
+                  Meet Our Team
+                </button>
+                <button
+                  className="w-full px-4 py-2 text-left text-base font-medium text-gray-800 hover:bg-yellow-50 transition"
+                  onClick={() => { setMenuOpen(false); navigate('/services'); }}
+                >
+                  Our Services
                 </button>
                 <button
                   className="w-full px-4 py-2 text-left text-base font-medium text-gray-800 hover:bg-yellow-50 transition"
                   onClick={() => { setMenuOpen(false); navigate('/contact'); }}
                 >
                   Contact
-                </button>
-                <button
-                  className="w-full px-4 py-2 text-left text-base font-medium text-gray-800 hover:bg-yellow-50 transition"
-                  onClick={() => { setMenuOpen(false); navigate('/certificate-validates'); }}
-                >
-                  Certificate Validates
                 </button>
               </div>
             )}

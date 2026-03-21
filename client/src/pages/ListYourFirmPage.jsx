@@ -70,7 +70,7 @@ const ListYourFirmPage = () => {
       <div className="form-container max-w-[900px] mx-auto px-4 py-10">
         <div className="text-center mb-8">
           <h1 className="text-3xl md:text-4xl font-bold mb-2">Join BURG InvestDecide</h1>
-          <p className="text-gray-600">Become a verified partner and get your premium landing page + dashboard.</p>
+          <p className="text-gray-600">Become a verified partner and get your premium wlanding page + dashboard.</p>
         </div>
 
         <form id="firmRegistrationForm" onSubmit={handleSubmit} className="space-y-8">

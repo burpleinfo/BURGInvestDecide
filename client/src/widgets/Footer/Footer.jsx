@@ -20,19 +20,13 @@ const Footer = () => (
           </a>
         </div>
       </div>
-      {/* Services */}
-      <div>
-        <h4 className="text-lg font-semibold mb-3 text-yellow-400">BURG Rentals Services</h4>
-        <ul className="space-y-1">
-          <li><a href="about" className="hover:text-yellow-400 transition">About Us</a></li>
-          <li><a href="#team" className="hover:text-yellow-400 transition">Meet Our Team</a></li>
-          <li><a href="#services" className="hover:text-yellow-400 transition">Our Services</a></li>
-        </ul>
-      </div>
       {/* Quick Links */}
       <div>
         <h4 className="text-lg font-semibold mb-3 text-yellow-400">Quick Links</h4>
         <ul className="space-y-1">
+          <li><a href="/about" className="hover:text-yellow-400 transition">About Us</a></li>
+          <li><a href="/team" className="hover:text-yellow-400 transition">Meet Our Team</a></li>
+          <li><a href="/services" className="hover:text-yellow-400 transition">Our Services</a></li>
           <li><a href="/" className="hover:text-yellow-400 transition">Home</a></li>
           <li><a href="/contact" className="hover:text-yellow-400 transition">Contact</a></li>
         </ul>
@@ -47,7 +41,10 @@ const Footer = () => (
           <li><a href="#privacy" className="hover:text-yellow-400 transition">Privacy Policy</a></li>
           <li><a href="#refund" className="hover:text-yellow-400 transition">Refund Policy</a></li>
         </ul>
-        <h4 className="text-lg font-semibold mt-6 mb-3 text-yellow-400">Contact</h4>
+      </div>
+      {/* Contact (moved to bottom right) */}
+      <div>
+        <h4 className="text-lg font-semibold mb-3 text-yellow-400">Contact</h4>
         <ul className="space-y-2">
           <li className="flex items-center space-x-2">
             <Mail size={18} />
