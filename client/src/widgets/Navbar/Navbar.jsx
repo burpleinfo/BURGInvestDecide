@@ -24,7 +24,7 @@ const Navbar = () => {
         >
           <span className="text-black">BURG</span>
           <span className="ml-1 bg-linear-to-r from-yellow-400 via-yellow-500 to-yellow-600 bg-clip-text text-transparent drop-shadow-lg">
-            Investdecide
+            InvestDecide
           </span>
         </div>
 
@@ -58,7 +58,7 @@ const Navbar = () => {
             </span>
             <button
               className="rounded-full bg-zinc-950 px-5 py-2 font-bold text-white shadow-md transition hover:bg-zinc-600 sm:text-sm xl:px-6 xl:py-2.5"
-              onClick={() => navigate('/contact')}
+              onClick={() => navigate('/list-your-firm')}
             >
               List Your Firm
             </button>

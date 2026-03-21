@@ -137,7 +137,7 @@ const BurgRealtyPage = () => {
           <span className="overline block mb-3">who we are</span>
           <h2 className="section-title mb-6 text-3xl font-serif font-semibold sm:text-4xl lg:text-[3rem]" style={{color: '#2e2b28', fontFamily: 'Literata, serif'}}>BURG Realty, in short</h2>
           <p className="text-[1.1rem] text-[#3e3a36] mb-6">A real estate advisory firm that connects investors with well‑evaluated, structured opportunities. We don’t list everything – we curate what makes sense. Every property we recommend has been walked, vetted, and stress‑tested. Our reputation lives or dies by your peace of mind.</p>
-          <p className="mt-6"><i className="fas fa-check-circle text-[#a56b3c] mr-2"></i> SEBI registered · <i className="fas fa-check-circle text-[#a56b3c] mr-2"></i> 17 yrs · <i className="fas fa-check-circle text-[#a56b3c] mr-2"></i> zero mis-selling</p>
+          <p className="mt-6"><i className="fas fa-check-circle text-[#a56b3c] mr-2"></i> 17 yrs · <i className="fas fa-check-circle text-[#a56b3c] mr-2"></i> zero mis-selling</p>
         </div>
       </div>
     </section>
@@ -186,7 +186,7 @@ const BurgRealtyPage = () => {
           <p><i className="fas fa-phone-alt mr-2" /> +91-22-2640-8800</p>
           <p><i className="fas fa-envelope mr-2" /> hello@burgrealty.in</p>
           <p><i className="fas fa-clock mr-2" /> Mon–Fri, 10am – 6pm (but we reply evenings too)</p>
-          <p className="mt-8"><i className="fas fa-seedling mr-2" /> SEBI reg. INA100004567 · since 2009</p>
+          <p className="mt-8"><i className="fas fa-seedling mr-2" /> since 2009</p>
         </div>
       </div>
     </section>
@@ -205,7 +205,7 @@ const BurgRealtyPage = () => {
         </div>
         <div className="footer-col">
           <h4 className="text-white text-[1.5rem] mb-2">Credibility</h4>
-          <p>SEBI registered · 17 years · zero commission model</p>
+          <p>17 years · zero commission model</p>
         </div>
       </div>
       <div className="footer-copyright text-center border-t border-[#4f4944] pt-8 mt-8 text-sm">

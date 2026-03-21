@@ -28,7 +28,7 @@ const AboutUs = () => (
               <div className="w-8 h-8 bg-yellow-100 rounded-full flex items-center justify-center shrink-0">
                 <span className="text-yellow-600 text-sm">✔️</span>
               </div>
-              <div><span className="font-semibold">Verified firm profiles</span><p className="text-gray-600 text-sm">Every firm undergoes background checks (SEBI registration, track record, client references).</p></div>
+              <div><span className="font-semibold">Verified firm profiles</span><p className="text-gray-600 text-sm">Every firm undergoes background checks (track record, client references).</p></div>
             </div>
             <div className="flex gap-3">
               <div className="w-8 h-8 bg-yellow-100 rounded-full flex items-center justify-center shrink-0">

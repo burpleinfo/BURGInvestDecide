@@ -12,7 +12,9 @@ import ContactPage from './pages/ContactPage';
 import SignupPage from './pages/SignupPage';
 import SigninPage from './pages/SigninPage';
 
+
 import AboutUs from './pages/AboutUs';
+import ListYourFirmPage from './pages/ListYourFirmPage';
 
 function App() {
   const location = useLocation();
@@ -31,6 +33,7 @@ function App() {
           <Route path="/signin" element={<SigninPage />} />
           <Route path="/forgot-password" element={<ForgotPasswordPage />} />
           <Route path="/reset-password" element={<ResetPasswordPage />} />
+          <Route path="/list-your-firm" element={<ListYourFirmPage />} />
         </Routes>
       </>
     </SearchProvider>

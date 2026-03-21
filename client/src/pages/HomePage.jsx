@@ -26,7 +26,7 @@ const featuredFirms = [
     years: "17 yrs",
     specialty: "Portfolio structuring & acquisition support",
     description: "Portfolio structuring & acquisition support. Family offices specialist.",
-    badge: "SEBI registered",
+    badge: "",
     color: "bg-yellow-600",
     initials: "BR",
     path: "/burg-realty",
@@ -105,7 +105,7 @@ const HomePage = () => {
               <span className="bg-linear-to-r from-yellow-400 via-yellow-500 to-yellow-600 bg-clip-text text-transparent drop-shadow-lg">InvestDecide</span>
             </h1>
             <p className="mx-auto mb-8 max-w-3xl text-lg font-bold text-yellow-400 drop-shadow-md sm:text-xl md:text-3xl">
-              Find verified, premium real estate advisory firms. <span className="text-white">We vet them. You choose with confidence.</span>
+              Find verified, premium real estate advisory firms. <span className="text-white"><br/>We vet them. You choose with confidence.</span>
             </p>
             {/* SEARCH BAR */}
             <div className="mx-auto mb-6 max-w-3xl" ref={searchBarRef}>
@@ -190,7 +190,7 @@ const HomePage = () => {
               <i className="fas fa-user-tie text-yellow-400 text-3xl mb-4" />
               <h3 className="text-2xl font-bold">Unverified advisors</h3>
               <p className="text-gray-300 mt-2">
-                Anyone can claim to be an expert. We verify credentials, track record, and SEBI registration.
+                Anyone can claim to be an expert. We verify credentials and track record.
               </p>
             </div>
             <div className="bg-white/10 backdrop-blur-sm p-6 rounded-2xl border border-white/20 hover:border-yellow-400 transition">
@@ -236,7 +236,7 @@ const HomePage = () => {
               </div>
               <h3 className="text-2xl font-bold">Verified only</h3>
               <p className="text-gray-600 mt-2">
-                Every firm is background-checked: SEBI registration, 5+ years track record, client references.
+                Every firm is background-checked:  5+ years track record, client references.
               </p>
             </div>
             <div className="border border-gray-200 p-8 rounded-3xl shadow-xl hover:shadow-2xl transition bg-white">
