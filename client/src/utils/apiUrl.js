@@ -8,13 +8,7 @@ export const getApiBaseUrl = () => {
     return configuredBaseUrl.replace(/\/$/, "");
   }
 
-  if (typeof window === "undefined") {
-    return DEFAULT_PRODUCTION_SERVER_ORIGIN;
-  }
-
-  const { origin } = window.location;
-
-  if (/localhost:5173|127\.0\.0\.1:5173/.test(origin)) {
+  if (import.meta.env.DEV) {
     return DEFAULT_LOCAL_SERVER_ORIGIN;
   }
 
