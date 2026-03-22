@@ -19,7 +19,7 @@ import SigninPage from './pages/SigninPage';
 import AboutUs from './pages/AboutUs';
 import ListYourFirmPage from './pages/ListYourFirmPage';
 import ListYourFirmSuccessPage from './pages/ListYourFirmSuccessPage';
-import Dashboard from './components/Dashboard';
+import Dashboard from './pages/Dashboard';
 
 function AppContent() {
   const location = useLocation();

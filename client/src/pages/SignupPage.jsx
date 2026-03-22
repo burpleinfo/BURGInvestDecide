@@ -331,15 +331,6 @@ const SignupPage = () => {
                 <GoogleLogo />
                 Sign up with Google
               </button>
-
-              <button
-                type="button"
-                onClick={() => handleGoogleAuth("signin")}
-                className="w-full py-3 rounded-lg font-semibold border border-gray-300 bg-white text-gray-800 hover:bg-gray-50 transition flex items-center justify-center gap-2"
-              >
-                <GoogleLogo />
-                Sign in with Google
-              </button>
             </div>
 
             <div className="text-center text-sm mt-6">

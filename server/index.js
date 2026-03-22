@@ -25,8 +25,30 @@ app.get("/", (req, res) => {
   res.send("Backend is running with MongoDB!");
 });
 
-// Start server
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
+mongoose.set("bufferCommands", false);
+
+const startServer = async () => {
+  const PORT = process.env.PORT || 5000;
+
+  if (!mongoURI) {
+    console.error("MongoDB connection string is missing. Check MONGO_URI/MONGODB_URI/MONGO_URL.");
+    process.exit(1);
+  }
+
+  try {
+    await mongoose.connect(mongoURI, {
+      serverSelectionTimeoutMS: 10000,
+    });
+
+    console.log("MongoDB connected");
+
+    app.listen(PORT, () => {
+      console.log(`Server running on port ${PORT}`);
+    });
+  } catch (err) {
+    console.error("MongoDB connection error:", err);
+    process.exit(1);
+  }
+};
+
+startServer();

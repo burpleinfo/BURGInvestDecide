@@ -12,6 +12,7 @@ const Navbar = () => {
   const storedEmail = getStoredUserEmail();
   const [isLoggedIn, setIsLoggedIn] = useState(Boolean(storedEmail));
   const [userEmail, setUserEmail] = useState(storedEmail || "");
+  const isAdmin = userEmail === "burpleinfodesk@gmail.com";
 
   useEffect(() => {
     document.body.style.overflow = menuOpen ? "hidden" : "";
@@ -61,67 +62,73 @@ const Navbar = () => {
           </form>
         </div>
 
-        <div className="ml-auto flex min-w-max shrink-0 items-center gap-3 sm:gap-4 lg:gap-6 xl:gap-8">
-          <div className="hidden items-center gap-4 md:flex lg:gap-6 xl:gap-8">
+        <div className="ml-auto flex min-w-max shrink-0 items-center gap-2 sm:gap-3 md:gap-4 lg:gap-6 xl:gap-8">
+          <div className="hidden items-center gap-2 md:flex md:gap-3 lg:gap-6 xl:gap-8">
             {!isLoggedIn ? (
               <>
-                <button
-                  className="rounded-full bg-yellow-400 px-5 py-2 font-bold text-black shadow-md transition hover:bg-yellow-500 sm:text-sm xl:px-6 xl:py-2.5"
-                  onClick={() => navigate('/dashboard')}
-                >
-                  Dashboard
-                </button>
                 <span
-                  className="cursor-pointer text-base font-bold text-black transition hover:rounded hover:border hover:border-black hover:p-2 hover:text-yellow-600 sm:text-sm"
+                  className="cursor-pointer text-sm font-bold text-black transition hover:text-yellow-600 active:scale-95 whitespace-nowrap lg:text-base"
                   onClick={() => navigate('/register')}
                 >
                   SignUp
                 </span>
               </>
             ) : (
-              <div className="relative">
-                <button
-                  onClick={() => setProfileOpen(!profileOpen)}
-                  className="inline-flex items-center justify-center h-10 w-10 rounded-full bg-yellow-400 text-black font-bold transition hover:bg-yellow-500 shadow-md"
-                  title={userEmail}
-                >
-                  <User className="h-5 w-5" />
-                </button>
-
-                {profileOpen && (
-                  <div className="absolute right-0 mt-2 w-56 rounded-xl border border-gray-200 bg-white shadow-lg z-50 flex flex-col py-2 animate-fade-in">
-                    <div className="px-4 py-3 border-b border-gray-100">
-                      <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Account</p>
-                      <p className="text-sm font-medium text-gray-900 mt-1 truncate">{userEmail}</p>
-                    </div>
-                    <button
-                      className="w-full px-4 py-2 text-left text-base font-medium text-gray-800 hover:bg-yellow-50 transition flex items-center gap-2"
-                      onClick={() => { setProfileOpen(false); navigate('/dashboard'); }}
-                    >
-                      <User className="h-4 w-4" />
-                      Dashboard
-                    </button>
-                    <button
-                      className="w-full px-4 py-2 text-left text-base font-medium text-gray-800 hover:bg-yellow-50 transition flex items-center gap-2"
-                      onClick={() => { setProfileOpen(false); navigate('/profile'); }}
-                    >
-                      <Settings className="h-4 w-4" />
-                      Profile Settings
-                    </button>
-                    <divider className="border-b border-gray-100 my-1" />
-                    <button
-                      className="w-full px-4 py-2 text-left text-base font-medium text-red-600 hover:bg-red-50 transition flex items-center gap-2"
-                      onClick={handleLogout}
-                    >
-                      <LogOut className="h-4 w-4" />
-                      Logout
-                    </button>
-                  </div>
+              <>
+                {isAdmin && (
+                  <button
+                    className="rounded-full bg-yellow-400 px-4 py-2 text-sm font-bold text-black shadow-md transition hover:bg-yellow-500 active:scale-95 lg:px-5 lg:py-2.5 xl:px-6"
+                    onClick={() => navigate('/dashboard')}
+                  >
+                    Dashboard
+                  </button>
                 )}
-              </div>
+                <div className="relative">
+                  <button
+                    onClick={() => setProfileOpen(!profileOpen)}
+                    className="inline-flex items-center justify-center h-9 w-9 sm:h-10 sm:w-10 rounded-full bg-yellow-400 text-black font-bold transition hover:bg-yellow-500 shadow-md active:scale-95"
+                    title={userEmail}
+                  >
+                    <User className="h-4 w-4 sm:h-5 sm:w-5" />
+                  </button>
+
+                  {profileOpen && (
+                    <div className="absolute right-0 mt-2 w-56 rounded-xl border border-gray-200 bg-white shadow-lg z-50 flex flex-col py-2 animate-fade-in">
+                      <div className="px-4 py-3 border-b border-gray-100">
+                        <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Account</p>
+                        <p className="text-sm font-medium text-gray-900 mt-1 truncate">{userEmail}</p>
+                      </div>
+                      {isAdmin && (
+                        <button
+                          className="w-full px-4 py-2 text-left text-base font-medium text-gray-800 hover:bg-yellow-50 transition flex items-center gap-2"
+                          onClick={() => { setProfileOpen(false); navigate('/dashboard'); }}
+                        >
+                          <User className="h-4 w-4" />
+                          Dashboard
+                        </button>
+                      )}
+                      <button
+                        className="w-full px-4 py-2 text-left text-base font-medium text-gray-800 hover:bg-yellow-50 transition flex items-center gap-2"
+                        onClick={() => { setProfileOpen(false); navigate('/profile'); }}
+                      >
+                        <Settings className="h-4 w-4" />
+                        Profile Settings
+                      </button>
+                      <divider className="border-b border-gray-100 my-1" />
+                      <button
+                        className="w-full px-4 py-2 text-left text-base font-medium text-red-600 hover:bg-red-50 transition flex items-center gap-2"
+                        onClick={handleLogout}
+                      >
+                        <LogOut className="h-4 w-4" />
+                        Logout
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </>
             )}
             <button
-              className="rounded-full bg-zinc-950 px-5 py-2 font-bold text-white shadow-md transition hover:bg-zinc-600 sm:text-sm xl:px-6 xl:py-2.5"
+              className="rounded-full bg-zinc-950 px-4 py-2 text-sm font-bold text-white shadow-md transition hover:bg-zinc-600 active:scale-95 whitespace-nowrap lg:px-5 lg:py-2.5 xl:px-6"
               onClick={() => navigate('/list-your-firm')}
             >
               List Your Firm
@@ -131,7 +138,7 @@ const Navbar = () => {
           <div className="relative">
             <button
               type="button"
-              className="inline-flex items-center justify-center rounded-full border border-yellow-400 p-2 text-black transition hover:bg-yellow-50"
+              className="inline-flex items-center justify-center rounded-full border-2 hover:border-yellow-400 p-2 sm:p-2.5 text-black transition hover:bg-yellow-50 active:scale-90"
               onClick={() => setMenuOpen((open) => !open)}
               aria-label={menuOpen ? "Close navigation menu" : "Open navigation menu"}
             >
@@ -139,27 +146,29 @@ const Navbar = () => {
                 className={`inline-block transition-transform duration-300 ease-in-out ${menuOpen ? 'rotate-90' : 'rotate-0'}`}
               >
                 {menuOpen ? (
-                  <X className="h-6 w-6" />
+                  <X className="h-5 w-5 sm:h-6 sm:w-6" />
                 ) : (
-                  <Menu className="h-6 w-6" />
+                  <Menu className="h-5 w-5 sm:h-6 sm:w-6" />
                 )}
               </span>
             </button>
             {menuOpen && (
-              <div className="absolute right-0 mt-2 w-56 rounded-xl border border-gray-200 bg-white shadow-lg z-50 flex flex-col py-2 animate-fade-in">
+              <div className="absolute right-0 mt-2 w-52 sm:w-56 rounded-xl border border-gray-200 bg-white shadow-lg z-50 flex flex-col py-2 animate-fade-in origin-top-right">
                 {isLoggedIn && (
                   <>
                     <div className="px-4 py-3 border-b border-gray-100">
                       <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Account</p>
                       <p className="text-sm font-medium text-gray-900 mt-1 truncate">{userEmail}</p>
                     </div>
-                    <button
-                      className="w-full px-4 py-2 text-left text-base font-medium text-gray-800 hover:bg-yellow-50 transition flex items-center gap-2"
-                      onClick={() => { setMenuOpen(false); navigate('/dashboard'); }}
-                    >
-                      <User className="h-4 w-4" />
-                      Dashboard
-                    </button>
+                    {isAdmin && (
+                      <button
+                        className="w-full px-4 py-2 text-left text-base font-medium text-gray-800 hover:bg-yellow-50 transition flex items-center gap-2"
+                        onClick={() => { setMenuOpen(false); navigate('/dashboard'); }}
+                      >
+                        <User className="h-4 w-4" />
+                        Dashboard
+                      </button>
+                    )}
                     <button
                       className="w-full px-4 py-2 text-left text-base font-medium text-gray-800 hover:bg-yellow-50 transition flex items-center gap-2"
                       onClick={() => { setMenuOpen(false); navigate('/profile'); }}

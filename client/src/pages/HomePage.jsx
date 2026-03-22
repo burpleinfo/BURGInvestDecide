@@ -108,18 +108,18 @@ const HomePage = () => {
               Find verified, premium real estate advisory firms. <span className="text-white"><br/>We vet them. You choose with confidence.</span>
             </p>
             {/* SEARCH BAR */}
-            <div className="mx-auto mb-6 max-w-3xl" ref={searchBarRef}>
+            <div className="mx-auto mb-8 w-full max-w-3xl px-2 sm:px-0" ref={searchBarRef}>
               <form
-                className="flex flex-col gap-3 rounded-3xl border border-gray-200 bg-linear-to-br from-white to-gray-50 p-3 shadow-lg transition-all duration-200 focus-within:border-yellow-400 focus-within:shadow-[0_4px_12px_rgba(251,191,36,0.15)] sm:flex-row sm:items-center sm:rounded-full sm:p-2"
+                className="flex flex-col gap-2.5 rounded-2xl border border-gray-200 bg-linear-to-br from-white to-gray-50 p-3.5 shadow-lg transition-all duration-200 focus-within:border-yellow-400 focus-within:shadow-[0_4px_12px_rgba(251,191,36,0.15)] sm:flex-row sm:items-center sm:rounded-full sm:gap-1 sm:p-2 md:p-2.5"
                 onSubmit={e => e.preventDefault()}
               >
-                <span className="ml-4 mr-2 text-gray-400 sm:ml-4">
+                <span className="hidden sm:inline-block ml-2 mr-1 text-gray-400 text-sm">
                   <i className="fas fa-search" />
                 </span>
                 <input
                   type="text"
-                  placeholder="Search by firm name, city, specialty..."
-                  className="flex-1 bg-transparent py-2.5 text-gray-700 outline-none sm:py-3"
+                  placeholder="Search firms by name, city, specialty..."
+                  className="flex-1 bg-transparent py-2.5 text-sm sm:text-base text-gray-700 outline-none placeholder-gray-400 sm:py-2.5 md:py-3"
                   id="searchInput"
                   value={search}
                   onChange={e => handleSearchChange(e.target.value)}
@@ -127,7 +127,7 @@ const HomePage = () => {
                 />
                 <button
                   type="submit"
-                  className="rounded-full bg-linear-to-br from-yellow-400 to-yellow-500 px-6 py-3 font-semibold text-black transition hover:from-yellow-500 hover:to-yellow-600 hover:shadow-lg sm:mx-2 sm:py-2"
+                  className="rounded-full bg-linear-to-br from-yellow-400 to-yellow-500 px-5 py-2.5 text-sm font-semibold text-black transition hover:from-yellow-500 hover:to-yellow-600 hover:shadow-lg active:scale-95 w-full sm:w-auto sm:px-6 sm:py-2 md:px-6 md:py-2.5"
                   tabIndex={-1}
                 >
                   Search
@@ -138,8 +138,8 @@ const HomePage = () => {
         </div>
         {/* FEATURED FIRMS */}
         <div className="mx-auto mt-12 max-w-6xl px-1 sm:mt-16 sm:px-0" id="firms">
-          <div className="mb-6 flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
-            <h2 className="text-2xl font-bold sm:text-3xl">Featured advisory firms</h2>
+          <div className="mb-6 flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center z-20 relative">
+            <h2 className="text-2xl font-bold sm:text-3xl !text-black">Featured advisory firms</h2>
             <a href="#firms" className="text-yellow-600 font-medium flex items-center gap-1">
               View all <i className="fas fa-arrow-right text-sm" />
             </a>
@@ -151,7 +151,7 @@ const HomePage = () => {
               filteredFirms.map((firm) => (
                 <div
                   key={firm.name}
-                  className={`transition duration-200 transform hover:-translate-y-1 hover:shadow-2xl border border-white/60 ${firm.path ? 'cursor-pointer' : ''} bg-white/35 backdrop-blur-xl p-6 rounded-2xl shadow-[0_12px_34px_rgba(0,0,0,0.14)]`}
+                  className={`transition duration-200 transform hover:-translate-y-1 hover:shadow-2xl border border-white/60 hover:border-yellow-400 ${firm.path ? 'cursor-pointer' : ''} bg-white/35 backdrop-blur-xl p-6 rounded-2xl shadow-[0_12px_34px_rgba(0,0,0,0.14)]`}
                   onClick={() => firm.path && navigate(firm.path)}
                 >
                   <div className="flex justify-between items-start mb-4">

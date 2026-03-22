@@ -108,6 +108,12 @@ router.get("/google/callback", async (req, res) => {
 
     let user = await User.findOne({ email: profile.email });
 
+    // For signin mode: user must already exist
+    if (mode === "signin" && !user) {
+      return res.redirect(`${buildClientUrl("/signin")}?google=error&reason=no_account`);
+    }
+
+    // For signup mode: create user if doesn't exist
     if (!user) {
       user = new User({
         fullName: profile.name || profile.given_name || "Google User",
@@ -118,6 +124,7 @@ router.get("/google/callback", async (req, res) => {
       });
       await user.save();
     } else if (!user.googleId) {
+      // Update existing user with Google ID if not already linked
       user.googleId = profile.sub;
       if (!user.fullName && profile.name) {
         user.fullName = profile.name;

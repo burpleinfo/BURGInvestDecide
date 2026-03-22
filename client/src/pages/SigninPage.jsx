@@ -51,6 +51,7 @@ const SigninPage = () => {
     const searchParams = new URLSearchParams(location.search);
     const googleStatus = searchParams.get("google");
     const email = searchParams.get("email");
+    const reason = searchParams.get("reason");
 
     if (googleStatus === "success" && email) {
       if (areCookiesAllowed()) {
@@ -61,7 +62,11 @@ const SigninPage = () => {
     }
 
     if (googleStatus === "error") {
-      setApiError("Google authentication failed. Please try again.");
+      if (reason === "no_account") {
+        setApiError("No account found. Please sign up first using Google.");
+      } else {
+        setApiError("Google authentication failed. Please try again.");
+      }
     }
   }, [location.search, navigate, addToast]);
 
