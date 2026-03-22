@@ -6,6 +6,7 @@ import Footer from "../widgets/Footer/Footer";
 import bgImage from "../assets/Background.png";
 import { useToast } from "../contexts/ToastContext";
 import { storeUserData, areCookiesAllowed } from "../utils/cookieUtils";
+import { getApiUrl } from "../utils/apiUrl";
 
 const GoogleLogo = () => (
   <svg viewBox="0 0 48 48" aria-hidden="true" className="h-5 w-5">
@@ -29,7 +30,7 @@ const SignupPage = () => {
 
   const handleGoogleAuth = (mode) => {
     try {
-      const endpoint = `/api/auth/google?mode=${mode}`;
+      const endpoint = getApiUrl(`/api/auth/google?mode=${mode}`);
       window.location.assign(endpoint);
     } catch {
       setApiError("Google authentication is currently unavailable. Please try again.");
@@ -115,7 +116,7 @@ const SignupPage = () => {
     if (!fullNameError && !emailError && !passwordError && !confirmPasswordError) {
       setLoading(true);
       try {
-        const res = await fetch("/api/auth/signup", {
+        const res = await fetch(getApiUrl("/api/auth/signup"), {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
