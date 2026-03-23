@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { FiUsers, FiCalendar, FiBriefcase, FiTrendingUp, FiAlertCircle, FiMessageSquare, FiSettings, FiDatabase, FiCpu, FiGlobe, FiUserCheck, FiZap, FiX, FiSend, FiMapPin, FiStar, FiFileText, FiShield, FiBookOpen, FiCheckCircle, FiSearch } from 'react-icons/fi';
+import { Settings as LucideSettings } from 'lucide-react';
 
 // ═══════════════════════════════════════════════════
 // UTILITY FUNCTIONS (Outside Component)
@@ -699,11 +700,11 @@ function Sidebar({ activeSection, setActiveSection, setModalOpen, profileData, c
   return (
     <aside className={`w-64 bg-linear-to-r ${sidebarThemeClass} text-white flex flex-col`} style={{ minWidth: '256px' }}>
       <div className="px-5 py-6">
-        <div className="flex items-center gap-2">
-          <div className="w-9 h-9 rounded-xl flex items-center justify-center bg-yellow-400">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-yellow-400">
             <span className="text-black font-bold text-lg">B</span>
           </div>
-          <span className="text-xl font-bold">BURG<span className="text-yellow-400">Hub</span></span>
+          <span className="text-xl font-bold">BURGHUB</span>
         </div>
       </div>
 
@@ -745,7 +746,16 @@ function Sidebar({ activeSection, setActiveSection, setModalOpen, profileData, c
 
       <div className="border-t border-white border-opacity-10 px-5 py-4">
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl flex items-center justify-center text-black font-bold text-sm bg-yellow-400">{profileData.displayName.split(' ').map(part => part[0]).join('').slice(0, 2).toUpperCase()}</div>
+          {profileData.photo ? (
+            <img
+              src={profileData.photo}
+              alt="Profile"
+              className="w-9 h-9 rounded-xl object-cover border-2 border-yellow-400 bg-white"
+              style={{ minWidth: 36, minHeight: 36 }}
+            />
+          ) : (
+            <div className="w-9 h-9 rounded-xl flex items-center justify-center text-black font-bold text-sm bg-yellow-400">{profileData.displayName.split(' ').map(part => part[0]).join('').slice(0, 2).toUpperCase()}</div>
+          )}
           <div>
             <div className="font-medium text-sm">{profileData.orgName}</div>
             <div className="text-xs text-gray-300">Enterprise Partner</div>
@@ -809,6 +819,19 @@ function Header({ searchQuery, setSearchQuery, clients, setModalOpen, currentDat
 // ═══════════════════════════════════════════════════
 function SettingsModal({ modalOpen, setModalOpen, settingsPanel, setSettingsPanel, profileData, setProfileData, currentTheme, setCurrentTheme, leftDualTheme, setLeftDualTheme, rightDualTheme, setRightDualTheme, onExportCsv, onExportExcel }) {
   const [draftProfile, setDraftProfile] = useState(profileData);
+  const [photo, setPhoto] = useState(profileData.photo || null);
+
+  // Handle photo upload and preview
+  const handlePhotoChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        setPhoto(ev.target.result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
   if (!modalOpen.settings) return null;
 
@@ -828,7 +851,7 @@ function SettingsModal({ modalOpen, setModalOpen, settingsPanel, setSettingsPane
           <div className="w-48 bg-gray-50 border-r border-gray-200 p-4 overflow-y-auto">
             <div className="flex items-center gap-2 mb-6">
               <div className="w-8 h-8 rounded-lg flex items-center justify-center bg-yellow-400">
-                <i className="fas fa-cog text-black text-sm"></i>
+                <LucideSettings size={20} color="#000" />
               </div>
               <span className="font-bold text-sm">Settings</span>
             </div>
@@ -864,15 +887,38 @@ function SettingsModal({ modalOpen, setModalOpen, settingsPanel, setSettingsPane
                 <div className="space-y-4">
                   <div className="p-4 rounded-xl border border-gray-200 bg-gray-50 flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                      <div className="w-12 h-12 rounded-xl bg-yellow-400 text-black font-bold flex items-center justify-center">
-                        {draftProfile.displayName.split(' ').map(part => part[0]).join('').slice(0, 2).toUpperCase()}
-                      </div>
+                      {photo ? (
+                        <img
+                          src={photo}
+                          alt="Profile"
+                          className="w-12 h-12 rounded-xl object-cover border border-yellow-400"
+                        />
+                      ) : (
+                        <div className="w-12 h-12 rounded-xl bg-yellow-400 text-black font-bold flex items-center justify-center">
+                          {draftProfile.displayName.split(' ').map(part => part[0]).join('').slice(0, 2).toUpperCase()}
+                        </div>
+                      )}
                       <div>
                         <div className="font-semibold">{draftProfile.orgName}</div>
                         <div className="text-xs text-gray-600">Enterprise Partner · Active</div>
                       </div>
                     </div>
-                    <button className="px-3 py-2 text-sm font-medium border border-gray-200 bg-white rounded-lg hover:bg-gray-100 transition">Change Photo</button>
+                    <div>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        id="profile-photo-input"
+                        style={{ display: 'none' }}
+                        onChange={handlePhotoChange}
+                      />
+                      <button
+                        className="px-3 py-2 text-sm font-medium border border-gray-200 bg-white rounded-lg hover:bg-gray-100 transition"
+                        onClick={() => document.getElementById('profile-photo-input').click()}
+                        type="button"
+                      >
+                        Change Photo
+                      </button>
+                    </div>
                   </div>
 
                   <div className="grid grid-cols-2 gap-4">
@@ -913,12 +959,13 @@ function SettingsModal({ modalOpen, setModalOpen, settingsPanel, setSettingsPane
               <div>
                 <h2 className="text-xl font-bold mb-1">Appearance</h2>
                 <p className="text-sm text-gray-600 mb-6">Customise how BURG Hub looks.</p>
-                <div className="grid grid-cols-2 gap-3">
-                  {['default', 'dark', 'blue', 'green'].map(t => (
+                {/* Only show default and dark themes */}
+                <div className="grid grid-cols-2 gap-3 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-2">
+                  {['default', 'dark'].map(t => (
                     <button
                       key={t}
                       onClick={() => setCurrentTheme(t)}
-                      className={`p-3 border-2 rounded-lg cursor-pointer transition text-left ${currentTheme === t ? 'border-yellow-400 bg-yellow-50' : 'border-gray-200 hover:border-yellow-200'}`}
+                      className={`p-3 border-2 rounded-lg cursor-pointer transition text-left w-full ${currentTheme === t ? 'border-yellow-400 bg-yellow-50' : 'border-gray-200 hover:border-yellow-200'}`}
                     >
                       <div className="text-sm font-semibold capitalize">{t} Theme</div>
                       <div className="text-xs text-gray-600 mt-1">{currentTheme === t ? 'Selected' : 'Click to apply'}</div>
@@ -929,7 +976,7 @@ function SettingsModal({ modalOpen, setModalOpen, settingsPanel, setSettingsPane
                 <div className="mt-6 grid grid-cols-1 gap-5">
                   <div>
                     <h4 className="text-sm font-semibold mb-2">Left Section Dual Color Theme</h4>
-                    <div className="grid grid-cols-2 gap-2">
+                    <div className="grid grid-cols-2 gap-2 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-2">
                       {[
                         { id: 'from-blue-900 to-blue-950', name: 'Navy Night' },
                         { id: 'from-indigo-900 to-purple-900', name: 'Indigo Plum' },
@@ -939,7 +986,7 @@ function SettingsModal({ modalOpen, setModalOpen, settingsPanel, setSettingsPane
                         <button
                           key={theme.id}
                           onClick={() => setLeftDualTheme(theme.id)}
-                          className={`p-2.5 border rounded-lg text-left transition ${leftDualTheme === theme.id ? 'border-yellow-400 bg-yellow-50' : 'border-gray-200 hover:border-yellow-200'}`}
+                          className={`p-2.5 border rounded-lg text-left transition w-full ${leftDualTheme === theme.id ? 'border-yellow-400 bg-yellow-50' : 'border-gray-200 hover:border-yellow-200'}`}
                         >
                           <div className={`h-4 rounded bg-linear-to-r ${theme.id} mb-1`}></div>
                           <div className="text-xs font-medium">{theme.name}</div>
@@ -950,7 +997,7 @@ function SettingsModal({ modalOpen, setModalOpen, settingsPanel, setSettingsPane
 
                   <div>
                     <h4 className="text-sm font-semibold mb-2">Right Section Dual Color Theme</h4>
-                    <div className="grid grid-cols-2 gap-2">
+                    <div className="grid grid-cols-2 gap-2 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-2">
                       {[
                         { id: 'from-gray-50 to-gray-100', name: 'Soft Gray' },
                         { id: 'from-blue-50 to-cyan-100', name: 'Sky Mist' },
@@ -960,7 +1007,7 @@ function SettingsModal({ modalOpen, setModalOpen, settingsPanel, setSettingsPane
                         <button
                           key={theme.id}
                           onClick={() => setRightDualTheme(theme.id)}
-                          className={`p-2.5 border rounded-lg text-left transition ${rightDualTheme === theme.id ? 'border-yellow-400 bg-yellow-50' : 'border-gray-200 hover:border-yellow-200'}`}
+                          className={`p-2.5 border rounded-lg text-left transition w-full ${rightDualTheme === theme.id ? 'border-yellow-400 bg-yellow-50' : 'border-gray-200 hover:border-yellow-200'}`}
                         >
                           <div className={`h-4 rounded bg-linear-to-r ${theme.id} mb-1`}></div>
                           <div className="text-xs font-medium">{theme.name}</div>
@@ -1160,6 +1207,7 @@ function SettingsModal({ modalOpen, setModalOpen, settingsPanel, setSettingsPane
               <button
                 onClick={() => {
                   setDraftProfile(profileData);
+                  setPhoto(profileData.photo || null);
                   setModalOpen(prev => ({ ...prev, settings: false }));
                 }}
                 className="px-4 py-2 border border-gray-200 rounded-lg text-sm font-medium hover:bg-gray-50"
@@ -1168,7 +1216,7 @@ function SettingsModal({ modalOpen, setModalOpen, settingsPanel, setSettingsPane
               </button>
               <button
                 onClick={() => {
-                  setProfileData(draftProfile);
+                  setProfileData({ ...draftProfile, photo });
                   setModalOpen(prev => ({ ...prev, settings: false }));
                 }}
                 className="px-4 py-2 bg-yellow-400 text-black rounded-lg text-sm font-semibold hover:bg-yellow-500 transition"
@@ -1872,7 +1920,12 @@ const Dashboard = () => {
                     type="text"
                     value={inboxSectionInput}
                     onChange={(e) => setInboxSectionInput(e.target.value)}
-                    onKeyDown={(e) => e.key === 'Enter' && handleSend()}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        handleSend();
+                      }
+                    }}
                     placeholder="Type a message..."
                     className="flex-1 px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-yellow-400"
                   />
@@ -2112,65 +2165,124 @@ const Dashboard = () => {
     );
   };
 
-  const DataHubSection = () => (
-    <div className="space-y-5">
-      <h2 className="text-2xl font-bold mb-5">Data Hub</h2>
+  // DataHubSection moved to its own function below
+  // DataHubSection as a function component
+  function DataHubSection() {
+    const [uploadedFiles, setUploadedFiles] = useState([
+      { name: 'march_client_dump.csv', info: '247 records · Uploaded 2 mins ago' },
+      { name: 'leads_referral_batch.xlsx', info: '89 records · Uploaded today' },
+      { name: 'old_pipeline_export.csv', info: '431 records · Uploaded yesterday' },
+    ]);
+    const [uploading, setUploading] = useState(false);
+    const [uploadError, setUploadError] = useState('');
 
-      <div className="rounded-2xl p-5 border border-gray-200 bg-white">
-        <h3 className="font-semibold mb-4">Upload Existing Client Files</h3>
-        <div className="border-2 border-dashed border-gray-300 rounded-xl p-8 text-center hover:border-yellow-400 transition cursor-pointer">
-          <i className="fas fa-cloud-upload-alt text-4xl text-gray-400 mb-2 block"></i>
-          <p className="text-gray-600">Drag & drop or click to upload</p>
-          <p className="text-xs text-gray-500 mt-1">Supports CSV, Excel, Google Sheets</p>
+    const handleFileChange = async (e) => {
+      setUploadError('');
+      const file = e.target.files[0];
+      if (!file) return;
+      const allowed = [
+        'application/pdf',
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        'application/vnd.ms-excel',
+        'text/csv',
+      ];
+      if (!allowed.includes(file.type) && !file.name.match(/\.(pdf|xlsx|xls|csv)$/i)) {
+        setUploadError('Only PDF, XLSX, XLS, or CSV files are allowed.');
+        return;
+      }
+      setUploading(true);
+      // Simulate upload delay
+      setTimeout(() => {
+        setUploadedFiles(prev => [
+          { name: file.name, info: `Uploaded just now` },
+          ...prev.slice(0, 4)
+        ]);
+        setUploading(false);
+      }, 1200);
+    };
+
+    const handleDrop = (e) => {
+      e.preventDefault();
+      if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+        const fakeEvent = { target: { files: e.dataTransfer.files } };
+        handleFileChange(fakeEvent);
+      }
+    };
+
+    const handleDragOver = (e) => {
+      e.preventDefault();
+    };
+
+    return (
+      <div className="space-y-5">
+        <h2 className="text-2xl font-bold mb-5">Data Hub</h2>
+
+        <div className="rounded-2xl p-5 border border-gray-200 bg-white">
+          <h3 className="font-semibold mb-4">Upload Existing Client Files</h3>
+          <div
+            className="border-2 border-dashed border-gray-300 rounded-xl p-8 text-center hover:border-yellow-400 transition cursor-pointer relative"
+            onDrop={handleDrop}
+            onDragOver={handleDragOver}
+            onClick={() => document.getElementById('file-upload-input').click()}
+            style={{ minHeight: 120 }}
+          >
+            <input
+              id="file-upload-input"
+              type="file"
+              accept=".pdf,.xlsx,.xls,.csv,application/pdf,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel,text/csv"
+              style={{ display: 'none' }}
+              onChange={handleFileChange}
+              disabled={uploading}
+            />
+            <i className="fas fa-cloud-upload-alt text-4xl text-gray-400 mb-2 block"></i>
+            <p className="text-gray-600">Drag & drop or click to upload</p>
+            <p className="text-xs text-gray-500 mt-1">Supports PDF, Excel, CSV</p>
+            {uploading && <div className="mt-2 text-xs text-blue-500">Uploading...</div>}
+            {uploadError && <div className="mt-2 text-xs text-red-500">{uploadError}</div>}
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 xl:grid-cols-2 gap-5">
+          <div className="rounded-2xl p-5 border border-gray-200 bg-white">
+            <div className="flex items-center gap-2 mb-4">
+              <FiDatabase className="text-blue-600 text-lg" />
+              <h3 className="font-semibold">Recently Uploaded</h3>
+            </div>
+            <div className="space-y-3">
+              {uploadedFiles.map((file, idx) => (
+                <div key={file.name + idx} className="p-3 rounded-lg bg-gray-50 border border-gray-100">
+                  <div className="text-sm font-medium">{file.name}</div>
+                  <div className="text-xs text-gray-600 mt-1">{file.info}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="rounded-2xl p-5 border border-gray-200 bg-white">
+            <div className="flex items-center gap-2 mb-2">
+              <FiCpu className="text-purple-600 text-lg" />
+              <h3 className="font-semibold">AI Mapping Preview</h3>
+            </div>
+            <p className="text-sm text-gray-600 mb-4">AI automatically maps fields when you upload.</p>
+
+            <div className="space-y-2 text-sm mb-5">
+              <div className="p-2.5 rounded-lg bg-green-50 border border-green-200">✅ Customer Name → <span className="font-medium">clientName</span></div>
+              <div className="p-2.5 rounded-lg bg-green-50 border border-green-200">✅ Email Address → <span className="font-medium">primaryEmail</span></div>
+              <div className="p-2.5 rounded-lg bg-green-50 border border-green-200">✅ Phone → <span className="font-medium">contactPhone</span></div>
+              <div className="p-2.5 rounded-lg bg-green-50 border border-green-200">✅ Investment → <span className="font-medium">dealValue</span></div>
+            </div>
+
+            <div className="flex items-center justify-between pt-3 border-t border-gray-200">
+              <div className="text-sm font-semibold">247 records ready to import</div>
+              <button className="px-4 py-2 rounded-lg bg-yellow-400 text-black text-sm font-medium hover:bg-yellow-500 transition">
+                Process Import
+              </button>
+            </div>
+          </div>
         </div>
       </div>
-
-      <div className="grid grid-cols-1 xl:grid-cols-2 gap-5">
-        <div className="rounded-2xl p-5 border border-gray-200 bg-white">
-          <div className="flex items-center gap-2 mb-4">
-            <FiDatabase className="text-blue-600 text-lg" />
-            <h3 className="font-semibold">Recently Uploaded</h3>
-          </div>
-          <div className="space-y-3">
-            <div className="p-3 rounded-lg bg-gray-50 border border-gray-100">
-              <div className="text-sm font-medium">march_client_dump.csv</div>
-              <div className="text-xs text-gray-600 mt-1">247 records · Uploaded 2 mins ago</div>
-            </div>
-            <div className="p-3 rounded-lg bg-gray-50 border border-gray-100">
-              <div className="text-sm font-medium">leads_referral_batch.xlsx</div>
-              <div className="text-xs text-gray-600 mt-1">89 records · Uploaded today</div>
-            </div>
-            <div className="p-3 rounded-lg bg-gray-50 border border-gray-100">
-              <div className="text-sm font-medium">old_pipeline_export.csv</div>
-              <div className="text-xs text-gray-600 mt-1">431 records · Uploaded yesterday</div>
-            </div>
-          </div>
-        </div>
-
-        <div className="rounded-2xl p-5 border border-gray-200 bg-white">
-          <div className="flex items-center gap-2 mb-2">
-            <FiCpu className="text-purple-600 text-lg" />
-            <h3 className="font-semibold">AI Mapping Preview</h3>
-          </div>
-          <p className="text-sm text-gray-600 mb-4">AI automatically maps fields when you upload.</p>
-
-          <div className="space-y-2 text-sm mb-5">
-            <div className="p-2.5 rounded-lg bg-green-50 border border-green-200">✅ Customer Name → <span className="font-medium">clientName</span></div>
-            <div className="p-2.5 rounded-lg bg-green-50 border border-green-200">✅ Email Address → <span className="font-medium">primaryEmail</span></div>
-            <div className="p-2.5 rounded-lg bg-green-50 border border-green-200">✅ Phone → <span className="font-medium">contactPhone</span></div>
-            <div className="p-2.5 rounded-lg bg-green-50 border border-green-200">✅ Investment → <span className="font-medium">dealValue</span></div>
-          </div>
-
-          <div className="flex items-center justify-between pt-3 border-t border-gray-200">
-            <div className="text-sm font-semibold">247 records ready to import</div>
-            <button className="px-4 py-2 rounded-lg bg-yellow-400 text-black text-sm font-medium hover:bg-yellow-500 transition">
-              Process Import
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
+    );
+  }
 
   const IntegrationsSection = () => (
     <div className="space-y-5">
