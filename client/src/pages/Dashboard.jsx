@@ -180,6 +180,7 @@ function MeetingActionModal({ client, isOpen, onClose, onReschedule, onCancelMee
 
 function InboxModal({ clients, isOpen, onClose, selectedClientId, setSelectedClientId, messagesByClient, onSendMessage }) {
   const [inboxInput, setInboxInput] = useState('');
+  const inputRef = React.useRef(null);
 
   useEffect(() => {
     if (isOpen && !selectedClientId && clients.length > 0) {
@@ -196,6 +197,8 @@ function InboxModal({ clients, isOpen, onClose, selectedClientId, setSelectedCli
     if (!activeClient || !inboxInput.trim()) return;
     onSendMessage(activeClient.id, inboxInput.trim());
     setInboxInput('');
+    // Keep focus on input after sending
+    if (inputRef.current) inputRef.current.focus();
   };
 
   return (
@@ -251,10 +254,16 @@ function InboxModal({ clients, isOpen, onClose, selectedClientId, setSelectedCli
 
                 <div className="p-4 border-t border-gray-200 flex gap-2">
                   <input
+                    ref={inputRef}
                     type="text"
                     value={inboxInput}
                     onChange={(e) => setInboxInput(e.target.value)}
-                    onKeyDown={(e) => e.key === 'Enter' && handleSend()}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        handleSend();
+                      }
+                    }}
                     placeholder="Type a message..."
                     className="flex-1 px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-yellow-400"
                   />
@@ -1242,8 +1251,16 @@ function SettingsModal({ modalOpen, setModalOpen, settingsPanel, setSettingsPane
 // MAIN DASHBOARD COMPONENT
 // ═══════════════════════════════════════════════════
 const Dashboard = () => {
-  const [activeSection, setActiveSection] = useState('overview');
+  // Persist activeSection in localStorage
+  const [activeSection, setActiveSection] = useState(() => {
+    return localStorage.getItem('burg_active_section') || 'overview';
+  });
   const [searchQuery, setSearchQuery] = useState('');
+
+  // Save activeSection to localStorage on change
+  useEffect(() => {
+    localStorage.setItem('burg_active_section', activeSection);
+  }, [activeSection]);
   const [stageFilter, setStageFilter] = useState('');
   const [modalOpen, setModalOpen] = useState({});
   const [currentDate, setCurrentDate] = useState(new Date());
@@ -1857,11 +1874,14 @@ const Dashboard = () => {
   const InboxSection = () => {
     const activeClient = clients.find(c => c.id === selectedInboxClientId) || clients[0] || null;
     const activeMessages = activeClient ? (messagesByClient[activeClient.id] || []) : [];
+    const inputRef = React.useRef(null);
 
+    // Use a controlled input, value and setter from Dashboard state
     const handleSend = () => {
       if (!activeClient || !inboxSectionInput.trim()) return;
       handleInboxSendMessage(activeClient.id, inboxSectionInput.trim());
       setInboxSectionInput('');
+      if (inputRef.current) inputRef.current.focus();
     };
 
     return (
@@ -1917,6 +1937,7 @@ const Dashboard = () => {
 
                 <div className="p-4 border-t border-gray-200 flex gap-2">
                   <input
+                    ref={inputRef}
                     type="text"
                     value={inboxSectionInput}
                     onChange={(e) => setInboxSectionInput(e.target.value)}
@@ -1928,6 +1949,7 @@ const Dashboard = () => {
                     }}
                     placeholder="Type a message..."
                     className="flex-1 px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-yellow-400"
+                    autoComplete="off"
                   />
                   <button
                     onClick={handleSend}
