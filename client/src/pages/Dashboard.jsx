@@ -814,7 +814,15 @@ function SettingsModal({ modalOpen, setModalOpen, settingsPanel, setSettingsPane
 
   return (
     <div className="fixed inset-0 bg-black/10 backdrop-blur-sm z-40 flex items-center justify-center">
-      <div className="bg-white rounded-2xl w-11/12 max-w-2xl max-h-[90vh] overflow-hidden flex flex-col">
+      <div className="bg-white rounded-2xl w-11/12 max-w-2xl max-h-[90vh] overflow-hidden flex flex-col relative">
+        {/* Close Button Top Right */}
+        <button
+          onClick={() => setModalOpen(prev => ({ ...prev, settings: false }))}
+          className="absolute top-3 right-3 text-gray-400 hover:text-gray-600 text-2xl z-50 p-1 rounded-full focus:outline-none focus:ring-2 focus:ring-yellow-400"
+          aria-label="Close settings"
+        >
+          <FiX />
+        </button>
         <div className="flex h-full">
           {/* Settings Sidebar */}
           <div className="w-48 bg-gray-50 border-r border-gray-200 p-4 overflow-y-auto">
@@ -848,7 +856,7 @@ function SettingsModal({ modalOpen, setModalOpen, settingsPanel, setSettingsPane
           </div>
 
           {/* Settings Content */}
-          <div className="flex-1 p-6 overflow-y-auto">
+          <div className="flex-1 p-6 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
             {settingsPanel === 'profile' && (
               <div>
                 <h2 className="text-xl font-bold mb-1">Profile</h2>
