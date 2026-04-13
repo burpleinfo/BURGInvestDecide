@@ -1,0 +1,1755 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BURG RideSafe — School, University & Corporate Transport</title>
+<link href="https://fonts.googleapis.com/css2?family=Clash+Display:wght@400;500;600;700&family=Instrument+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════════════════════════════
+   DESIGN SYSTEM
+═══════════════════════════════════════════════════════════════ */
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  /* Primary palette — refined dark navy + warm saffron */
+  --ink:       #080f1c;
+  --navy:      #0c1628;
+  --navy-mid:  #112038;
+  --saffron:   #e86b0a;
+  --saffron-l: #fff0e5;
+  --saffron-d: #c45608;
+  --gold:      #f0a500;
+  --sky:       #0061e0;
+  --sky-l:     #e8f0ff;
+  --teal:      #006b6b;
+  --teal-l:    #e0f4f4;
+  --green:     #0a8050;
+  --green-l:   #e3f5ed;
+  --red:       #c8002a;
+
+  /* Neutral */
+  --white:     #ffffff;
+  --off:       #f8f5f0;
+  --border:    rgba(8,15,28,0.1);
+  --border-s:  rgba(8,15,28,0.18);
+  --muted:     #6a7a94;
+
+  /* Type */
+  --font:   'Instrument Sans', sans-serif;
+  --display:'Clash Display', 'Instrument Sans', sans-serif;
+
+  /* Shadows */
+  --sh-sm:  0 2px 10px rgba(8,15,28,0.07);
+  --sh-md:  0 8px 32px rgba(8,15,28,0.10);
+  --sh-lg:  0 20px 60px rgba(8,15,28,0.13);
+  --sh-xl:  0 32px 80px rgba(8,15,28,0.18);
+
+  --r: 14px;
+}
+
+html { scroll-behavior: smooth; font-size: 16px; }
+body { background: var(--white); color: var(--ink); font-family: var(--font); overflow-x: hidden; }
+img { max-width: 100%; }
+a { text-decoration: none; color: inherit; }
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-thumb { background: rgba(8,15,28,0.2); border-radius: 3px; }
+
+/* ── UTILITIES ────────────────────────────────────────────────── */
+.container { max-width: 1200px; margin: 0 auto; padding: 0 40px; }
+.section-label {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-size: 11px; font-weight: 700; letter-spacing: 2.5px; text-transform: uppercase;
+  padding: 5px 14px; border-radius: 50px; margin-bottom: 16px;
+}
+.section-title {
+  font-family: var(--display); font-size: clamp(36px, 4.5vw, 60px);
+  font-weight: 700; letter-spacing: -1.5px; line-height: 1.05;
+}
+.section-sub {
+  font-size: 17px; color: var(--muted); line-height: 1.7;
+  max-width: 560px; margin-top: 14px;
+}
+.tag {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: 12px; font-weight: 600; padding: 4px 12px; border-radius: 50px;
+  letter-spacing: 0.3px;
+}
+
+/* ── BUTTONS ─────────────────────────────────────────────────── */
+.btn {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-family: var(--font); font-weight: 700; font-size: 15px;
+  padding: 13px 28px; border-radius: 50px; border: 2px solid transparent;
+  cursor: pointer; transition: all 0.22s cubic-bezier(0.34,1.2,0.64,1);
+  letter-spacing: 0.2px; white-space: nowrap;
+}
+.btn:hover { transform: translateY(-2px); }
+.btn-dark { background: var(--ink); color: var(--white); }
+.btn-dark:hover { background: var(--navy-mid); box-shadow: 0 8px 24px rgba(8,15,28,0.28); }
+.btn-saffron { background: var(--saffron); color: var(--white); border-color: var(--saffron); }
+.btn-saffron:hover { background: var(--saffron-d); box-shadow: 0 8px 24px rgba(232,107,10,0.32); }
+.btn-outline { background: transparent; border-color: var(--border-s); color: var(--ink); }
+.btn-outline:hover { background: var(--ink); color: #fff; border-color: var(--ink); }
+.btn-ghost-white { background: rgba(255,255,255,0.12); color: #fff; border-color: rgba(255,255,255,0.2); backdrop-filter: blur(4px); }
+.btn-ghost-white:hover { background: rgba(255,255,255,0.22); box-shadow: 0 8px 24px rgba(0,0,0,0.2); }
+.btn-sm { font-size: 13px; padding: 9px 20px; }
+.btn-lg { font-size: 16px; padding: 16px 36px; }
+.btn-xl { font-size: 17px; padding: 18px 42px; }
+
+/* ── PAGE ROUTER ─────────────────────────────────────────────── */
+.page { display: none; }
+.page.active { display: block; }
+
+/* ═══════════════════════════════════════════════════════════════
+   NAVIGATION
+═══════════════════════════════════════════════════════════════ */
+#navbar {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 900;
+  transition: all 0.3s;
+}
+.nav-inner {
+  display: flex; align-items: center; height: 68px;
+  background: rgba(8,15,28,0.95); backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(255,255,255,0.07);
+  padding: 0 40px; gap: 32px;
+}
+.nav-logo { display: flex; align-items: center; gap: 10px; cursor: pointer; flex-shrink: 0; }
+.nav-logo-mark {
+  width: 38px; height: 38px; border-radius: 9px;
+  background: linear-gradient(135deg, var(--saffron), var(--gold));
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--display); font-weight: 700; font-size: 14px; color: #fff; letter-spacing: -0.5px;
+}
+.nav-logo-name { font-family: var(--display); font-size: 17px; font-weight: 600; color: #fff; letter-spacing: -0.3px; }
+.nav-logo-sub { font-size: 9px; color: rgba(255,255,255,0.4); letter-spacing: 1.5px; }
+
+.nav-links { display: flex; align-items: center; gap: 4px; flex: 1; }
+.nav-link {
+  padding: 7px 14px; border-radius: 8px; font-size: 13px; font-weight: 600;
+  color: rgba(255,255,255,0.65); cursor: pointer; transition: all 0.15s; white-space: nowrap;
+}
+.nav-link:hover { color: #fff; background: rgba(255,255,255,0.08); }
+.nav-link.active { color: #fff; background: rgba(255,255,255,0.1); }
+.nav-divider { width: 1px; height: 20px; background: rgba(255,255,255,0.12); margin: 0 4px; }
+
+.nav-actions { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+.nav-contact { font-size: 12px; color: rgba(255,255,255,0.5); }
+.nav-contact a { color: rgba(255,255,255,0.75); transition: color 0.15s; }
+.nav-contact a:hover { color: #fff; }
+
+/* ═══════════════════════════════════════════════════════════════
+   PAGE 1 — MAIN (SCHOOL + UNI + CORPORATE HUB)
+═══════════════════════════════════════════════════════════════ */
+
+/* ── HERO ─────────────────────────────────────────────────────── */
+.hero {
+  background: var(--ink); min-height: 100vh;
+  display: flex; flex-direction: column; justify-content: flex-end;
+  padding: 140px 40px 80px; position: relative; overflow: hidden;
+}
+/* Architectural grid lines */
+.hero::before {
+  content: '';
+  position: absolute; inset: 0;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+  background-size: 80px 80px;
+}
+.hero-glow-1 {
+  position: absolute; width: 800px; height: 800px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(232,107,10,0.13) 0%, transparent 60%);
+  top: -200px; right: -200px; pointer-events: none;
+}
+.hero-glow-2 {
+  position: absolute; width: 500px; height: 500px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(0,97,224,0.10) 0%, transparent 60%);
+  bottom: -100px; left: -100px; pointer-events: none;
+}
+.hero-content { max-width: 1200px; margin: 0 auto; width: 100%; position: relative; z-index: 1; }
+.hero-eyebrow {
+  display: flex; align-items: center; gap: 10px; margin-bottom: 28px;
+}
+.hero-eyebrow-line { width: 32px; height: 2px; background: var(--saffron); }
+.hero-eyebrow-text { font-size: 12px; font-weight: 700; color: var(--saffron); letter-spacing: 3px; text-transform: uppercase; }
+.hero-title {
+  font-family: var(--display); font-size: clamp(52px, 7vw, 96px);
+  font-weight: 700; line-height: 0.96; letter-spacing: -3px; color: #fff;
+  margin-bottom: 36px;
+}
+.hero-title .accent { color: var(--saffron); }
+.hero-title .outline {
+  -webkit-text-stroke: 1.5px rgba(255,255,255,0.3);
+  color: transparent;
+}
+.hero-bottom { display: flex; align-items: flex-end; justify-content: space-between; gap: 40px; flex-wrap: wrap; }
+.hero-desc { font-size: 17px; color: rgba(255,255,255,0.6); line-height: 1.65; max-width: 440px; }
+.hero-actions { display: flex; flex-direction: column; align-items: flex-end; gap: 16px; }
+.hero-cta-row { display: flex; gap: 12px; flex-wrap: wrap; justify-content: flex-end; }
+.hero-stats { display: flex; gap: 32px; }
+.hstat { text-align: center; }
+.hstat-val { font-family: var(--display); font-size: 32px; font-weight: 700; color: #fff; letter-spacing: -1px; }
+.hstat-lbl { font-size: 11px; color: rgba(255,255,255,0.4); letter-spacing: 1px; margin-top: 2px; }
+
+/* ── SEGMENT SELECTOR ────────────────────────────────────────── */
+.segment-section { background: var(--white); padding: 80px 40px; }
+.segment-header { text-align: center; margin-bottom: 56px; }
+.segments-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; max-width: 1120px; margin: 0 auto; }
+.segment-card {
+  position: relative; border-radius: 20px; padding: 40px 32px 36px;
+  cursor: pointer; overflow: hidden; transition: all 0.35s cubic-bezier(0.34,1.2,0.64,1);
+  border: 2px solid transparent; min-height: 340px; display: flex; flex-direction: column; justify-content: space-between;
+}
+.segment-card:hover { transform: translateY(-8px); box-shadow: var(--sh-xl); }
+
+.seg-school { background: linear-gradient(145deg, #0c1628 0%, #152844 100%); }
+.seg-corporate { background: linear-gradient(145deg, #0f1f0f 0%, #162816 100%); }
+.seg-university { background: linear-gradient(145deg, #1a0a00 0%, #2a1400 100%); }
+
+.segment-card .seg-badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: 10px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase;
+  padding: 4px 12px; border-radius: 50px; margin-bottom: 20px; width: fit-content;
+}
+.seg-school .seg-badge { background: rgba(0,97,224,0.2); color: #6eb3ff; }
+.seg-corporate .seg-badge { background: rgba(10,128,80,0.2); color: #5dcd9a; }
+.seg-university .seg-badge { background: rgba(232,107,10,0.2); color: #ffb07a; }
+
+.segment-card h3 { font-family: var(--display); font-size: 30px; font-weight: 700; color: #fff; letter-spacing: -0.8px; margin-bottom: 12px; }
+.segment-card p { font-size: 14px; color: rgba(255,255,255,0.55); line-height: 1.65; margin-bottom: 28px; flex: 1; }
+.seg-features { display: flex; flex-direction: column; gap: 7px; margin-bottom: 28px; }
+.seg-feat { display: flex; align-items: center; gap: 8px; font-size: 12px; color: rgba(255,255,255,0.7); font-weight: 500; }
+.seg-feat::before { content: '—'; opacity: 0.4; flex-shrink: 0; }
+.seg-arrow {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-size: 13px; font-weight: 700; transition: gap 0.2s;
+}
+.seg-school .seg-arrow { color: #6eb3ff; }
+.seg-corporate .seg-arrow { color: #5dcd9a; }
+.seg-university .seg-arrow { color: #ffb07a; }
+.segment-card:hover .seg-arrow { gap: 14px; }
+
+/* Decorative corner shape */
+.seg-deco {
+  position: absolute; top: 0; right: 0; width: 120px; height: 120px;
+  border-radius: 0 20px 0 120px; opacity: 0.06;
+}
+.seg-school .seg-deco { background: var(--sky); }
+.seg-corporate .seg-deco { background: var(--green); }
+.seg-university .seg-deco { background: var(--saffron); }
+
+/* ── TRUST STRIP ─────────────────────────────────────────────── */
+.trust-strip {
+  background: var(--off); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);
+  padding: 28px 40px; display: flex; align-items: center; justify-content: center;
+  gap: 48px; flex-wrap: wrap;
+}
+.trust-item { display: flex; align-items: center; gap: 10px; }
+.trust-icon { font-size: 22px; }
+.trust-text { font-size: 13px; font-weight: 600; color: var(--muted); }
+.trust-sep { width: 4px; height: 4px; border-radius: 50%; background: var(--border-s); }
+
+/* ── WHY BURG ────────────────────────────────────────────────── */
+.why-section { padding: 100px 40px; background: var(--white); }
+.why-grid { display: grid; grid-template-columns: 1fr 1.1fr; gap: 80px; align-items: center; max-width: 1200px; margin: 60px auto 0; }
+.why-visual { position: relative; }
+.why-card-stack { position: relative; height: 420px; }
+.wcard {
+  position: absolute; background: var(--white); border-radius: var(--r);
+  border: 1px solid var(--border); box-shadow: var(--sh-md); padding: 20px;
+}
+.wcard.c1 { top: 0; left: 0; right: 40px; }
+.wcard.c2 { top: 100px; left: 30px; right: 0; }
+.wcard.c3 { bottom: 0; left: 0; right: 60px; }
+.wcard-label { font-size: 10px; font-weight: 700; letter-spacing: 1.5px; color: var(--muted); text-transform: uppercase; margin-bottom: 8px; }
+.wcard-val { font-family: var(--display); font-size: 28px; font-weight: 700; letter-spacing: -0.5px; }
+.wcard-sub { font-size: 12px; color: var(--muted); margin-top: 4px; }
+.wcard-bar { height: 6px; background: var(--border); border-radius: 3px; margin-top: 10px; overflow: hidden; }
+.wcard-fill { height: 100%; border-radius: 3px; }
+.why-features { display: flex; flex-direction: column; gap: 28px; }
+.why-feat {
+  display: flex; gap: 16px; padding: 20px; border-radius: var(--r);
+  border: 1px solid transparent; transition: all 0.2s; cursor: default;
+}
+.why-feat:hover { background: var(--off); border-color: var(--border); }
+.why-feat-icon {
+  width: 44px; height: 44px; border-radius: 10px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center; font-size: 20px;
+}
+.why-feat-title { font-size: 15px; font-weight: 700; margin-bottom: 4px; }
+.why-feat-desc { font-size: 13px; color: var(--muted); line-height: 1.6; }
+
+/* ── MARQUEE ─────────────────────────────────────────────────── */
+.marquee-wrap { background: var(--ink); padding: 16px 0; overflow: hidden; }
+.marquee-track { display: flex; animation: marquee 30s linear infinite; }
+.marquee-item { display: flex; align-items: center; gap: 10px; padding: 0 32px; white-space: nowrap; font-size: 13px; font-weight: 600; color: rgba(255,255,255,0.55); flex-shrink: 0; }
+.marquee-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--saffron); flex-shrink: 0; }
+@keyframes marquee { 0%{transform:translateX(0)} 100%{transform:translateX(-50%)} }
+
+/* ═══════════════════════════════════════════════════════════════
+   ENROLLMENT FORMS — shared shell
+═══════════════════════════════════════════════════════════════ */
+.enroll-page-hero {
+  background: var(--ink); padding: 140px 40px 80px; position: relative; overflow: hidden;
+}
+.enroll-page-hero::before {
+  content: ''; position: absolute; inset: 0;
+  background-image: linear-gradient(rgba(255,255,255,0.025) 1px,transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px);
+  background-size: 60px 60px;
+}
+.eph-content { max-width: 800px; position: relative; z-index: 1; }
+.eph-tag { display: inline-flex; align-items: center; gap: 7px; font-size: 11px; font-weight: 700; color: var(--saffron); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 20px; }
+.eph-tag::before { content: ''; width: 24px; height: 2px; background: var(--saffron); }
+.eph-title { font-family: var(--display); font-size: clamp(36px, 5vw, 64px); font-weight: 700; color: #fff; letter-spacing: -2px; line-height: 1.02; margin-bottom: 16px; }
+.eph-sub { font-size: 17px; color: rgba(255,255,255,0.55); line-height: 1.65; max-width: 520px; }
+
+/* Step progress */
+.enroll-progress { background: var(--off); border-bottom: 1px solid var(--border); }
+.progress-inner { max-width: 800px; margin: 0 auto; padding: 24px 40px; }
+.progress-steps { display: flex; align-items: center; }
+.ps { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+.ps-circle {
+  width: 34px; height: 34px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px; font-weight: 700; border: 2px solid var(--border-s);
+  color: var(--muted); background: var(--white); transition: all 0.3s;
+}
+.ps-circle.active { background: var(--saffron); border-color: var(--saffron); color: #fff; }
+.ps-circle.done { background: var(--green); border-color: var(--green); color: #fff; }
+.ps-label { font-size: 10px; font-weight: 700; color: var(--muted); letter-spacing: 0.3px; white-space: nowrap; }
+.ps-label.active { color: var(--saffron); }
+.ps-line { flex: 1; height: 2px; background: var(--border); margin: 0 6px 18px; transition: background 0.3s; }
+.ps-line.done { background: var(--green); }
+
+/* Form container */
+.enroll-form-section { padding: 60px 40px 80px; background: var(--white); }
+.form-container { max-width: 800px; margin: 0 auto; }
+.form-card { background: var(--white); border: 1px solid var(--border); border-radius: 20px; padding: 40px; box-shadow: var(--sh-sm); }
+.form-step-title { font-family: var(--display); font-size: 26px; font-weight: 700; letter-spacing: -0.5px; margin-bottom: 4px; }
+.form-step-sub { font-size: 14px; color: var(--muted); margin-bottom: 32px; }
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+.form-grid.g1 { grid-template-columns: 1fr; }
+.form-grid.g3 { grid-template-columns: 1fr 1fr 1fr; }
+.field { display: flex; flex-direction: column; gap: 6px; }
+.field.full { grid-column: 1 / -1; }
+.field label { font-size: 12px; font-weight: 700; color: var(--ink); letter-spacing: 0.2px; }
+.field label .req { color: var(--saffron); }
+.field input, .field select, .field textarea {
+  background: var(--off); border: 1.5px solid var(--border);
+  color: var(--ink); font-family: var(--font); font-size: 14px;
+  padding: 12px 16px; border-radius: 10px; outline: none; transition: all 0.2s;
+  appearance: none; -webkit-appearance: none;
+}
+.field input:focus, .field select:focus, .field textarea:focus {
+  border-color: var(--saffron); background: var(--white);
+  box-shadow: 0 0 0 3px rgba(232,107,10,0.1);
+}
+.field input::placeholder { color: rgba(8,15,28,0.3); }
+.field select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23080f1c' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: right 14px center; padding-right: 38px; cursor: pointer;
+  background-color: var(--off);
+}
+.field textarea { resize: none; height: 96px; line-height: 1.5; }
+
+/* Choice cards */
+.choice-grid { display: grid; gap: 12px; }
+.choice-card { position: relative; }
+.choice-card input[type="radio"], .choice-card input[type="checkbox"] { position: absolute; opacity: 0; width: 0; }
+.choice-label {
+  display: flex; align-items: center; gap: 14px; padding: 14px 18px;
+  border: 2px solid var(--border); border-radius: 12px; cursor: pointer;
+  transition: all 0.2s; background: var(--off);
+}
+.choice-label:hover { border-color: var(--saffron); background: var(--saffron-l); }
+.choice-card input:checked + .choice-label { border-color: var(--saffron); background: var(--saffron-l); }
+.choice-icon { font-size: 22px; flex-shrink: 0; }
+.choice-info { flex: 1; }
+.choice-name { font-size: 14px; font-weight: 700; }
+.choice-desc { font-size: 12px; color: var(--muted); margin-top: 2px; }
+.choice-price { font-size: 14px; font-weight: 800; color: var(--saffron); flex-shrink: 0; }
+.choice-radio { width: 20px; height: 20px; border-radius: 50%; border: 2px solid var(--border); flex-shrink: 0; transition: all 0.2s; display: flex; align-items: center; justify-content: center; }
+.choice-card input:checked + .choice-label .choice-radio { border-color: var(--saffron); background: var(--saffron); }
+.choice-card input:checked + .choice-label .choice-radio::after { content: ''; width: 7px; height: 7px; border-radius: 50%; background: #fff; }
+
+/* Upload */
+.upload-box {
+  border: 2px dashed var(--border); border-radius: 12px; padding: 28px;
+  text-align: center; cursor: pointer; transition: all 0.2s; background: var(--off);
+}
+.upload-box:hover { border-color: var(--saffron); background: var(--saffron-l); }
+.upload-box input { display: none; }
+.upload-icon { font-size: 28px; margin-bottom: 8px; }
+.upload-title { font-size: 13px; font-weight: 700; }
+.upload-sub { font-size: 11px; color: var(--muted); margin-top: 4px; }
+.uploaded-name { display: none; font-size: 13px; font-weight: 600; color: var(--green); }
+.uploaded-name.show { display: block; }
+
+/* Review summary */
+.review-block { background: var(--off); border-radius: 12px; padding: 20px; margin-bottom: 16px; }
+.review-block-title { font-size: 10px; font-weight: 800; letter-spacing: 2px; color: var(--muted); text-transform: uppercase; margin-bottom: 12px; }
+.review-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.review-field-lbl { font-size: 11px; color: var(--muted); font-weight: 600; margin-bottom: 2px; }
+.review-field-val { font-size: 14px; font-weight: 700; }
+.fee-table { width: 100%; border-collapse: collapse; }
+.fee-table td { padding: 9px 0; font-size: 14px; border-bottom: 1px solid var(--border); }
+.fee-table td:last-child { text-align: right; font-weight: 700; }
+.fee-table tr:last-child td { border: none; font-size: 17px; font-weight: 800; padding-top: 14px; }
+.fee-table tr:last-child td:last-child { color: var(--saffron); }
+.discount-row td { color: var(--green); }
+
+/* Form navigation */
+.form-nav-bar { display: flex; justify-content: space-between; align-items: center; margin-top: 36px; padding-top: 28px; border-top: 1px solid var(--border); }
+.btn-back-form { background: transparent; border: 2px solid var(--border-s); color: var(--ink); font-family: var(--font); font-size: 14px; font-weight: 700; padding: 12px 28px; border-radius: 50px; cursor: pointer; transition: all 0.2s; }
+.btn-back-form:hover { border-color: var(--ink); background: var(--ink); color: #fff; }
+.btn-next-form { background: var(--saffron); border: none; color: #fff; font-family: var(--font); font-size: 15px; font-weight: 700; padding: 13px 32px; border-radius: 50px; cursor: pointer; transition: all 0.25s; display: flex; align-items: center; gap: 8px; }
+.btn-next-form:hover { background: var(--saffron-d); transform: translateY(-2px); box-shadow: 0 8px 24px rgba(232,107,10,0.3); }
+.btn-submit { background: var(--sky); border: none; color: #fff; font-family: var(--font); font-size: 15px; font-weight: 700; padding: 14px 36px; border-radius: 50px; cursor: pointer; transition: all 0.25s; display: flex; align-items: center; gap: 8px; }
+.btn-submit:hover { background: #004ec7; transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,97,224,0.3); }
+
+/* Info alert */
+.info-alert { border-radius: 10px; padding: 13px 16px; display: flex; align-items: flex-start; gap: 10px; font-size: 13px; line-height: 1.55; margin: 16px 0; }
+.info-alert.blue { background: var(--sky-l); color: #004ec7; border: 1px solid rgba(0,97,224,0.15); }
+.info-alert.orange { background: var(--saffron-l); color: var(--saffron-d); border: 1px solid rgba(232,107,10,0.15); }
+.info-alert.green { background: var(--green-l); color: var(--green); border: 1px solid rgba(10,128,80,0.15); }
+
+/* ── SUCCESS ─────────────────────────────────────────────────── */
+.success-container { display: none; max-width: 640px; margin: 60px auto; padding: 0 40px; text-align: center; }
+.success-container.show { display: block; }
+.success-animation { width: 80px; height: 80px; background: var(--green-l); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 36px; margin: 0 auto 28px; animation: popIn 0.5s cubic-bezier(0.34,1.56,0.64,1); }
+@keyframes popIn { from{transform:scale(0)} to{transform:scale(1)} }
+.success-title { font-family: var(--display); font-size: 40px; font-weight: 700; letter-spacing: -1px; margin-bottom: 12px; }
+.success-sub { font-size: 16px; color: var(--muted); line-height: 1.6; margin-bottom: 32px; }
+.success-ref-box { background: var(--saffron-l); border: 1px solid rgba(232,107,10,0.2); border-radius: 14px; padding: 20px; display: inline-block; margin-bottom: 32px; }
+.success-ref-label { font-size: 11px; font-weight: 700; color: var(--saffron); letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 4px; }
+.success-ref-val { font-family: var(--display); font-size: 28px; font-weight: 700; letter-spacing: 1px; }
+.success-next { background: var(--green-l); border: 1px solid rgba(10,128,80,0.15); border-radius: 14px; padding: 20px 24px; text-align: left; margin-bottom: 32px; }
+.success-next-title { font-size: 13px; font-weight: 800; color: var(--green); margin-bottom: 12px; }
+.success-next-item { display: flex; align-items: flex-start; gap: 10px; font-size: 13px; margin-bottom: 8px; color: var(--ink); }
+.success-next-item:last-child { margin-bottom: 0; }
+
+/* ═══════════════════════════════════════════════════════════════
+   PAGE 2 — CORPORATE
+═══════════════════════════════════════════════════════════════ */
+.corporate-hero {
+  background: linear-gradient(150deg, #0a1a0a 0%, #081a08 50%, #0c1f0c 100%);
+  padding: 140px 40px 80px; position: relative; overflow: hidden;
+}
+.corporate-hero::before {
+  content: ''; position: absolute; inset: 0;
+  background-image: linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px);
+  background-size: 60px 60px;
+}
+.corp-glow { position: absolute; width: 600px; height: 600px; border-radius: 50%; background: radial-gradient(circle, rgba(10,128,80,0.15) 0%, transparent 60%); top: -100px; right: -100px; pointer-events: none; }
+
+.corporate-plans { padding: 80px 40px; background: var(--white); }
+.corp-plans-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; max-width: 1100px; margin: 56px auto 0; }
+.corp-plan-card { border-radius: 20px; padding: 32px; border: 2px solid var(--border); transition: all 0.3s; background: var(--white); }
+.corp-plan-card:hover { border-color: var(--green); box-shadow: 0 16px 48px rgba(10,128,80,0.12); transform: translateY(-4px); }
+.corp-plan-card.featured-corp { background: var(--ink); border-color: var(--green); }
+.corp-plan-name { font-size: 12px; font-weight: 800; letter-spacing: 2px; text-transform: uppercase; color: var(--green); margin-bottom: 12px; }
+.corp-plan-price { font-family: var(--display); font-size: 42px; font-weight: 700; letter-spacing: -1.5px; margin-bottom: 6px; }
+.corp-plan-card.featured-corp .corp-plan-price { color: #fff; }
+.corp-plan-sub { font-size: 13px; color: var(--muted); margin-bottom: 24px; }
+.corp-plan-card.featured-corp .corp-plan-sub { color: rgba(255,255,255,0.5); }
+.corp-features { list-style: none; display: flex; flex-direction: column; gap: 10px; margin-bottom: 28px; }
+.corp-features li { display: flex; align-items: flex-start; gap: 8px; font-size: 13px; line-height: 1.5; }
+.corp-features li::before { content: '✓'; color: var(--green); font-weight: 800; flex-shrink: 0; margin-top: 0.5px; }
+.corp-plan-card.featured-corp .corp-features li { color: rgba(255,255,255,0.8); }
+.corp-plan-card.featured-corp .corp-features li::before { color: #5dcd9a; }
+.btn-corp { width: 100%; padding: 13px; border-radius: 50px; border: 2px solid var(--border-s); background: transparent; color: var(--ink); font-family: var(--font); font-size: 14px; font-weight: 700; cursor: pointer; transition: all 0.2s; }
+.btn-corp:hover { background: var(--green); border-color: var(--green); color: #fff; }
+.corp-plan-card.featured-corp .btn-corp { background: var(--green); border-color: var(--green); color: #fff; }
+
+/* Corp contact form */
+.corp-contact-section { padding: 80px 40px; background: var(--off); }
+.corp-form-wrapper { max-width: 720px; margin: 0 auto; background: var(--white); border-radius: 20px; border: 1px solid var(--border); box-shadow: var(--sh-md); overflow: hidden; }
+.corp-form-header { background: linear-gradient(135deg, #0a1a0a, #162816); padding: 36px 40px; position: relative; overflow: hidden; }
+.corp-form-header::after { content: '🚌'; position: absolute; right: 40px; top: 50%; transform: translateY(-50%); font-size: 80px; opacity: 0.06; }
+.corp-form-header h2 { font-family: var(--display); font-size: 28px; font-weight: 700; color: #fff; letter-spacing: -0.5px; margin-bottom: 6px; }
+.corp-form-header p { font-size: 14px; color: rgba(255,255,255,0.55); }
+.corp-form-body { padding: 36px 40px; }
+
+/* ═══════════════════════════════════════════════════════════════
+   PAGE 3 — LEASING / RENTAL
+═══════════════════════════════════════════════════════════════ */
+.lease-hero {
+  background: linear-gradient(160deg, #0f0a00 0%, #1e1200 50%, #160e00 100%);
+  padding: 140px 40px 80px; position: relative; overflow: hidden;
+}
+.lease-hero::before {
+  content: ''; position: absolute; inset: 0;
+  background-image: linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px);
+  background-size: 60px 60px;
+}
+.lease-glow { position: absolute; width: 600px; height: 600px; border-radius: 50%; background: radial-gradient(circle, rgba(240,165,0,0.15) 0%, transparent 60%); top: -100px; right: -100px; pointer-events: none; }
+
+.fleet-grid-section { padding: 80px 40px; background: var(--white); }
+.fleet-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; max-width: 1100px; margin: 56px auto 0; }
+.fleet-card { background: var(--white); border: 2px solid var(--border); border-radius: 20px; overflow: hidden; transition: all 0.3s; }
+.fleet-card:hover { border-color: var(--gold); box-shadow: 0 16px 48px rgba(240,165,0,0.12); transform: translateY(-4px); }
+.fleet-card-img { height: 160px; display: flex; align-items: center; justify-content: center; font-size: 72px; }
+.fleet-card-body { padding: 24px; }
+.fleet-card-tag { display: inline-flex; align-items: center; gap: 6px; font-size: 10px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; padding: 3px 10px; border-radius: 50px; margin-bottom: 10px; }
+.fleet-card-name { font-family: var(--display); font-size: 22px; font-weight: 700; letter-spacing: -0.3px; margin-bottom: 8px; }
+.fleet-card-desc { font-size: 13px; color: var(--muted); line-height: 1.6; margin-bottom: 16px; }
+.fleet-specs { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px; }
+.spec-pill { background: var(--off); border: 1px solid var(--border); border-radius: 6px; padding: 4px 10px; font-size: 11px; font-weight: 600; color: var(--muted); }
+.fleet-card-price { display: flex; align-items: baseline; gap: 4px; margin-bottom: 16px; }
+.fleet-price-val { font-family: var(--display); font-size: 26px; font-weight: 700; color: var(--gold); letter-spacing: -0.5px; }
+.fleet-price-unit { font-size: 13px; color: var(--muted); }
+
+/* Lease enquiry form */
+.lease-enquiry-section { padding: 80px 40px; background: var(--off); }
+.lease-form-wrapper { max-width: 720px; margin: 0 auto; background: var(--white); border-radius: 20px; border: 1px solid var(--border); box-shadow: var(--sh-md); overflow: hidden; }
+.lease-form-header { background: linear-gradient(135deg, #1e1200, #2a1a00); padding: 36px 40px; position: relative; overflow: hidden; }
+.lease-form-header::after { content: '🚐'; position: absolute; right: 40px; top: 50%; transform: translateY(-50%); font-size: 80px; opacity: 0.06; }
+.lease-form-header h2 { font-family: var(--display); font-size: 28px; font-weight: 700; color: #fff; letter-spacing: -0.5px; margin-bottom: 6px; }
+.lease-form-header p { font-size: 14px; color: rgba(255,255,255,0.55); }
+.lease-form-body { padding: 36px 40px; }
+
+/* ═══════════════════════════════════════════════════════════════
+   SHARED: FEATURES SECTIONS, FOOTER, TOAST, MODAL
+═══════════════════════════════════════════════════════════════ */
+.features-band { padding: 80px 40px; }
+.features-band.dark { background: var(--ink); }
+.features-band.light { background: var(--off); }
+.features-band.white { background: var(--white); }
+.fb-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; max-width: 1100px; margin: 56px auto 0; }
+.fb-card { padding: 28px; border-radius: var(--r); transition: transform 0.3s; }
+.fb-card:hover { transform: translateY(-4px); }
+.fb-card.on-dark { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); }
+.fb-card.on-dark:hover { background: rgba(255,255,255,0.07); }
+.fb-card.on-light { background: var(--white); border: 1px solid var(--border); }
+.fb-icon { font-size: 26px; margin-bottom: 14px; }
+.fb-title { font-size: 16px; font-weight: 700; margin-bottom: 8px; }
+.fb-card.on-dark .fb-title { color: #fff; }
+.fb-desc { font-size: 13px; line-height: 1.65; }
+.fb-card.on-dark .fb-desc { color: rgba(255,255,255,0.5); }
+.fb-card.on-light .fb-desc { color: var(--muted); }
+
+/* CTA band */
+.cta-band {
+  background: var(--saffron); padding: 64px 40px; text-align: center; position: relative; overflow: hidden;
+}
+.cta-band::before { content: ''; position: absolute; inset: 0; background: linear-gradient(135deg, var(--saffron-d), var(--saffron), var(--gold)); }
+.cta-band .container { position: relative; z-index: 1; }
+.cta-band h2 { font-family: var(--display); font-size: clamp(32px, 4vw, 52px); font-weight: 700; color: #fff; letter-spacing: -1.5px; margin-bottom: 16px; }
+.cta-band p { font-size: 17px; color: rgba(255,255,255,0.8); max-width: 480px; margin: 0 auto 36px; line-height: 1.6; }
+.cta-band-actions { display: flex; justify-content: center; gap: 12px; flex-wrap: wrap; }
+.btn-cta-white { background: #fff; color: var(--saffron); border: none; font-family: var(--font); font-size: 15px; font-weight: 800; padding: 14px 32px; border-radius: 50px; cursor: pointer; transition: all 0.2s; }
+.btn-cta-white:hover { box-shadow: 0 8px 24px rgba(0,0,0,0.2); transform: translateY(-2px); }
+
+/* FAQ */
+.faq-section { padding: 80px 40px; max-width: 760px; margin: 0 auto; }
+.faq-title-area { margin-bottom: 40px; }
+.faq-item { border-bottom: 1px solid var(--border); }
+.faq-q { display: flex; justify-content: space-between; align-items: center; gap: 16px; padding: 18px 0; cursor: pointer; font-size: 15px; font-weight: 700; transition: color 0.2s; }
+.faq-q:hover { color: var(--saffron); }
+.faq-plus { font-size: 20px; color: var(--saffron); flex-shrink: 0; transition: transform 0.3s; }
+.faq-item.open .faq-plus { transform: rotate(45deg); }
+.faq-a { font-size: 14px; color: var(--muted); line-height: 1.7; max-height: 0; overflow: hidden; transition: max-height 0.4s ease, padding 0.3s; }
+.faq-item.open .faq-a { max-height: 300px; padding-bottom: 18px; }
+
+/* FOOTER */
+footer {
+  background: var(--ink); color: rgba(255,255,255,0.55);
+  padding: 64px 40px 32px; border-top: 1px solid rgba(255,255,255,0.06);
+}
+.footer-top { display: grid; grid-template-columns: 1.8fr 1fr 1fr 1fr; gap: 48px; margin-bottom: 48px; }
+.footer-brand-col {}
+.footer-logo-row { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+.footer-logo-name { font-family: var(--display); font-size: 17px; font-weight: 700; color: #fff; }
+.footer-logo-sub { font-size: 9px; color: rgba(255,255,255,0.35); letter-spacing: 1.5px; }
+.footer-tagline { font-size: 13px; line-height: 1.65; max-width: 280px; color: rgba(255,255,255,0.45); margin-bottom: 20px; }
+.footer-contact-item { display: flex; align-items: flex-start; gap: 8px; font-size: 12px; color: rgba(255,255,255,0.5); margin-bottom: 7px; line-height: 1.5; }
+.footer-contact-item a { color: rgba(255,255,255,0.65); transition: color 0.15s; }
+.footer-contact-item a:hover { color: var(--saffron); }
+.footer-col-title { font-size: 11px; font-weight: 800; letter-spacing: 2px; text-transform: uppercase; color: rgba(255,255,255,0.65); margin-bottom: 16px; }
+.footer-links { display: flex; flex-direction: column; gap: 10px; }
+.footer-links a { font-size: 13px; color: rgba(255,255,255,0.45); transition: color 0.15s; cursor: pointer; }
+.footer-links a:hover { color: rgba(255,255,255,0.85); }
+.footer-bottom { border-top: 1px solid rgba(255,255,255,0.07); padding-top: 24px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; font-size: 12px; }
+.footer-legal { display: flex; gap: 20px; }
+.footer-legal a { color: rgba(255,255,255,0.35); transition: color 0.15s; }
+.footer-legal a:hover { color: rgba(255,255,255,0.7); }
+.footer-badges { display: flex; gap: 10px; flex-wrap: wrap; }
+.footer-badge { display: flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 600; padding: 5px 12px; border-radius: 50px; border: 1px solid rgba(255,255,255,0.1); color: rgba(255,255,255,0.5); }
+
+/* TOAST */
+#toastBox { position: fixed; bottom: 24px; right: 24px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; pointer-events: none; }
+.toast { display: flex; align-items: center; gap: 10px; padding: 13px 20px; border-radius: 12px; font-size: 13px; font-weight: 600; min-width: 280px; max-width: 360px; pointer-events: auto; box-shadow: var(--sh-lg); transform: translateX(120%); transition: transform 0.4s cubic-bezier(0.34,1.2,0.64,1); }
+.toast.in { transform: translateX(0); }
+.toast-success { background: var(--green); color: #fff; }
+.toast-error { background: var(--red); color: #fff; }
+.toast-info { background: var(--sky); color: #fff; }
+.toast-warn { background: var(--saffron); color: #fff; }
+
+/* WHATSAPP FLOATING BTN */
+.wa-float { position: fixed; bottom: 24px; left: 24px; z-index: 888; background: #25D366; color: #fff; width: 56px; height: 56px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 26px; box-shadow: 0 4px 20px rgba(37,211,102,0.4); cursor: pointer; transition: all 0.25s; text-decoration: none; }
+.wa-float:hover { transform: scale(1.1); box-shadow: 0 8px 28px rgba(37,211,102,0.5); }
+
+/* RESPONSIVE */
+@media (max-width: 900px) {
+  .container, .nav-inner { padding: 0 20px; }
+  .hero, .enroll-page-hero, .corporate-hero, .lease-hero { padding: 120px 20px 60px; }
+  .segment-section, .why-section, .corporate-plans, .corp-contact-section, .fleet-grid-section, .lease-enquiry-section, .enroll-form-section, .features-band, .cta-band { padding: 60px 20px; }
+  .segments-grid, .corp-plans-grid, .fleet-cards, .fb-grid { grid-template-columns: 1fr; }
+  .why-grid { grid-template-columns: 1fr; gap: 40px; }
+  .why-card-stack { height: 280px; }
+  .wcard.c2, .wcard.c3 { display: none; }
+  .form-grid { grid-template-columns: 1fr; }
+  .form-grid.g3 { grid-template-columns: 1fr 1fr; }
+  .review-grid { grid-template-columns: 1fr; }
+  .footer-top { grid-template-columns: 1fr 1fr; }
+  .nav-links { display: none; }
+  .trust-strip { flex-direction: column; gap: 16px; }
+  .hero-title { letter-spacing: -1.5px; }
+  .hero-stats { gap: 20px; }
+  .hero-bottom { flex-direction: column; align-items: flex-start; }
+  .hero-actions { width: 100%; align-items: flex-start; }
+  .hero-cta-row { flex-direction: column; }
+  .enroll-form-section { padding: 40px 20px 60px; }
+  .form-card { padding: 28px 20px; }
+  .corp-form-body, .lease-form-body { padding: 28px 24px; }
+  .corp-form-header, .lease-form-header { padding: 28px 24px; }
+  .progress-inner { padding: 20px; }
+  .footer-top { grid-template-columns: 1fr; }
+}
+@media (max-width: 540px) {
+  .form-grid.g3 { grid-template-columns: 1fr; }
+  .hero-title { font-size: 42px; }
+  .corp-plans-grid { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<!-- ═══ NAV ═══════════════════════════════════════════════════ -->
+<nav id="navbar">
+  <div class="nav-inner">
+    <div class="nav-logo" onclick="showPage('home')">
+      <div class="nav-logo-mark">BR</div>
+      <div>
+        <div class="nav-logo-name">BURG RideSafe</div>
+        <div class="nav-logo-sub">BURG RENTAL SERVICES LLP</div>
+      </div>
+    </div>
+    <div class="nav-links">
+      <div class="nav-link active" onclick="showPage('home')" data-page="home">Home</div>
+      <div class="nav-divider"></div>
+      <div class="nav-link" onclick="showPage('school')" data-page="school">🏫 School Enrollment</div>
+      <div class="nav-link" onclick="showPage('university')" data-page="university">🎓 University Transport</div>
+      <div class="nav-link" onclick="showPage('corporate')" data-page="corporate">🏢 Corporate</div>
+      <div class="nav-divider"></div>
+      <div class="nav-link" onclick="showPage('leasing')" data-page="leasing">🚌 Leasing & Rental</div>
+    </div>
+    <div class="nav-actions">
+      <div class="nav-contact">📧 <a href="mailto:hello@burgrental.com">hello@burgrental.com</a></div>
+      <button class="btn btn-saffron btn-sm" onclick="showPage('school')">Enroll Now</button>
+    </div>
+  </div>
+</nav>
+
+<!-- ═══════════════════════════════════════════════════════════
+     PAGE: HOME
+═══════════════════════════════════════════════════════════════ -->
+<div class="page active" id="page-home">
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-glow-1"></div>
+    <div class="hero-glow-2"></div>
+    <div class="hero-content">
+      <div class="hero-eyebrow"><div class="hero-eyebrow-line"></div><div class="hero-eyebrow-text">Revolutionizing Commercial Vehicle Rentals Since 2024</div></div>
+      <h1 class="hero-title">
+        Move every<br>
+        <span class="accent">student,</span><br>
+        <span class="outline">employee,</span><br>
+        institution.
+      </h1>
+      <div class="hero-bottom">
+        <p class="hero-desc">End-to-end transport management for schools, universities, colleges, and corporates across Bangalore. Live GPS, smart scheduling, and guaranteed safety.</p>
+        <div class="hero-actions">
+          <div class="hero-cta-row">
+            <button class="btn btn-saffron btn-lg" onclick="showPage('school')">🏫 School / University Enrollment</button>
+            <button class="btn btn-ghost-white btn-lg" onclick="showPage('corporate')">🏢 Corporate Enquiry</button>
+          </div>
+          <div class="hero-stats">
+            <div class="hstat"><div class="hstat-val">2,400+</div><div class="hstat-lbl">FAMILIES SERVED</div></div>
+            <div class="hstat"><div class="hstat-val">6</div><div class="hstat-lbl">ACTIVE ROUTES</div></div>
+            <div class="hstat"><div class="hstat-val">100%</div><div class="hstat-lbl">GPS TRACKED</div></div>
+            <div class="hstat"><div class="hstat-val">2024</div><div class="hstat-lbl">SINCE</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- MARQUEE -->
+  <div class="marquee-wrap"><div class="marquee-track" id="marqueeTrack"></div></div>
+
+  <!-- SEGMENT SELECTOR -->
+  <section class="segment-section">
+    <div class="segment-header">
+      <div class="section-label" style="background:var(--saffron-l);color:var(--saffron)">What Are You Looking For?</div>
+      <h2 class="section-title">Choose your transport solution.</h2>
+      <p class="section-sub" style="margin:14px auto 0">From primary school drop to corporate shuttle fleets — BURG RideSafe covers every commute.</p>
+    </div>
+    <div class="segments-grid">
+      <div class="segment-card seg-school" onclick="showPage('school')">
+        <div class="seg-deco"></div>
+        <div>
+          <div class="seg-badge">🏫 Education</div>
+          <h3>School & University Transport</h3>
+          <p>Safe, GPS-tracked bus service for students from KG to postgrad. Real-time alerts for parents, barcode boarding, and dedicated routes.</p>
+          <div class="seg-features">
+            <div class="seg-feat">Real-time GPS for parents</div>
+            <div class="seg-feat">Barcode student ID boarding</div>
+            <div class="seg-feat">Morning & evening routes</div>
+            <div class="seg-feat">Plans from ₹850/month</div>
+          </div>
+        </div>
+        <div class="seg-arrow">Enroll Now →</div>
+      </div>
+      <div class="segment-card seg-corporate" onclick="showPage('corporate')">
+        <div class="seg-deco"></div>
+        <div>
+          <div class="seg-badge">🏢 Corporate</div>
+          <h3>Corporate Employee Shuttle</h3>
+          <p>Managed shuttle services for offices and IT parks. Dedicated fleet, smart scheduling, app-based tracking, and monthly billing.</p>
+          <div class="seg-features">
+            <div class="seg-feat">Dedicated fleet assignment</div>
+            <div class="seg-feat">Employee app with ETA</div>
+            <div class="seg-feat">Shift-based scheduling</div>
+            <div class="seg-feat">Custom invoicing</div>
+          </div>
+        </div>
+        <div class="seg-arrow" style="color:#5dcd9a">Get a Quote →</div>
+      </div>
+      <div class="segment-card seg-university" onclick="showPage('leasing')">
+        <div class="seg-deco"></div>
+        <div>
+          <div class="seg-badge">🚌 Fleet Leasing</div>
+          <h3>Bus Leasing & Rental</h3>
+          <p>Long-term and short-term bus leasing for institutions. Fully maintained, insured, and GPS-equipped vehicles on flexible contracts.</p>
+          <div class="seg-features">
+            <div class="seg-feat">Mini bus to 52-seater buses</div>
+            <div class="seg-feat">Driver + fuel options</div>
+            <div class="seg-feat">Monthly or annual leasing</div>
+            <div class="seg-feat">Maintenance included</div>
+          </div>
+        </div>
+        <div class="seg-arrow" style="color:#ffb07a">Explore Fleet →</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- TRUST STRIP -->
+  <div class="trust-strip">
+    <div class="trust-item"><div class="trust-icon">🔐</div><div class="trust-text">All drivers background verified</div></div>
+    <div class="trust-sep"></div>
+    <div class="trust-item"><div class="trust-icon">📍</div><div class="trust-text">Live GPS on every vehicle</div></div>
+    <div class="trust-sep"></div>
+    <div class="trust-item"><div class="trust-icon">🛡️</div><div class="trust-text">Fully insured fleet</div></div>
+    <div class="trust-sep"></div>
+    <div class="trust-item"><div class="trust-icon">📱</div><div class="trust-text">Parent & employee apps</div></div>
+    <div class="trust-sep"></div>
+    <div class="trust-item"><div class="trust-icon">🔧</div><div class="trust-text">Regular maintenance tracked</div></div>
+    <div class="trust-sep"></div>
+    <div class="trust-item"><div class="trust-icon">🆘</div><div class="trust-text">24/7 SOS support</div></div>
+  </div>
+
+  <!-- WHY BURG -->
+  <section class="why-section">
+    <div style="max-width:1200px;margin:0 auto">
+      <div class="section-label" style="background:var(--saffron-l);color:var(--saffron)">Why BURG RideSafe</div>
+      <h2 class="section-title">Built different, for<br>a reason.</h2>
+    </div>
+    <div class="why-grid" style="max-width:1200px;margin:60px auto 0">
+      <div class="why-visual">
+        <div class="why-card-stack">
+          <div class="wcard c1">
+            <div class="wcard-label">On-Time Rate</div>
+            <div class="wcard-val" style="color:var(--green)">96.4%</div>
+            <div class="wcard-sub">This month across all routes</div>
+            <div class="wcard-bar"><div class="wcard-fill" style="width:96%;background:var(--green)"></div></div>
+          </div>
+          <div class="wcard c2">
+            <div class="wcard-label">Active Enrollments</div>
+            <div class="wcard-val" style="color:var(--sky)">2,400+</div>
+            <div class="wcard-sub">Students & employees covered</div>
+            <div class="wcard-bar"><div class="wcard-fill" style="width:78%;background:var(--sky)"></div></div>
+          </div>
+          <div class="wcard c3">
+            <div class="wcard-label">Fleet Fitness Score</div>
+            <div class="wcard-val" style="color:var(--saffron)">98%</div>
+            <div class="wcard-sub">All buses passed last inspection</div>
+            <div class="wcard-bar"><div class="wcard-fill" style="width:98%;background:var(--saffron)"></div></div>
+          </div>
+        </div>
+      </div>
+      <div class="why-features">
+        <div class="why-feat"><div class="why-feat-icon" style="background:var(--saffron-l)">📍</div><div><div class="why-feat-title">Real-Time GPS — Not Just "Last Known"</div><div class="why-feat-desc">Location updates every 5 seconds. You watch the bus move on a live map, not a static dot from 10 minutes ago.</div></div></div>
+        <div class="why-feat"><div class="why-feat-icon" style="background:var(--sky-l)">🪪</div><div><div class="why-feat-title">Barcode ID Boarding System</div><div class="why-feat-desc">Every student gets a personalized barcode card. One scan boards them — and instantly notifies parents with time and location.</div></div></div>
+        <div class="why-feat"><div class="why-feat-icon" style="background:var(--green-l)">🛡️</div><div><div class="why-feat-title">Full Compliance, Zero Shortcuts</div><div class="why-feat-desc">Police verification for all drivers, fitness-certified buses, comprehensive insurance, and a digital maintenance log — always up to date.</div></div></div>
+        <div class="why-feat"><div class="why-feat-icon" style="background:#fff3cd)">💬</div><div><div class="why-feat-title">Communication Built In</div><div class="why-feat-desc">Drivers send real-time updates to all parents on a route. Delays, detours, emergencies — everyone knows, instantly.</div></div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA BAND -->
+  <div class="cta-band">
+    <div class="container">
+      <h2>Ready to enroll your child or get a corporate quote?</h2>
+      <p>Join thousands of families and companies in Bangalore who trust BURG RideSafe for their daily transport needs.</p>
+      <div class="cta-band-actions">
+        <button class="btn-cta-white" onclick="showPage('school')">🏫 Enroll a Student</button>
+        <button class="btn btn-ghost-white" onclick="showPage('corporate')">🏢 Corporate Enquiry</button>
+        <button class="btn btn-ghost-white" onclick="showPage('leasing')">🚌 Bus Leasing</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <div id="footer-home"></div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     PAGE: SCHOOL ENROLLMENT
+═══════════════════════════════════════════════════════════════ -->
+<div class="page" id="page-school">
+  <section class="enroll-page-hero" style="background:linear-gradient(150deg,#060f20 0%,#0c1a38 100%)">
+    <div class="eph-content">
+      <div class="eph-tag">School & University Enrollment</div>
+      <h1 class="eph-title">Enroll your child<br>or student today.</h1>
+      <p class="eph-sub">Safe, GPS-tracked transport for students from primary school through university. Plans from ₹850/month. Takes under 5 minutes.</p>
+    </div>
+  </section>
+
+  <!-- Type selector -->
+  <div style="background:var(--off);border-bottom:1px solid var(--border);padding:24px 40px">
+    <div style="max-width:800px;margin:0 auto">
+      <div style="font-size:12px;font-weight:700;color:var(--muted);letter-spacing:1px;margin-bottom:12px">SELECT INSTITUTION TYPE</div>
+      <div style="display:flex;gap:12px;flex-wrap:wrap">
+        <div class="inst-type-btn active" data-type="school" onclick="setInstType('school',this)" style="padding:10px 24px;border-radius:50px;border:2px solid var(--sky);background:var(--sky-l);color:var(--sky);font-size:13px;font-weight:700;cursor:pointer">🏫 School (KG–12)</div>
+        <div class="inst-type-btn" data-type="university" onclick="setInstType('university',this)" style="padding:10px 24px;border-radius:50px;border:2px solid var(--border-s);background:transparent;color:var(--muted);font-size:13px;font-weight:700;cursor:pointer">🎓 College / University</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Progress -->
+  <div class="enroll-progress">
+    <div class="progress-inner">
+      <div class="progress-steps" id="schoolProgress">
+        <div class="ps"><div class="ps-circle active" id="ssp1">1</div><div class="ps-label active">Student Info</div></div>
+        <div class="ps-line" id="ssl1"></div>
+        <div class="ps"><div class="ps-circle" id="ssp2">2</div><div class="ps-label">Contact & Address</div></div>
+        <div class="ps-line" id="ssl2"></div>
+        <div class="ps"><div class="ps-circle" id="ssp3">3</div><div class="ps-label">Route & Plan</div></div>
+        <div class="ps-line" id="ssl3"></div>
+        <div class="ps"><div class="ps-circle" id="ssp4">4</div><div class="ps-label">Documents</div></div>
+        <div class="ps-line" id="ssl4"></div>
+        <div class="ps"><div class="ps-circle" id="ssp5">5</div><div class="ps-label">Review & Submit</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="enroll-form-section" id="schoolFormSection">
+    <div class="form-container">
+      <!-- STEP 1 -->
+      <div class="form-card" id="sSt1">
+        <div class="form-step-title">Student Information</div>
+        <div class="form-step-sub">Tell us about the student who will be using the transport service.</div>
+        <div class="form-grid">
+          <div class="field"><label>First Name <span class="req">*</span></label><input type="text" id="s_fname" placeholder="e.g. Arjun" /></div>
+          <div class="field"><label>Last Name <span class="req">*</span></label><input type="text" id="s_lname" placeholder="e.g. Reddy" /></div>
+          <div class="field"><label>Date of Birth <span class="req">*</span></label><input type="date" id="s_dob" /></div>
+          <div class="field"><label>Gender <span class="req">*</span></label>
+            <select id="s_gender"><option value="">Select...</option><option>Male</option><option>Female</option><option>Prefer not to say</option></select>
+          </div>
+          <div class="field"><label id="s_inst_label">School Name <span class="req">*</span></label><input type="text" id="s_school" placeholder="e.g. Delhi Public School" /></div>
+          <div class="field"><label id="s_class_label">Class / Grade <span class="req">*</span></label>
+            <select id="s_class">
+              <option value="">Select class...</option>
+              <option>KG / LKG / UKG</option><option>Class 1</option><option>Class 2</option><option>Class 3</option><option>Class 4</option><option>Class 5</option><option>Class 6</option><option>Class 7</option><option>Class 8</option><option>Class 9</option><option>Class 10</option><option>Class 11</option><option>Class 12</option>
+              <option>1st Year (UG)</option><option>2nd Year (UG)</option><option>3rd Year (UG)</option><option>4th Year (UG)</option><option>PG / Masters</option><option>PhD</option>
+            </select>
+          </div>
+          <div class="field"><label>Section / Department</label><input type="text" id="s_section" placeholder="e.g. A / Computer Science" /></div>
+          <div class="field"><label>Roll / Admission Number</label><input type="text" id="s_roll" placeholder="e.g. 2024-0842" /></div>
+          <div class="field full"><label>Medical Conditions / Special Needs</label><textarea id="s_medical" placeholder="Optional — mention allergies, disabilities, or any info the driver should know..."></textarea></div>
+        </div>
+        <div style="margin-top:24px">
+          <label style="font-size:12px;font-weight:700;display:block;margin-bottom:10px">Pickup Type <span class="req">*</span></label>
+          <div class="choice-grid" style="grid-template-columns:repeat(3,1fr)">
+            <div class="choice-card"><input type="radio" name="s_pickup" id="sp1" value="Morning Only"><label class="choice-label" for="sp1"><div class="choice-icon">🌅</div><div class="choice-info"><div class="choice-name">Morning Only</div><div class="choice-desc">School drop only</div></div><div class="choice-radio"></div></label></div>
+            <div class="choice-card"><input type="radio" name="s_pickup" id="sp2" value="Evening Only"><label class="choice-label" for="sp2"><div class="choice-icon">🌇</div><div class="choice-info"><div class="choice-name">Evening Only</div><div class="choice-desc">Home drop only</div></div><div class="choice-radio"></div></label></div>
+            <div class="choice-card"><input type="radio" name="s_pickup" id="sp3" value="Both Ways" checked><label class="choice-label" for="sp3" style="border-color:var(--saffron);background:var(--saffron-l)"><div class="choice-icon">🔄</div><div class="choice-info"><div class="choice-name">Both Ways</div><div class="choice-desc">Best value</div></div><div class="choice-radio" style="border-color:var(--saffron);background:var(--saffron)"><div style="width:7px;height:7px;border-radius:50%;background:#fff;margin:auto"></div></div></label></div>
+          </div>
+        </div>
+        <div class="form-nav-bar"><div></div><button class="btn-next-form" onclick="schoolNext(1)">Next: Contact Info →</button></div>
+      </div>
+
+      <!-- STEP 2 -->
+      <div class="form-card" id="sSt2" style="display:none">
+        <div class="form-step-title">Parent / Guardian Contact</div>
+        <div class="form-step-sub">We'll use this for live alerts, emergencies, and enrollment confirmations.</div>
+        <div class="form-grid">
+          <div class="field"><label>Full Name <span class="req">*</span></label><input type="text" id="s_pname" placeholder="Parent / guardian name" /></div>
+          <div class="field"><label>Relationship <span class="req">*</span></label>
+            <select id="s_prel"><option value="">Select...</option><option>Father</option><option>Mother</option><option>Guardian</option><option>Grand Parent</option><option>Sibling</option><option>Other</option></select>
+          </div>
+          <div class="field"><label>Mobile Number <span class="req">*</span></label><input type="tel" id="s_pphone" placeholder="+91 98765 43210" /></div>
+          <div class="field"><label>Alternate Mobile</label><input type="tel" id="s_pphone2" placeholder="+91 87654 32109" /></div>
+          <div class="field"><label>Email Address <span class="req">*</span></label><input type="email" id="s_pemail" placeholder="parent@example.com" /></div>
+          <div class="field"><label>Occupation</label><input type="text" id="s_pocc" placeholder="e.g. Engineer, Teacher..." /></div>
+          <div class="field full"><label>Home Address <span class="req">*</span></label><textarea id="s_addr" placeholder="Flat/House no., Street, Area, City, PIN..."></textarea></div>
+          <div class="field"><label>City <span class="req">*</span></label><input type="text" id="s_city" placeholder="e.g. Bangalore" /></div>
+          <div class="field"><label>PIN Code <span class="req">*</span></label><input type="text" id="s_pin" placeholder="e.g. 560102" maxlength="6" /></div>
+        </div>
+        <div class="info-alert blue">ℹ️ You'll receive WhatsApp & SMS alerts when your child/student boards, deboads, or if there's a delay. Ensure the number is active on WhatsApp.</div>
+        <div class="form-nav-bar"><button class="btn-back-form" onclick="schoolPrev(2)">← Back</button><button class="btn-next-form" onclick="schoolNext(2)">Next: Route & Plan →</button></div>
+      </div>
+
+      <!-- STEP 3 -->
+      <div class="form-card" id="sSt3" style="display:none">
+        <div class="form-step-title">Route & Service Plan</div>
+        <div class="form-step-sub">Select the bus route nearest to your address and your preferred plan.</div>
+        <div style="margin-bottom:24px">
+          <label style="font-size:12px;font-weight:700;display:block;margin-bottom:10px">Select Route <span class="req">*</span></label>
+          <div class="choice-grid" id="routeGrid">
+            <div class="choice-card"><input type="radio" name="s_route" id="r1" value="HSR Layout" checked><label class="choice-label" for="r1" style="border-color:var(--saffron);background:var(--saffron-l)"><div class="choice-icon">🚌</div><div class="choice-info"><div class="choice-name">HSR Layout Route — KA-01</div><div class="choice-desc">Bommanahalli → HSR Sector 1 → Agara → HSR Sector 7 · 8:05 AM pickup</div></div><div class="choice-price">₹850/mo</div></label></div>
+            <div class="choice-card"><input type="radio" name="s_route" id="r2" value="Koramangala"><label class="choice-label" for="r2"><div class="choice-icon">🚌</div><div class="choice-info"><div class="choice-name">Koramangala Route — KA-02</div><div class="choice-desc">BTM Layout → 5th Block → Sony World → Indiranagar · 7:50 AM pickup</div></div><div class="choice-price">₹850/mo</div></label></div>
+            <div class="choice-card"><input type="radio" name="s_route" id="r3" value="Jayanagar"><label class="choice-label" for="r3"><div class="choice-icon">🚌</div><div class="choice-info"><div class="choice-name">Jayanagar Route — KA-03</div><div class="choice-desc">JP Nagar → 4th Block → Basavanagudi · 7:45 AM pickup</div></div><div class="choice-price">₹850/mo</div></label></div>
+            <div class="choice-card"><input type="radio" name="s_route" id="r4" value="Electronic City"><label class="choice-label" for="r4"><div class="choice-icon">🚌</div><div class="choice-info"><div class="choice-name">Electronic City Route — KA-04</div><div class="choice-desc">Hongasandra → Begur → Bommanahalli → EC Phase 1 · 7:30 AM pickup</div></div><div class="choice-price">₹950/mo</div></label></div>
+            <div class="choice-card"><input type="radio" name="s_route" id="r5" value="Whitefield"><label class="choice-label" for="r5"><div class="choice-icon">🚌</div><div class="choice-info"><div class="choice-name">Whitefield Route — KA-05</div><div class="choice-desc">Marathahalli → KR Puram → Whitefield Main · 7:20 AM pickup</div></div><div class="choice-price">₹1,050/mo</div></label></div>
+          </div>
+        </div>
+        <div class="form-grid" style="margin-bottom:24px">
+          <div class="field">
+            <label>Your Nearest Stop / Landmark <span class="req">*</span></label>
+            <input type="text" id="s_stop" placeholder="e.g. HSR Sector 7 Main Road" />
+          </div>
+          <div class="field">
+            <label>Preferred Pickup Time</label>
+            <select id="s_pickuptime"><option>7:00 AM</option><option>7:15 AM</option><option>7:30 AM</option><option selected>7:45 AM</option><option>8:00 AM</option><option>8:15 AM</option></select>
+          </div>
+        </div>
+        <div style="margin-bottom:24px">
+          <label style="font-size:12px;font-weight:700;display:block;margin-bottom:10px">Service Plan <span class="req">*</span></label>
+          <div class="choice-grid" style="grid-template-columns:repeat(3,1fr)">
+            <div class="choice-card"><input type="radio" name="s_plan" id="pl1" value="Basic|850"><label class="choice-label" for="pl1"><div class="choice-icon">🟢</div><div class="choice-info"><div class="choice-name">Basic</div><div class="choice-desc">GPS, alerts, parent app</div></div><div class="choice-price">₹850/mo</div></label></div>
+            <div class="choice-card"><input type="radio" name="s_plan" id="pl2" value="Standard|1200" checked><label class="choice-label" for="pl2" style="border-color:var(--saffron);background:var(--saffron-l)"><div class="choice-icon">⭐</div><div class="choice-info"><div class="choice-name">Standard</div><div class="choice-desc">+ Missed bus, complaints</div></div><div class="choice-price">₹1,200/mo</div></label></div>
+            <div class="choice-card"><input type="radio" name="s_plan" id="pl3" value="Premium|1800"><label class="choice-label" for="pl3"><div class="choice-icon">👑</div><div class="choice-info"><div class="choice-name">Premium</div><div class="choice-desc">AC bus + priority + SOS</div></div><div class="choice-price">₹1,800/mo</div></label></div>
+          </div>
+        </div>
+        <div class="field">
+          <label>Enrollment Duration <span class="req">*</span></label>
+          <select id="s_duration">
+            <option value="1|0">Monthly (1 month) — Flexible</option>
+            <option value="3|5">Quarterly (3 months) — Save 5%</option>
+            <option value="6|10">Half-Yearly (6 months) — Save 10%</option>
+            <option value="12|15" selected>Annual (12 months) — Save 15%</option>
+          </select>
+        </div>
+        <div class="form-nav-bar"><button class="btn-back-form" onclick="schoolPrev(3)">← Back</button><button class="btn-next-form" onclick="schoolNext(3)">Next: Documents →</button></div>
+      </div>
+
+      <!-- STEP 4 -->
+      <div class="form-card" id="sSt4" style="display:none">
+        <div class="form-step-title">Upload Documents</div>
+        <div class="form-step-sub">Required for student verification. All files encrypted and securely stored.</div>
+        <div class="form-grid">
+          <div class="field"><label>Student Photo <span class="req">*</span></label>
+            <div class="upload-box" onclick="document.getElementById('s_doc_photo').click()">
+              <input type="file" id="s_doc_photo" accept="image/*" onchange="markUpload(this,'s_doc_photo_name')">
+              <div class="upload-icon">👤</div><div class="upload-title">Student Photo</div><div class="upload-sub">Recent, clear face photo</div>
+              <div class="uploaded-name" id="s_doc_photo_name"></div>
+            </div>
+          </div>
+          <div class="field"><label>School / College ID <span class="req">*</span></label>
+            <div class="upload-box" onclick="document.getElementById('s_doc_id').click()">
+              <input type="file" id="s_doc_id" accept="image/*,.pdf" onchange="markUpload(this,'s_doc_id_name')">
+              <div class="upload-icon">🪪</div><div class="upload-title">ID Card / Admission Letter</div><div class="upload-sub">School or college issued</div>
+              <div class="uploaded-name" id="s_doc_id_name"></div>
+            </div>
+          </div>
+          <div class="field"><label>Parent / Guardian ID <span class="req">*</span></label>
+            <div class="upload-box" onclick="document.getElementById('s_doc_pid').click()">
+              <input type="file" id="s_doc_pid" accept="image/*,.pdf" onchange="markUpload(this,'s_doc_pid_name')">
+              <div class="upload-icon">📋</div><div class="upload-title">Aadhaar / PAN / Passport</div><div class="upload-sub">Any government-issued ID</div>
+              <div class="uploaded-name" id="s_doc_pid_name"></div>
+            </div>
+          </div>
+          <div class="field"><label>Address Proof <span class="span"></span></label>
+            <div class="upload-box" onclick="document.getElementById('s_doc_addr').click()">
+              <input type="file" id="s_doc_addr" accept="image/*,.pdf" onchange="markUpload(this,'s_doc_addr_name')">
+              <div class="upload-icon">🏠</div><div class="upload-title">Utility Bill / Bank Statement</div><div class="upload-sub">Not older than 3 months</div>
+              <div class="uploaded-name" id="s_doc_addr_name"></div>
+            </div>
+          </div>
+        </div>
+        <div class="info-alert orange">🔒 Documents are encrypted with 256-bit SSL and used only for student verification. Not shared with third parties.</div>
+        <div class="form-nav-bar"><button class="btn-back-form" onclick="schoolPrev(4)">← Back</button><button class="btn-next-form" onclick="schoolNext(4)">Review & Submit →</button></div>
+      </div>
+
+      <!-- STEP 5 REVIEW -->
+      <div class="form-card" id="sSt5" style="display:none">
+        <div class="form-step-title">Review & Submit</div>
+        <div class="form-step-sub">Please check all details before submitting. Your form will be sent to BURG RideSafe and you'll be contacted within 24 hours.</div>
+        <div id="schoolReview"></div>
+        <div style="background:var(--off);border-radius:12px;padding:16px;margin-bottom:16px">
+          <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer;font-size:13px;font-weight:500;line-height:1.55">
+            <input type="checkbox" id="s_terms" style="margin-top:3px;accent-color:var(--saffron);flex-shrink:0">
+            <span>I confirm all information is accurate. I agree to BURG RideSafe's <a href="#" style="color:var(--saffron)">Terms of Service</a> and <a href="#" style="color:var(--saffron)">Privacy Policy</a>.</span>
+          </label>
+        </div>
+        <div class="info-alert green">📱 After submission, BURG RideSafe team will reach out on your WhatsApp within 24 hours to confirm your slot and share payment details.</div>
+        <div class="form-nav-bar"><button class="btn-back-form" onclick="schoolPrev(5)">← Back</button><button class="btn-submit" onclick="submitSchool()">📩 Submit Enrollment</button></div>
+      </div>
+    </div>
+
+    <!-- SUCCESS -->
+    <div class="success-container" id="schoolSuccess">
+      <div class="success-animation">🎉</div>
+      <h2 class="success-title">Enrollment Submitted!</h2>
+      <p class="success-sub">Thank you for choosing BURG RideSafe. Your enrollment request has been sent to our team and your details have been shared on WhatsApp. We'll confirm your slot within 24 hours.</p>
+      <div class="success-ref-box">
+        <div class="success-ref-label">Reference Number</div>
+        <div class="success-ref-val" id="schoolRef">BRS-SCH-00000</div>
+      </div>
+      <div class="success-next">
+        <div class="success-next-title">✅ What Happens Next?</div>
+        <div class="success-next-item">📱 BURG team will WhatsApp you within 24 hours</div>
+        <div class="success-next-item">💳 Payment link will be shared for your selected plan</div>
+        <div class="success-next-item">🪪 Student ID card delivered within 3 working days after payment</div>
+        <div class="success-next-item">🚌 Bus service starts from next working Monday</div>
+      </div>
+      <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
+        <button class="btn btn-saffron" onclick="showPage('home')">← Back to Home</button>
+        <button class="btn btn-outline" onclick="resetSchoolForm()">Enroll Another Student</button>
+      </div>
+    </div>
+  </div>
+  <div id="footer-school"></div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     PAGE: CORPORATE
+═══════════════════════════════════════════════════════════════ -->
+<div class="page" id="page-corporate">
+  <section class="corporate-hero">
+    <div class="corp-glow"></div>
+    <div class="eph-content" style="position:relative;z-index:1">
+      <div class="eph-tag" style="color:var(--green)">Corporate Employee Transport</div>
+      <h1 class="eph-title">Move your workforce,<br>efficiently.</h1>
+      <p class="eph-sub">Managed shuttle services for offices, IT parks, and manufacturing units. Custom routes, shift-based scheduling, and a dedicated account manager.</p>
+      <div style="display:flex;gap:12px;margin-top:32px;flex-wrap:wrap">
+        <button class="btn btn-saffron btn-lg" onclick="document.getElementById('corpForm').scrollIntoView({behavior:'smooth'})">Get a Custom Quote</button>
+        <button class="btn btn-ghost-white btn-lg" onclick="scrollToAnchor('corp-plans')">View Plans</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features -->
+  <div class="features-band white">
+    <div style="max-width:1100px;margin:0 auto;text-align:center">
+      <div class="section-label" style="background:var(--green-l);color:var(--green)">Why BURG for Corporates</div>
+      <h2 class="section-title">Enterprise-grade transport,<br>startup-easy setup.</h2>
+    </div>
+    <div class="fb-grid" style="max-width:1100px;margin:56px auto 0">
+      <div class="fb-card on-light"><div class="fb-icon">🗺️</div><div class="fb-title">Custom Route Planning</div><div class="fb-desc">We design optimal pickup routes based on employee residential clusters, minimizing travel time and fuel cost.</div></div>
+      <div class="fb-card on-light"><div class="fb-icon">🔄</div><div class="fb-title">Shift-Based Scheduling</div><div class="fb-desc">Morning, afternoon, and night shift support. Automatic schedule adjustments for holidays and roster changes.</div></div>
+      <div class="fb-card on-light"><div class="fb-icon">📊</div><div class="fb-title">Monthly MIS Reports</div><div class="fb-desc">Detailed utilization reports, on-time performance, employee boarding data — delivered to your HR team monthly.</div></div>
+      <div class="fb-card on-light"><div class="fb-icon">💼</div><div class="fb-title">Dedicated Account Manager</div><div class="fb-desc">A single point of contact for all your transport needs. Reachable on WhatsApp, phone, and email.</div></div>
+      <div class="fb-card on-light"><div class="fb-icon">📱</div><div class="fb-title">Employee App</div><div class="fb-desc">Employees track their shuttle live, see ETA, get delay alerts, and can report issues — all from their phone.</div></div>
+      <div class="fb-card on-light"><div class="fb-icon">🧾</div><div class="fb-title">GST-Compliant Invoicing</div><div class="fb-desc">Automated monthly invoices with full GST breakup, ready for your accounts team to process without follow-up.</div></div>
+    </div>
+  </div>
+
+  <!-- Plans -->
+  <section class="corporate-plans" id="corp-plans">
+    <div style="max-width:1100px;margin:0 auto;text-align:center">
+      <div class="section-label" style="background:var(--green-l);color:var(--green)">Corporate Plans</div>
+      <h2 class="section-title">Scale to your headcount.</h2>
+      <p class="section-sub" style="margin:14px auto 0">All plans include GPS tracking, employee app, dedicated driver, and monthly reporting.</p>
+    </div>
+    <div class="corp-plans-grid">
+      <div class="corp-plan-card">
+        <div class="corp-plan-name">Starter</div>
+        <div class="corp-plan-price">₹28,000<span style="font-size:14px;font-weight:400;color:var(--muted)">/month</span></div>
+        <div class="corp-plan-sub">Up to 20 employees · 1 route · 1 vehicle</div>
+        <ul class="corp-features">
+          <li>1 dedicated bus / van</li><li>1 custom route</li><li>Employee tracking app</li><li>GPS & live tracking</li><li>Monthly MIS report</li><li>WhatsApp support</li>
+        </ul>
+        <button class="btn-corp" onclick="document.getElementById('corpForm').scrollIntoView({behavior:'smooth'})">Get Quote</button>
+      </div>
+      <div class="corp-plan-card featured-corp">
+        <div class="corp-plan-name">Growth</div>
+        <div class="corp-plan-price" style="color:#fff">₹65,000<span style="font-size:14px;font-weight:400;color:rgba(255,255,255,0.5)">/month</span></div>
+        <div class="corp-plan-sub">Up to 50 employees · 3 routes · 3 vehicles</div>
+        <ul class="corp-features">
+          <li>3 dedicated buses</li><li>3 custom routes</li><li>Shift-based scheduling</li><li>Dedicated account manager</li><li>GST-compliant invoicing</li><li>HR dashboard access</li><li>Priority support</li>
+        </ul>
+        <button class="btn-corp" onclick="document.getElementById('corpForm').scrollIntoView({behavior:'smooth'})">Get Quote</button>
+      </div>
+      <div class="corp-plan-card">
+        <div class="corp-plan-name">Enterprise</div>
+        <div class="corp-plan-price">Custom<span style="font-size:14px;font-weight:400;color:var(--muted)"> pricing</span></div>
+        <div class="corp-plan-sub">100+ employees · Multiple routes · Fleet</div>
+        <ul class="corp-features">
+          <li>Unlimited buses</li><li>City-wide route coverage</li><li>Night shift & on-call support</li><li>Custom branded app</li><li>SLA guarantee</li><li>On-site coordinator</li><li>Monthly review meetings</li>
+        </ul>
+        <button class="btn-corp" onclick="document.getElementById('corpForm').scrollIntoView({behavior:'smooth'})">Contact Us</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Contact Form -->
+  <div class="corp-contact-section" id="corpForm">
+    <div class="corp-form-wrapper">
+      <div class="corp-form-header">
+        <h2>Request a Corporate Quote</h2>
+        <p>Fill in your details and we'll get back to you within 4 business hours with a custom proposal.</p>
+      </div>
+      <div class="corp-form-body">
+        <div class="form-grid">
+          <div class="field"><label>Company Name <span class="req">*</span></label><input type="text" id="c_company" placeholder="e.g. Infosys Ltd" /></div>
+          <div class="field"><label>Industry / Sector <span class="req">*</span></label>
+            <select id="c_industry"><option value="">Select...</option><option>IT / Software</option><option>Manufacturing</option><option>Healthcare / Hospital</option><option>Retail / FMCG</option><option>Banking / Finance</option><option>Education Institution</option><option>Government / PSU</option><option>Logistics</option><option>Other</option></select>
+          </div>
+          <div class="field"><label>Contact Person Name <span class="req">*</span></label><input type="text" id="c_name" placeholder="HR Manager / Admin" /></div>
+          <div class="field"><label>Designation</label><input type="text" id="c_designation" placeholder="e.g. HR Manager" /></div>
+          <div class="field"><label>Mobile Number <span class="req">*</span></label><input type="tel" id="c_phone" placeholder="+91 98765 43210" /></div>
+          <div class="field"><label>Work Email <span class="req">*</span></label><input type="email" id="c_email" placeholder="hr@company.com" /></div>
+          <div class="field"><label>No. of Employees to Transport <span class="req">*</span></label>
+            <select id="c_headcount"><option value="">Select range...</option><option>1–20</option><option>21–50</option><option>51–100</option><option>101–200</option><option>200+</option></select>
+          </div>
+          <div class="field"><label>Number of Shifts</label>
+            <select id="c_shifts"><option>1 Shift</option><option>2 Shifts</option><option>3 Shifts</option><option>24×7 Rotational</option></select>
+          </div>
+          <div class="field"><label>Office Location / Area <span class="req">*</span></label><input type="text" id="c_location" placeholder="e.g. Electronic City Phase 2" /></div>
+          <div class="field"><label>Preferred Start Date</label><input type="date" id="c_startdate" /></div>
+          <div class="field full"><label>Additional Requirements</label><textarea id="c_notes" placeholder="Any specific routes, special requirements, or questions..."></textarea></div>
+        </div>
+        <div style="margin-top:20px;display:flex;justify-content:flex-end">
+          <button class="btn-submit" onclick="submitCorporate()">📩 Send Enquiry →</button>
+        </div>
+        <div class="success-container" id="corpSuccess" style="margin:0;padding:40px 0 0">
+          <div class="success-animation">✅</div>
+          <h3 class="success-title" style="font-size:28px">Enquiry Received!</h3>
+          <p class="success-sub">Our corporate team will reach out to <strong id="corpContactName"></strong> on WhatsApp within 4 business hours with a customized proposal.</p>
+          <div class="success-ref-box"><div class="success-ref-label">Enquiry Reference</div><div class="success-ref-val" id="corpRef">BRS-CORP-00000</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div id="footer-corporate"></div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     PAGE: LEASING / BUS RENTAL
+═══════════════════════════════════════════════════════════════ -->
+<div class="page" id="page-leasing">
+  <section class="lease-hero">
+    <div class="lease-glow"></div>
+    <div class="eph-content" style="position:relative;z-index:1">
+      <div class="eph-tag" style="color:var(--gold)">Bus Leasing & Institutional Rental</div>
+      <h1 class="eph-title">Your fleet, <br>fully managed.</h1>
+      <p class="eph-sub" style="color:rgba(255,255,255,0.55)">Long-term and short-term bus leasing for schools, colleges, hospitals, and businesses. GPS-equipped, insured, maintained — with or without a driver.</p>
+      <div style="display:flex;gap:12px;margin-top:32px;flex-wrap:wrap">
+        <button class="btn btn-saffron btn-lg" onclick="document.getElementById('leaseForm').scrollIntoView({behavior:'smooth'})">Request Fleet Quote</button>
+        <button class="btn btn-ghost-white btn-lg" onclick="scrollToAnchor('fleet-section')">View Fleet</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Fleet cards -->
+  <section class="fleet-grid-section" id="fleet-section">
+    <div style="max-width:1100px;margin:0 auto;text-align:center">
+      <div class="section-label" style="background:#fff3cd;color:var(--gold)">Our Fleet</div>
+      <h2 class="section-title">Every size,<br>every need.</h2>
+      <p class="section-sub" style="margin:14px auto 0">All vehicles are GPS-equipped, comprehensively insured, and undergo monthly fitness checks.</p>
+    </div>
+    <div class="fleet-cards">
+      <div class="fleet-card">
+        <div class="fleet-card-img" style="background:linear-gradient(135deg,#fff8e6,#fff3cd)">🚐</div>
+        <div class="fleet-card-body">
+          <div class="fleet-card-tag" style="background:#fff3cd;color:var(--gold)">MINI</div>
+          <div class="fleet-card-name">Minibus — 12 Seater</div>
+          <div class="fleet-card-desc">Ideal for small institutions, corporate pickups, or school feeder routes. Easy to maneuver in narrow lanes.</div>
+          <div class="fleet-specs"><span class="spec-pill">12 Seats</span><span class="spec-pill">AC / Non-AC</span><span class="spec-pill">GPS</span><span class="spec-pill">CNG Option</span></div>
+          <div class="fleet-card-price"><div class="fleet-price-val">₹45,000</div><div class="fleet-price-unit">/month</div></div>
+          <button class="btn btn-outline btn-sm" style="width:100%" onclick="document.getElementById('leaseForm').scrollIntoView({behavior:'smooth'})">Enquire Now</button>
+        </div>
+      </div>
+      <div class="fleet-card" style="border-color:var(--gold)">
+        <div class="fleet-card-img" style="background:linear-gradient(135deg,#fff3cd,#ffecb3)">🚌</div>
+        <div class="fleet-card-body">
+          <div class="fleet-card-tag" style="background:#fff3cd;color:var(--gold)">POPULAR</div>
+          <div class="fleet-card-name">Standard Bus — 32 Seater</div>
+          <div class="fleet-card-desc">Our most popular option. Suited for school routes, college transport, and corporate mid-size teams.</div>
+          <div class="fleet-specs"><span class="spec-pill">32 Seats</span><span class="spec-pill">AC / Non-AC</span><span class="spec-pill">GPS + CCTV</span><span class="spec-pill">Luggage Bay</span></div>
+          <div class="fleet-card-price"><div class="fleet-price-val">₹85,000</div><div class="fleet-price-unit">/month</div></div>
+          <button class="btn btn-saffron btn-sm" style="width:100%" onclick="document.getElementById('leaseForm').scrollIntoView({behavior:'smooth'})">Enquire Now</button>
+        </div>
+      </div>
+      <div class="fleet-card">
+        <div class="fleet-card-img" style="background:linear-gradient(135deg,#fff8e6,#fff3cd)">🚌</div>
+        <div class="fleet-card-body">
+          <div class="fleet-card-tag" style="background:#fff3cd;color:var(--gold)">LARGE</div>
+          <div class="fleet-card-name">Large Coach — 52 Seater</div>
+          <div class="fleet-card-desc">Best for large institutions, field trips, and corporate fleet operations with high daily ridership.</div>
+          <div class="fleet-specs"><span class="spec-pill">52 Seats</span><span class="spec-pill">AC</span><span class="spec-pill">GPS + CCTV</span><span class="spec-pill">Emergency Exit</span><span class="spec-pill">Wi-Fi Optional</span></div>
+          <div class="fleet-card-price"><div class="fleet-price-val">₹1,20,000</div><div class="fleet-price-unit">/month</div></div>
+          <button class="btn btn-outline btn-sm" style="width:100%" onclick="document.getElementById('leaseForm').scrollIntoView({behavior:'smooth'})">Enquire Now</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- What's included -->
+  <div class="features-band" style="background:var(--ink)">
+    <div style="max-width:1100px;margin:0 auto;text-align:center">
+      <div class="section-label" style="background:rgba(240,165,0,0.15);color:var(--gold)">Every Lease Includes</div>
+      <h2 class="section-title" style="color:#fff">Zero hidden costs. Zero surprises.</h2>
+    </div>
+    <div class="fb-grid" style="max-width:1100px;margin:56px auto 0">
+      <div class="fb-card on-dark"><div class="fb-icon">📍</div><div class="fb-title">Live GPS Tracking</div><div class="fb-desc">24/7 location visibility for your operations team via our web dashboard and mobile app.</div></div>
+      <div class="fb-card on-dark"><div class="fb-icon">🛡️</div><div class="fb-title">Comprehensive Insurance</div><div class="fb-desc">Full vehicle insurance, third-party liability, and passenger coverage — renewed annually.</div></div>
+      <div class="fb-card on-dark"><div class="fb-icon">🔧</div><div class="fb-title">Preventive Maintenance</div><div class="fb-desc">Monthly maintenance checks, oil changes, tyre rotation — all tracked digitally, zero extra cost.</div></div>
+      <div class="fb-card on-dark"><div class="fb-icon">👤</div><div class="fb-title">Driver Option Available</div><div class="fb-desc">Add a verified, trained driver to your lease. Background checked, commercially licensed, and familiar with Bangalore routes.</div></div>
+      <div class="fb-card on-dark"><div class="fb-icon">📄</div><div class="fb-title">Fitness & RC Documents</div><div class="fb-desc">All statutory documents — fitness certificate, route permit, PUC — maintained and renewed on time.</div></div>
+      <div class="fb-card on-dark"><div class="fb-icon">🔁</div><div class="fb-title">Replacement Guarantee</div><div class="fb-desc">If your vehicle breaks down for more than 4 hours, we deploy a replacement bus at no extra charge.</div></div>
+    </div>
+  </div>
+
+  <!-- Lease Enquiry Form -->
+  <div class="lease-enquiry-section" id="leaseForm">
+    <div class="lease-form-wrapper">
+      <div class="lease-form-header">
+        <h2>Request a Leasing Quote</h2>
+        <p>Tell us what you need and we'll prepare a custom quote within 24 hours.</p>
+      </div>
+      <div class="lease-form-body">
+        <div class="form-grid">
+          <div class="field"><label>Organisation Name <span class="req">*</span></label><input type="text" id="l_org" placeholder="School / College / Company name" /></div>
+          <div class="field"><label>Organisation Type <span class="req">*</span></label>
+            <select id="l_type"><option value="">Select...</option><option>School (K-12)</option><option>College / University</option><option>Corporate / IT Company</option><option>Hospital / Healthcare</option><option>Government / PSU</option><option>NGO</option><option>Other</option></select>
+          </div>
+          <div class="field"><label>Contact Person <span class="req">*</span></label><input type="text" id="l_name" placeholder="Full name" /></div>
+          <div class="field"><label>Designation</label><input type="text" id="l_designation" placeholder="e.g. Principal, Admin Manager" /></div>
+          <div class="field"><label>Mobile Number <span class="req">*</span></label><input type="tel" id="l_phone" placeholder="+91 98765 43210" /></div>
+          <div class="field"><label>Email Address <span class="req">*</span></label><input type="email" id="l_email" placeholder="admin@institution.in" /></div>
+          <div class="field"><label>Vehicle Type Needed <span class="req">*</span></label>
+            <select id="l_vehicle"><option value="">Select...</option><option>Minibus (12-seater)</option><option>Standard Bus (32-seater)</option><option>Large Coach (52-seater)</option><option>Multiple — Need Consultation</option></select>
+          </div>
+          <div class="field"><label>Number of Vehicles</label>
+            <select id="l_qty"><option>1</option><option>2</option><option>3</option><option>4–6</option><option>7–10</option><option>10+</option></select>
+          </div>
+          <div class="field"><label>Lease Duration <span class="req">*</span></label>
+            <select id="l_duration"><option value="">Select...</option><option>1 Month</option><option>3 Months</option><option>6 Months</option><option>1 Year</option><option>2+ Years</option></select>
+          </div>
+          <div class="field"><label>With Driver?</label>
+            <select id="l_driver"><option>Yes — Include verified driver</option><option>No — Self-driven / own driver</option></select>
+          </div>
+          <div class="field"><label>Location / City <span class="req">*</span></label><input type="text" id="l_city" placeholder="e.g. Bangalore, Mysore..." /></div>
+          <div class="field"><label>Preferred Start Date</label><input type="date" id="l_start" /></div>
+          <div class="field full"><label>Purpose / Additional Notes</label><textarea id="l_notes" placeholder="Describe how you plan to use the vehicle(s) — route, daily km estimate, any special requirements..."></textarea></div>
+        </div>
+        <div style="margin-top:20px;display:flex;justify-content:flex-end">
+          <button class="btn-submit" style="background:var(--gold);color:var(--ink)" onclick="submitLease()">📩 Send Leasing Enquiry</button>
+        </div>
+        <div class="success-container" id="leaseSuccess" style="margin:0;padding:40px 0 0">
+          <div class="success-animation">🚌</div>
+          <h3 class="success-title" style="font-size:28px">Enquiry Submitted!</h3>
+          <p class="success-sub">Our leasing team will reach out to <strong id="leaseContactName"></strong> on WhatsApp within 24 hours with a detailed quote.</p>
+          <div class="success-ref-box"><div class="success-ref-label">Enquiry Reference</div><div class="success-ref-val" id="leaseRef">BRS-LSE-00000</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FAQ -->
+  <div class="faq-section" style="max-width:760px;margin:0 auto;padding:80px 40px">
+    <div class="faq-title-area">
+      <div class="section-label" style="background:#fff3cd;color:var(--gold)">FAQs</div>
+      <h2 class="section-title">Leasing questions answered.</h2>
+    </div>
+    <div id="leaseFaq"></div>
+  </div>
+
+  <div id="footer-leasing"></div>
+</div>
+
+<!-- ═══ FOOTER TEMPLATE ════════════════════════════════════════ -->
+<template id="footerTemplate">
+  <footer>
+    <div class="footer-top">
+      <div class="footer-brand-col">
+        <div class="footer-logo-row">
+          <div class="nav-logo-mark">BR</div>
+          <div><div class="footer-logo-name">BURG RideSafe</div><div class="footer-logo-sub">BURG RENTAL SERVICES LLP</div></div>
+        </div>
+        <div class="footer-tagline">Revolutionizing commercial vehicle rentals since 2024. Trusted by schools, universities, and corporates across Bangalore.</div>
+        <div class="footer-contact-item">📧 <a href="mailto:hello@burgrental.com">hello@burgrental.com</a></div>
+        <div class="footer-contact-item">📍 Dhiraan Newyork Meadows, No.104, Block A, Chandapura, Iggaluru, Bangalore, India</div>
+        <div class="footer-contact-item">🏛️ LLPIN: ACR-9256 · BURG Rental Services LLP</div>
+      </div>
+      <div>
+        <div class="footer-col-title">Services</div>
+        <div class="footer-links">
+          <a onclick="showPage('school')">School Enrollment</a>
+          <a onclick="showPage('school')">University Transport</a>
+          <a onclick="showPage('corporate')">Corporate Shuttle</a>
+          <a onclick="showPage('leasing')">Bus Leasing</a>
+          <a onclick="showPage('leasing')">Institutional Rental</a>
+        </div>
+      </div>
+      <div>
+        <div class="footer-col-title">Company</div>
+        <div class="footer-links">
+          <a>About BURG</a>
+          <a>Our Fleet</a>
+          <a>Safety Standards</a>
+          <a>Driver Careers</a>
+          <a onclick="showPage('corporate')">Partner with Us</a>
+        </div>
+      </div>
+      <div>
+        <div class="footer-col-title">Support</div>
+        <div class="footer-links">
+          <a href="mailto:hello@burgrental.com">📧 hello@burgrental.com</a>
+          <a href="https://wa.me/918778579209" target="_blank">💬 WhatsApp Us</a>
+          <a>Help Center</a>
+          <a>Terms of Service</a>
+          <a>Privacy Policy</a>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <div>© 2025 BURG Rental Services LLP · LLPIN ACR-9256 · All rights reserved.</div>
+      <div class="footer-badges">
+        <div class="footer-badge">🔒 SSL Secured</div>
+        <div class="footer-badge">📍 GPS Tracked Fleet</div>
+        <div class="footer-badge">✅ Verified Drivers</div>
+      </div>
+      <div class="footer-legal">
+        <a>Privacy</a><a>Terms</a><a>Refunds</a>
+      </div>
+    </div>
+  </footer>
+</template>
+
+<!-- ═══ WHATSAPP FLOAT ══════════════════════════════════════════ -->
+<a class="wa-float" href="https://wa.me/918778579209" target="_blank" title="Chat on WhatsApp">💬</a>
+
+<!-- ═══ TOAST ══════════════════════════════════════════════════ -->
+<div id="toastBox"></div>
+
+<script>
+/* ═══════════════════════════════════════════════════════════════
+   CORE UTILITIES
+═══════════════════════════════════════════════════════════════ */
+const WA_NUMBER = '918778579209';
+
+function toast(msg, type = 'info', dur = 4000) {
+  const box = document.getElementById('toastBox');
+  const el = document.createElement('div');
+  el.className = `toast toast-${type}`;
+  el.textContent = msg;
+  box.appendChild(el);
+  requestAnimationFrame(() => requestAnimationFrame(() => el.classList.add('in')));
+  setTimeout(() => {
+    el.classList.remove('in');
+    setTimeout(() => el.remove(), 400);
+  }, dur);
+}
+
+function sendWhatsApp(formData, formType) {
+  const ref = genRef(formType);
+  let msg = `🚌 *BURG RideSafe — New ${formType} Submission*\n`;
+  msg += `📋 *Reference:* ${ref}\n`;
+  msg += `📅 *Date:* ${new Date().toLocaleString('en-IN')}\n\n`;
+  Object.entries(formData).forEach(([k, v]) => {
+    if (v) msg += `*${k}:* ${v}\n`;
+  });
+  msg += `\n_Submitted via burgridesafe.in_`;
+  const url = `https://wa.me/${WA_NUMBER}?text=${encodeURIComponent(msg)}`;
+  window.open(url, '_blank');
+  return ref;
+}
+
+function genRef(type) {
+  const codes = { school: 'SCH', university: 'UNI', corporate: 'CORP', leasing: 'LSE' };
+  return `BRS-${codes[type] || 'GEN'}-${Date.now().toString().slice(-5)}`;
+}
+
+function gv(id) { const el = document.getElementById(id); return el ? el.value.trim() : ''; }
+
+function scrollToAnchor(id) {
+  setTimeout(() => document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' }), 100);
+}
+
+/* ═══ PAGE ROUTER ════════════════════════════════════════════ */
+function showPage(name) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('page-' + name)?.classList.add('active');
+  document.querySelectorAll('.nav-link').forEach(l => {
+    l.classList.toggle('active', l.dataset.page === name);
+  });
+  // Inject footer
+  const tpl = document.getElementById('footerTemplate').content.cloneNode(true);
+  const slot = document.getElementById('footer-' + name);
+  if (slot && !slot.hasChildNodes()) slot.appendChild(tpl);
+  window.scrollTo({ top: 0, behavior: 'instant' });
+}
+
+/* ═══ MARQUEE ════════════════════════════════════════════════ */
+const mItems = ['2,400+ Students & Employees Served','Live GPS on Every Bus','Barcode Boarding System','Verified & Background-Checked Drivers','School · University · Corporate · Leasing','Bangalore\'s Trusted Transport Partner','Instant Parent & Employee Alerts','Monthly Maintenance Tracked Digitally','24/7 SOS Emergency Support','GST-Compliant Invoicing','BURG Rental Services LLP · LLPIN ACR-9256','100% GPS-Tracked Fleet'];
+const track = document.getElementById('marqueeTrack');
+[...mItems,...mItems].forEach(t => {
+  const d = document.createElement('div');
+  d.className = 'marquee-item';
+  d.innerHTML = `<div class="marquee-dot"></div>${t}`;
+  track.appendChild(d);
+});
+
+/* ═══ INSTITUTION TYPE TOGGLE ════════════════════════════════ */
+function setInstType(type, el) {
+  document.querySelectorAll('.inst-type-btn').forEach(b => {
+    b.style.borderColor = 'var(--border-s)';
+    b.style.background = 'transparent';
+    b.style.color = 'var(--muted)';
+  });
+  el.style.borderColor = 'var(--sky)';
+  el.style.background = 'var(--sky-l)';
+  el.style.color = 'var(--sky)';
+  // Update labels
+  const isUni = type === 'university';
+  const instLabel = document.getElementById('s_inst_label');
+  const classLabel = document.getElementById('s_class_label');
+  if (instLabel) instLabel.innerHTML = (isUni ? 'College / University Name' : 'School Name') + ' <span class="req">*</span>';
+  if (classLabel) classLabel.innerHTML = (isUni ? 'Course / Year' : 'Class / Grade') + ' <span class="req">*</span>';
+}
+
+/* ═══ UPLOAD HELPER ══════════════════════════════════════════ */
+function markUpload(input, nameId) {
+  const file = input.files[0];
+  if (!file) return;
+  const nm = document.getElementById(nameId);
+  if (nm) {
+    nm.textContent = '✅ ' + (file.name.length > 24 ? file.name.substr(0,22)+'...' : file.name);
+    nm.classList.add('show');
+    nm.previousElementSibling?.previousElementSibling?.previousElementSibling?.remove();
+  }
+  toast(`📎 ${file.name} uploaded`, 'success', 2500);
+}
+
+/* ═══ SCHOOL FORM STEPS ══════════════════════════════════════ */
+let schoolStep = 1;
+
+function schoolNext(n) {
+  if (!validateSchoolStep(n)) return;
+  schoolStep = n + 1;
+  for (let i = 1; i <= 5; i++) {
+    const card = document.getElementById('sSt'+i);
+    if (card) card.style.display = i === schoolStep ? 'block' : 'none';
+  }
+  updateSchoolProgress(schoolStep);
+  if (schoolStep === 5) buildSchoolReview();
+  document.getElementById('schoolFormSection')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function schoolPrev(n) {
+  schoolStep = n - 1;
+  for (let i = 1; i <= 5; i++) {
+    const card = document.getElementById('sSt'+i);
+    if (card) card.style.display = i === schoolStep ? 'block' : 'none';
+  }
+  updateSchoolProgress(schoolStep);
+  document.getElementById('schoolFormSection')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function updateSchoolProgress(step) {
+  for (let i = 1; i <= 5; i++) {
+    const c = document.getElementById('ssp'+i);
+    const l = c?.nextElementSibling;
+    if (!c) continue;
+    c.classList.remove('active','done');
+    l?.classList.remove('active');
+    if (i < step) { c.classList.add('done'); c.textContent = '✓'; }
+    else if (i === step) { c.classList.add('active'); c.textContent = i; l?.classList.add('active'); }
+    else { c.textContent = i; }
+    if (i < 5) {
+      const line = document.getElementById('ssl'+i);
+      if (line) line.classList.toggle('done', i < step);
+    }
+  }
+}
+
+function validateSchoolStep(n) {
+  const required = {
+    1: ['s_fname','s_lname','s_dob','s_gender','s_school','s_class'],
+    2: ['s_pname','s_prel','s_pphone','s_pemail','s_addr','s_city','s_pin'],
+    3: ['s_stop'],
+    4: [],
+  };
+  const fields = required[n] || [];
+  let ok = true;
+  fields.forEach(id => {
+    const el = document.getElementById(id);
+    if (!el || !el.value.trim()) {
+      if(el){ el.style.borderColor='#c8002a'; el.addEventListener('input',()=>el.style.borderColor='',{once:true}); }
+      ok = false;
+    }
+  });
+  if (!ok) { toast('⚠️ Please fill in all required fields.', 'warn'); return false; }
+  if (n === 2) {
+    const ph = gv('s_pphone'), em = gv('s_pemail');
+    if (!/^\+?[\d\s\-]{10,}$/.test(ph)) { toast('⚠️ Enter a valid phone number.','warn'); return false; }
+    if (!/\S+@\S+\.\S+/.test(em)) { toast('⚠️ Enter a valid email address.','warn'); return false; }
+    if (gv('s_pin').length !== 6) { toast('⚠️ PIN code must be 6 digits.','warn'); return false; }
+  }
+  return true;
+}
+
+function buildSchoolReview() {
+  const planVal = document.querySelector('input[name="s_plan"]:checked')?.value || 'Standard|1200';
+  const [planName, planPriceStr] = planVal.split('|');
+  const planPrice = parseInt(planPriceStr) || 1200;
+  const durVal = document.getElementById('s_duration')?.value || '12|15';
+  const [durMonths, discPct] = durVal.split('|').map(Number);
+  const base = planPrice * durMonths;
+  const discAmt = Math.round(base * discPct / 100);
+  const reg = 500, idCard = 200;
+  const total = base - discAmt + reg + idCard;
+  const route = document.querySelector('input[name="s_route"]:checked')?.value || 'HSR Layout';
+  const pickup = document.querySelector('input[name="s_pickup"]:checked')?.value || 'Both Ways';
+
+  document.getElementById('schoolReview').innerHTML = `
+    <div class="review-block">
+      <div class="review-block-title">Student Details</div>
+      <div class="review-grid">
+        <div><div class="review-field-lbl">NAME</div><div class="review-field-val">${gv('s_fname')} ${gv('s_lname')}</div></div>
+        <div><div class="review-field-lbl">CLASS</div><div class="review-field-val">${gv('s_class')} ${gv('s_section') ? '— '+gv('s_section') : ''}</div></div>
+        <div><div class="review-field-lbl">SCHOOL</div><div class="review-field-val">${gv('s_school')}</div></div>
+        <div><div class="review-field-lbl">PICKUP TYPE</div><div class="review-field-val">${pickup}</div></div>
+      </div>
+    </div>
+    <div class="review-block">
+      <div class="review-block-title">Parent / Guardian</div>
+      <div class="review-grid">
+        <div><div class="review-field-lbl">NAME</div><div class="review-field-val">${gv('s_pname')}</div></div>
+        <div><div class="review-field-lbl">PHONE</div><div class="review-field-val">${gv('s_pphone')}</div></div>
+        <div><div class="review-field-lbl">EMAIL</div><div class="review-field-val">${gv('s_pemail')}</div></div>
+        <div><div class="review-field-lbl">CITY</div><div class="review-field-val">${gv('s_city')}</div></div>
+      </div>
+    </div>
+    <div class="review-block">
+      <div class="review-block-title">Service Details</div>
+      <div class="review-grid">
+        <div><div class="review-field-lbl">ROUTE</div><div class="review-field-val">${route} Route</div></div>
+        <div><div class="review-field-lbl">STOP</div><div class="review-field-val">${gv('s_stop')}</div></div>
+        <div><div class="review-field-lbl">PLAN</div><div class="review-field-val">${planName}</div></div>
+        <div><div class="review-field-lbl">DURATION</div><div class="review-field-val">${durMonths} Month${durMonths>1?'s':''}</div></div>
+      </div>
+    </div>
+    <div class="review-block">
+      <div class="review-block-title">Fee Summary</div>
+      <table class="fee-table">
+        <tr><td>Service (${planName} × ${durMonths} months)</td><td>₹${base.toLocaleString('en-IN')}</td></tr>
+        ${discAmt>0?`<tr class="discount-row"><td>Duration Discount (${discPct}%)</td><td>−₹${discAmt.toLocaleString('en-IN')}</td></tr>`:''}
+        <tr><td>Registration Fee (one-time)</td><td>₹${reg}</td></tr>
+        <tr><td>Student ID Card</td><td>₹${idCard}</td></tr>
+        <tr><td><strong>Total</strong></td><td>₹${total.toLocaleString('en-IN')}</td></tr>
+      </table>
+    </div>`;
+  window._schoolTotal = total;
+}
+
+function submitSchool() {
+  if (!document.getElementById('s_terms')?.checked) { toast('⚠️ Please accept the Terms of Service.','warn'); return; }
+  const planVal = document.querySelector('input[name="s_plan"]:checked')?.value || 'Standard|1200';
+  const [planName] = planVal.split('|');
+  const route = document.querySelector('input[name="s_route"]:checked')?.value || 'HSR Layout';
+  const pickup = document.querySelector('input[name="s_pickup"]:checked')?.value || 'Both Ways';
+  const durVal = document.getElementById('s_duration')?.value || '12|15';
+  const [durMonths] = durVal.split('|');
+  const formData = {
+    'Student Name': `${gv('s_fname')} ${gv('s_lname')}`,
+    'DOB': gv('s_dob'),
+    'Class': `${gv('s_class')} ${gv('s_section')}`,
+    'School': gv('s_school'),
+    'Roll No': gv('s_roll'),
+    'Pickup Type': pickup,
+    'Parent Name': gv('s_pname'),
+    'Relationship': gv('s_prel'),
+    'Mobile': gv('s_pphone'),
+    'Alt Mobile': gv('s_pphone2'),
+    'Email': gv('s_pemail'),
+    'Address': gv('s_addr'),
+    'City': gv('s_city'),
+    'PIN': gv('s_pin'),
+    'Route': `${route} Route`,
+    'Stop': gv('s_stop'),
+    'Plan': planName,
+    'Duration': `${durMonths} months`,
+    'Total Amount': `₹${(window._schoolTotal||0).toLocaleString('en-IN')}`,
+    'Medical Notes': gv('s_medical'),
+  };
+  const ref = sendWhatsApp(formData, 'school');
+  document.getElementById('schoolRef').textContent = ref;
+  for (let i = 1; i <= 5; i++) {
+    const c = document.getElementById('sSt'+i);
+    if (c) c.style.display = 'none';
+  }
+  document.getElementById('schoolSuccess').classList.add('show');
+  toast('🎉 Enrollment submitted! WhatsApp opening...', 'success', 4000);
+}
+
+function resetSchoolForm() {
+  schoolStep = 1;
+  document.getElementById('schoolSuccess').classList.remove('show');
+  for (let i = 1; i <= 5; i++) {
+    const c = document.getElementById('sSt'+i);
+    if (c) c.style.display = i === 1 ? 'block' : 'none';
+  }
+  updateSchoolProgress(1);
+  document.querySelectorAll('#page-school input[type="text"], #page-school input[type="email"], #page-school input[type="tel"], #page-school input[type="date"], #page-school textarea').forEach(el => el.value = '');
+  document.querySelectorAll('#page-school select').forEach(el => el.selectedIndex = 0);
+  document.getElementById('schoolFormSection')?.scrollIntoView({ behavior: 'smooth' });
+}
+
+/* ═══ CORPORATE FORM ════════════════════════════════════════ */
+function submitCorporate() {
+  const req = ['c_company','c_industry','c_name','c_phone','c_email','c_headcount','c_location'];
+  let ok = true;
+  req.forEach(id => {
+    const el = document.getElementById(id);
+    if (!el || !el.value.trim()) {
+      if(el){ el.style.borderColor='#c8002a'; el.addEventListener('input',()=>el.style.borderColor='',{once:true}); }
+      ok = false;
+    }
+  });
+  if (!ok) { toast('⚠️ Please fill in all required fields.','warn'); return; }
+  const formData = {
+    'Company': gv('c_company'),
+    'Industry': gv('c_industry'),
+    'Contact Person': gv('c_name'),
+    'Designation': gv('c_designation'),
+    'Mobile': gv('c_phone'),
+    'Email': gv('c_email'),
+    'Headcount': gv('c_headcount'),
+    'Shifts': gv('c_shifts'),
+    'Office Location': gv('c_location'),
+    'Start Date': gv('c_startdate'),
+    'Requirements': gv('c_notes'),
+  };
+  const ref = sendWhatsApp(formData, 'corporate');
+  document.getElementById('corpRef').textContent = ref;
+  document.getElementById('corpContactName').textContent = gv('c_name');
+  document.getElementById('corpSuccess').classList.add('show');
+  document.getElementById('corpSuccess').scrollIntoView({ behavior: 'smooth' });
+  toast('✅ Corporate enquiry sent! WhatsApp opening...', 'success', 4000);
+}
+
+/* ═══ LEASE FORM ════════════════════════════════════════════ */
+function submitLease() {
+  const req = ['l_org','l_type','l_name','l_phone','l_email','l_vehicle','l_duration','l_city'];
+  let ok = true;
+  req.forEach(id => {
+    const el = document.getElementById(id);
+    if (!el || !el.value.trim()) {
+      if(el){ el.style.borderColor='#c8002a'; el.addEventListener('input',()=>el.style.borderColor='',{once:true}); }
+      ok = false;
+    }
+  });
+  if (!ok) { toast('⚠️ Please fill in all required fields.','warn'); return; }
+  const formData = {
+    'Organisation': gv('l_org'),
+    'Org Type': gv('l_type'),
+    'Contact Person': gv('l_name'),
+    'Designation': gv('l_designation'),
+    'Mobile': gv('l_phone'),
+    'Email': gv('l_email'),
+    'Vehicle Type': gv('l_vehicle'),
+    'Quantity': gv('l_qty'),
+    'Lease Duration': gv('l_duration'),
+    'With Driver': gv('l_driver'),
+    'City': gv('l_city'),
+    'Start Date': gv('l_start'),
+    'Notes': gv('l_notes'),
+  };
+  const ref = sendWhatsApp(formData, 'leasing');
+  document.getElementById('leaseRef').textContent = ref;
+  document.getElementById('leaseContactName').textContent = gv('l_name');
+  document.getElementById('leaseSuccess').classList.add('show');
+  document.getElementById('leaseSuccess').scrollIntoView({ behavior: 'smooth' });
+  toast('✅ Leasing enquiry sent! WhatsApp opening...', 'success', 4000);
+}
+
+/* ═══ RADIO CHOICE VISUAL ═══════════════════════════════════ */
+document.addEventListener('change', e => {
+  if (e.target.type !== 'radio') return;
+  const name = e.target.name;
+  document.querySelectorAll(`input[name="${name}"]`).forEach(r => {
+    const lbl = r.nextElementSibling;
+    if (!lbl?.classList.contains('choice-label')) return;
+    const radio = lbl.querySelector('.choice-radio');
+    if (r.checked) {
+      lbl.style.borderColor = 'var(--saffron)';
+      lbl.style.background = 'var(--saffron-l)';
+      if (radio) { radio.style.borderColor='var(--saffron)'; radio.style.background='var(--saffron)'; }
+    } else {
+      lbl.style.borderColor = '';
+      lbl.style.background = '';
+      if (radio) { radio.style.borderColor=''; radio.style.background=''; }
+    }
+  });
+});
+
+/* ═══ LEASE FAQ ════════════════════════════════════════════ */
+const leaseFaqs = [
+  { q: 'What is the minimum lease period?', a: 'The minimum lease period is 1 month for all vehicle categories. We recommend 6-month or annual leases for better pricing and priority availability.' },
+  { q: 'Is a driver included in the lease price?', a: 'The base lease price covers the vehicle only. Adding a verified, commercially licensed driver costs an additional ₹18,000–₹22,000/month depending on shifts and vehicle type.' },
+  { q: 'What documents are needed to start a lease?', a: 'We require: GST registration certificate (for businesses), address proof of the institution, a signed lease agreement, and an advance equivalent to 2 months\' rent.' },
+  { q: 'What happens if the bus breaks down?', a: 'If the vehicle is out of service for more than 4 consecutive hours, we deploy a replacement at no extra charge. Routine maintenance is our responsibility throughout the lease.' },
+  { q: 'Can we customize the bus with our institution\'s branding?', a: 'Yes! We offer full vinyl branding of the bus exterior and interior signage with your institution\'s name and logo for an additional one-time fee of ₹8,000–₹15,000.' },
+  { q: 'Is the vehicle insured?', a: 'Yes. All leased vehicles carry comprehensive motor insurance and third-party liability coverage. Passenger risk is covered under group personal accident insurance.' },
+];
+const leaseFaqContainer = document.getElementById('leaseFaq');
+leaseFaqs.forEach(faq => {
+  const div = document.createElement('div');
+  div.className = 'faq-item';
+  div.innerHTML = `<div class="faq-q" onclick="this.parentElement.classList.toggle('open')">${faq.q}<span class="faq-plus">+</span></div><div class="faq-a">${faq.a}</div>`;
+  leaseFaqContainer.appendChild(div);
+});
+
+/* ═══ SCROLL OBSERVER FOR ENTRANCE ANIMATIONS ══════════════ */
+const obs = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) { e.target.style.opacity='1'; e.target.style.transform='translateY(0)'; }
+  });
+}, { threshold: 0.08 });
+
+setTimeout(() => {
+  document.querySelectorAll('.segment-card,.fb-card,.fleet-card,.corp-plan-card,.why-feat,.wcard').forEach(el => {
+    el.style.opacity='0'; el.style.transform='translateY(24px)'; el.style.transition='opacity 0.5s ease, transform 0.5s ease';
+    obs.observe(el);
+  });
+}, 200);
+
+/* ═══ INIT ══════════════════════════════════════════════════ */
+showPage('home');
+// Inject home footer
+const tpl = document.getElementById('footerTemplate').content.cloneNode(true);
+document.getElementById('footer-home').appendChild(tpl);
+</script>
+</body>
+</html>
