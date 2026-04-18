@@ -1,0 +1,1163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BURG RideSafe x Christ University - CICF Proposal</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+  <style>
+    :root {
+      --black: #080808;
+      --ink: #111111;
+      --panel: #171717;
+      --panel-soft: #202020;
+      --yellow: #ffd21f;
+      --yellow-deep: #dca900;
+      --white: #ffffff;
+      --muted: #b9b9b9;
+      --line: rgba(255, 255, 255, 0.12);
+      --shadow: 0 18px 48px rgba(0, 0, 0, 0.34);
+      --radius: 8px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      min-width: 320px;
+      font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: var(--black);
+      color: var(--white);
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    img {
+      display: block;
+      max-width: 100%;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    button {
+      font: inherit;
+    }
+
+    .nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 30;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.09);
+      background: rgba(8, 8, 8, 0.82);
+      backdrop-filter: blur(14px);
+    }
+
+    .nav-inner {
+      width: min(1160px, calc(100% - 32px));
+      min-height: 72px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-weight: 900;
+      font-size: 18px;
+      white-space: nowrap;
+    }
+
+    .brand-mark {
+      width: 40px;
+      height: 40px;
+      border-radius: var(--radius);
+      display: grid;
+      place-items: center;
+      color: var(--black);
+      background: var(--yellow);
+      box-shadow: 0 0 0 5px rgba(255, 210, 31, 0.12);
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 22px;
+      color: var(--muted);
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    .nav-links a {
+      transition: color 180ms ease;
+    }
+
+    .nav-links a:hover {
+      color: var(--yellow);
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      min-height: 48px;
+      padding: 0 20px;
+      border: 0;
+      border-radius: var(--radius);
+      color: var(--black);
+      background: var(--yellow);
+      font-weight: 900;
+      cursor: pointer;
+      box-shadow: 0 14px 30px rgba(255, 210, 31, 0.24);
+      transition: transform 180ms ease, box-shadow 180ms ease, background 180ms ease;
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+      background: #ffe066;
+      box-shadow: 0 20px 42px rgba(255, 210, 31, 0.3);
+    }
+
+    .btn.secondary {
+      color: var(--white);
+      background: transparent;
+      border: 1px solid var(--line);
+      box-shadow: none;
+    }
+
+    .btn.secondary:hover {
+      border-color: rgba(255, 210, 31, 0.52);
+      color: var(--yellow);
+      background: rgba(255, 210, 31, 0.06);
+    }
+
+    .hero {
+      min-height: 92vh;
+      display: grid;
+      align-items: center;
+      padding: 124px 0 58px;
+      position: relative;
+      isolation: isolate;
+      background:
+        linear-gradient(90deg, rgba(8, 8, 8, 0.95), rgba(8, 8, 8, 0.74) 48%, rgba(8, 8, 8, 0.5)),
+        linear-gradient(0deg, rgba(8, 8, 8, 0.88), rgba(8, 8, 8, 0.1) 48%, rgba(8, 8, 8, 0.34)),
+        url("https://images.unsplash.com/photo-1570125909232-eb263c188f7e?auto=format&fit=crop&w=1800&q=82") center / cover;
+    }
+
+    .hero::after {
+      content: "";
+      position: absolute;
+      inset: auto 0 0;
+      height: 116px;
+      background: linear-gradient(0deg, var(--black), transparent);
+      z-index: -1;
+    }
+
+    .wrap {
+      width: min(1160px, calc(100% - 32px));
+      margin: 0 auto;
+    }
+
+    .hero-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 360px;
+      align-items: end;
+      gap: 48px;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 18px;
+      color: var(--yellow);
+      font-size: 13px;
+      font-weight: 900;
+      text-transform: uppercase;
+    }
+
+    .hero h1 {
+      max-width: 760px;
+      font-size: 72px;
+      line-height: 0.95;
+      font-weight: 900;
+      margin-bottom: 20px;
+    }
+
+    .hero h1 span {
+      color: var(--yellow);
+    }
+
+    .hero p {
+      max-width: 650px;
+      color: #eeeeee;
+      font-size: 20px;
+      margin-bottom: 30px;
+    }
+
+    .hero-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 14px;
+    }
+
+    .hero-proof {
+      display: grid;
+      gap: 12px;
+    }
+
+    .proof-item {
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      border-radius: var(--radius);
+      padding: 18px;
+      background: rgba(17, 17, 17, 0.72);
+      backdrop-filter: blur(12px);
+      box-shadow: var(--shadow);
+    }
+
+    .proof-item strong {
+      display: block;
+      color: var(--yellow);
+      font-size: 26px;
+      line-height: 1;
+      margin-bottom: 8px;
+    }
+
+    .proof-item span {
+      color: #d8d8d8;
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    section {
+      padding: 82px 0;
+    }
+
+    .section-head {
+      display: grid;
+      grid-template-columns: minmax(0, 0.8fr) minmax(280px, 0.55fr);
+      gap: 34px;
+      align-items: end;
+      margin-bottom: 34px;
+    }
+
+    .kicker {
+      color: var(--yellow);
+      font-weight: 900;
+      font-size: 13px;
+      text-transform: uppercase;
+      margin-bottom: 10px;
+    }
+
+    h2 {
+      font-size: 42px;
+      line-height: 1.08;
+      font-weight: 900;
+    }
+
+    .section-head p,
+    .muted {
+      color: var(--muted);
+    }
+
+    .grid {
+      display: grid;
+      gap: 18px;
+    }
+
+    .grid.three {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .grid.four {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+
+    .card {
+      min-height: 100%;
+      padding: 24px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: linear-gradient(180deg, var(--panel), #101010);
+      box-shadow: 0 14px 34px rgba(0, 0, 0, 0.22);
+      transition: transform 180ms ease, border-color 180ms ease, background 180ms ease;
+    }
+
+    .card:hover {
+      transform: translateY(-5px);
+      border-color: rgba(255, 210, 31, 0.5);
+      background: linear-gradient(180deg, #202020, #111111);
+    }
+
+    .icon {
+      width: 46px;
+      height: 46px;
+      border-radius: var(--radius);
+      display: grid;
+      place-items: center;
+      margin-bottom: 20px;
+      color: var(--black);
+      background: var(--yellow);
+      font-size: 19px;
+    }
+
+    .card h3 {
+      font-size: 19px;
+      margin-bottom: 10px;
+    }
+
+    .card p,
+    .card li {
+      color: var(--muted);
+      font-size: 15px;
+    }
+
+    .problem {
+      background: #0c0c0c;
+    }
+
+    .issue-list {
+      display: grid;
+      gap: 12px;
+    }
+
+    .issue {
+      display: flex;
+      gap: 14px;
+      align-items: flex-start;
+      padding: 18px;
+      border-radius: var(--radius);
+      border: 1px solid var(--line);
+      background: rgba(255, 255, 255, 0.035);
+    }
+
+    .issue i {
+      color: var(--yellow);
+      margin-top: 4px;
+    }
+
+    .split {
+      display: grid;
+      grid-template-columns: minmax(0, 0.95fr) minmax(320px, 0.85fr);
+      gap: 36px;
+      align-items: center;
+    }
+
+    .media-panel {
+      overflow: hidden;
+      border-radius: var(--radius);
+      border: 1px solid var(--line);
+      box-shadow: var(--shadow);
+      position: relative;
+    }
+
+    .media-panel img {
+      width: 100%;
+      height: 440px;
+      object-fit: cover;
+      filter: saturate(0.9) contrast(1.05);
+    }
+
+    .media-label {
+      position: absolute;
+      left: 18px;
+      right: 18px;
+      bottom: 18px;
+      padding: 16px;
+      border-radius: var(--radius);
+      background: rgba(8, 8, 8, 0.78);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      backdrop-filter: blur(10px);
+    }
+
+    .media-label strong {
+      color: var(--yellow);
+    }
+
+    .context-band {
+      border-top: 1px solid var(--line);
+      border-bottom: 1px solid var(--line);
+      background:
+        linear-gradient(rgba(8, 8, 8, 0.86), rgba(8, 8, 8, 0.92)),
+        url("https://images.unsplash.com/photo-1597047084897-51e81819a499?auto=format&fit=crop&w=1800&q=82") center / cover;
+    }
+
+    .phase-tag {
+      display: inline-flex;
+      align-items: center;
+      min-height: 30px;
+      padding: 0 10px;
+      border-radius: var(--radius);
+      color: var(--black);
+      background: var(--yellow);
+      font-size: 12px;
+      font-weight: 900;
+      margin-bottom: 16px;
+    }
+
+    .phase-number {
+      color: rgba(255, 255, 255, 0.13);
+      font-size: 58px;
+      line-height: 1;
+      font-weight: 900;
+      margin-bottom: 12px;
+    }
+
+    .steps {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 14px;
+      counter-reset: steps;
+    }
+
+    .step {
+      position: relative;
+      min-height: 210px;
+      padding: 22px;
+      border-radius: var(--radius);
+      border: 1px solid var(--line);
+      background: #121212;
+      overflow: hidden;
+    }
+
+    .step::before {
+      counter-increment: steps;
+      content: "0" counter(steps);
+      position: absolute;
+      top: 12px;
+      right: 14px;
+      color: rgba(255, 255, 255, 0.1);
+      font-size: 44px;
+      font-weight: 900;
+      line-height: 1;
+    }
+
+    .step i {
+      color: var(--yellow);
+      font-size: 28px;
+      margin-bottom: 30px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .step h3 {
+      font-size: 17px;
+      margin-bottom: 8px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .step p {
+      color: var(--muted);
+      font-size: 14px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .safety {
+      background: linear-gradient(180deg, #101010, #080808);
+    }
+
+    .safety-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+    }
+
+    .safety-item {
+      display: flex;
+      gap: 16px;
+      align-items: flex-start;
+      padding: 20px;
+      border: 1px solid rgba(255, 210, 31, 0.25);
+      border-radius: var(--radius);
+      background: rgba(255, 210, 31, 0.055);
+    }
+
+    .safety-item i {
+      color: var(--yellow);
+      font-size: 22px;
+      margin-top: 4px;
+    }
+
+    .table-wrap {
+      overflow-x: auto;
+      border-radius: var(--radius);
+      border: 1px solid var(--line);
+      background: var(--panel);
+      box-shadow: var(--shadow);
+    }
+
+    table {
+      width: 100%;
+      min-width: 680px;
+      border-collapse: collapse;
+    }
+
+    th,
+    td {
+      padding: 18px 20px;
+      text-align: left;
+      border-bottom: 1px solid var(--line);
+    }
+
+    th {
+      color: var(--black);
+      background: var(--yellow);
+      font-weight: 900;
+    }
+
+    tr:last-child td {
+      border-bottom: 0;
+    }
+
+    td:last-child {
+      color: var(--yellow);
+      font-weight: 900;
+    }
+
+    .price-grid {
+      margin-top: 18px;
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 16px;
+    }
+
+    .price {
+      padding: 20px;
+      border-radius: var(--radius);
+      border: 1px solid var(--line);
+      background: #121212;
+    }
+
+    .price strong {
+      display: block;
+      margin-bottom: 6px;
+      color: var(--yellow);
+      font-size: 20px;
+    }
+
+    .role {
+      background: #0f0f0f;
+    }
+
+    .role-box {
+      padding: 34px;
+      border-radius: var(--radius);
+      border: 1px solid rgba(255, 210, 31, 0.32);
+      background: linear-gradient(135deg, rgba(255, 210, 31, 0.16), rgba(255, 255, 255, 0.035));
+    }
+
+    .role-list {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 16px;
+      margin-top: 22px;
+    }
+
+    .role-list div {
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+      padding: 16px;
+      border-radius: var(--radius);
+      background: rgba(8, 8, 8, 0.42);
+      border: 1px solid var(--line);
+    }
+
+    .role-list i {
+      color: var(--yellow);
+      margin-top: 4px;
+    }
+
+    .metrics {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 16px;
+    }
+
+    .metric {
+      padding: 26px;
+      text-align: center;
+      border-radius: var(--radius);
+      border: 1px solid var(--line);
+      background: #121212;
+    }
+
+    .metric strong {
+      display: block;
+      color: var(--yellow);
+      font-size: 42px;
+      line-height: 1;
+      margin-bottom: 12px;
+    }
+
+    .metric span {
+      color: var(--muted);
+      font-weight: 700;
+    }
+
+    .faq-list {
+      display: grid;
+      gap: 12px;
+    }
+
+    .faq-item {
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: #121212;
+      overflow: hidden;
+    }
+
+    .faq-question {
+      width: 100%;
+      min-height: 64px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 18px 20px;
+      border: 0;
+      color: var(--white);
+      background: transparent;
+      text-align: left;
+      font-weight: 900;
+      cursor: pointer;
+    }
+
+    .faq-question i {
+      color: var(--yellow);
+      transition: transform 180ms ease;
+    }
+
+    .faq-answer {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 220ms ease;
+    }
+
+    .faq-answer p {
+      padding: 0 20px 20px;
+      color: var(--muted);
+    }
+
+    .faq-item.active .faq-question i {
+      transform: rotate(45deg);
+    }
+
+    .final-cta {
+      padding: 92px 0;
+      text-align: center;
+      background:
+        linear-gradient(rgba(8, 8, 8, 0.88), rgba(8, 8, 8, 0.94)),
+        url("https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=1800&q=82") center / cover;
+    }
+
+    .final-cta h2 {
+      max-width: 780px;
+      margin: 0 auto 18px;
+    }
+
+    .final-cta p {
+      max-width: 700px;
+      margin: 0 auto 28px;
+      color: #e2e2e2;
+      font-size: 18px;
+    }
+
+    .footer {
+      padding: 28px 0;
+      color: var(--muted);
+      border-top: 1px solid var(--line);
+      font-size: 14px;
+    }
+
+    .footer .wrap {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .reveal {
+      opacity: 0;
+      transform: translateY(22px);
+      transition: opacity 600ms ease, transform 600ms ease;
+    }
+
+    .reveal.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    @media (max-width: 980px) {
+      .nav-links {
+        display: none;
+      }
+
+      .hero-grid,
+      .section-head,
+      .split {
+        grid-template-columns: 1fr;
+      }
+
+      .hero h1 {
+        font-size: 56px;
+      }
+
+      .grid.three,
+      .grid.four,
+      .steps,
+      .metrics,
+      .role-list {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .hero-proof {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+
+      .price-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 680px) {
+      .nav-inner {
+        min-height: 64px;
+      }
+
+      .brand {
+        font-size: 16px;
+      }
+
+      .hero {
+        min-height: 95vh;
+        padding-top: 102px;
+      }
+
+      .hero h1 {
+        font-size: 42px;
+        line-height: 1;
+      }
+
+      .hero p {
+        font-size: 17px;
+      }
+
+      h2 {
+        font-size: 32px;
+      }
+
+      section {
+        padding: 62px 0;
+      }
+
+      .grid.three,
+      .grid.four,
+      .steps,
+      .metrics,
+      .hero-proof,
+      .safety-grid,
+      .role-list {
+        grid-template-columns: 1fr;
+      }
+
+      .hero-proof {
+        gap: 10px;
+      }
+
+      .media-panel img {
+        height: 320px;
+      }
+
+      .role-box {
+        padding: 24px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <nav class="nav" aria-label="Primary navigation">
+    <div class="nav-inner">
+      <a class="brand" href="#top" aria-label="BURG RideSafe home">
+        <span class="brand-mark"><i class="fa-solid fa-shield-halved"></i></span>
+        BURG RideSafe
+      </a>
+      <div class="nav-links">
+        <a href="#problem">Problem</a>
+        <a href="#solution">Solution</a>
+        <a href="#plan">Plan</a>
+        <a href="#safety">Safety</a>
+        <a href="#faq">FAQ</a>
+      </div>
+      <a class="btn" href="#final">View Plan</a>
+    </div>
+  </nav>
+
+  <header class="hero" id="top">
+    <div class="wrap hero-grid">
+      <div class="reveal">
+        <div class="eyebrow"><i class="fa-solid fa-location-dot"></i> Christ University CICF Proposal</div>
+        <h1>BURG <span>RideSafe</span></h1>
+        <p>Safe. Reliable. Guaranteed. A structured student transport pilot built for Bangalore traffic, campus timing complexity, and parent-grade accountability.</p>
+        <div class="hero-actions">
+          <a class="btn" href="#plan"><i class="fa-solid fa-route"></i> View Plan</a>
+          <a class="btn secondary" href="#role"><i class="fa-solid fa-handshake"></i> CICF Role</a>
+        </div>
+      </div>
+      <div class="hero-proof reveal">
+        <div class="proof-item">
+          <strong>30 days</strong>
+          <span>Pilot-ready deployment window</span>
+        </div>
+        <div class="proof-item">
+          <strong>100-150</strong>
+          <span>Students in Phase 1 validation</span>
+        </div>
+        <div class="proof-item">
+          <strong>No funding</strong>
+          <span>Institutional access only</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section class="problem" id="problem">
+      <div class="wrap">
+        <div class="section-head reveal">
+          <div>
+            <div class="kicker">Bangalore Reality</div>
+            <h2>Student transport is fragmented, late, and hard to verify.</h2>
+          </div>
+          <p>Many students depend on autos, private vans, and informal carpools. The missing layer is not demand. It is structure, tracking, verification, and accountability.</p>
+        </div>
+        <div class="split">
+          <div class="issue-list reveal">
+            <div class="issue"><i class="fa-solid fa-triangle-exclamation"></i><div><strong>Unorganized transport</strong><p class="muted">60-70% of students rely on options without consistent checks or operating standards.</p></div></div>
+            <div class="issue"><i class="fa-solid fa-clock"></i><div><strong>Late arrivals</strong><p class="muted">Average delays of 10-25 minutes disrupt attendance, planning, and early classes.</p></div></div>
+            <div class="issue"><i class="fa-solid fa-user-shield"></i><div><strong>Safety concerns</strong><p class="muted">Driver verification, vehicle fitness, and emergency readiness are often unclear.</p></div></div>
+            <div class="issue"><i class="fa-solid fa-headset"></i><div><strong>No grievance system</strong><p class="muted">Students and parents lack a clear support path when rides fail or standards drop.</p></div></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="solution">
+      <div class="wrap">
+        <div class="section-head reveal">
+          <div>
+            <div class="kicker">The Solution</div>
+            <h2>A verified, tech-enabled transport system for students.</h2>
+          </div>
+          <p>RideSafe combines route discipline, live tracking, operational dashboards, and verified fleet partners through a single digital onboarding flow.</p>
+        </div>
+        <div class="grid four">
+          <article class="card reveal">
+            <div class="icon"><i class="fa-solid fa-id-card"></i></div>
+            <h3>Verified Drivers</h3>
+            <p>KYC, background checks, active documentation, and operating accountability.</p>
+          </article>
+          <article class="card reveal">
+            <div class="icon"><i class="fa-solid fa-map-location-dot"></i></div>
+            <h3>Live Tracking</h3>
+            <p>Student and parent access for real-time vehicle movement and delay visibility.</p>
+          </article>
+          <article class="card reveal">
+            <div class="icon"><i class="fa-solid fa-road"></i></div>
+            <h3>Fixed Routes</h3>
+            <p>Optimized pickup points for BTM, Electronic City, Bannerghatta, and expansion zones.</p>
+          </article>
+          <article class="card reveal">
+            <div class="icon"><i class="fa-solid fa-chart-line"></i></div>
+            <h3>Dashboards</h3>
+            <p>Admin, driver, parent, and passenger interfaces for daily control and transparency.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="context-band" id="christ">
+      <div class="wrap">
+        <div class="section-head reveal">
+          <div>
+            <div class="kicker">Christ University Context</div>
+            <h2>Built for multiple campuses, staggered timings, and high student density.</h2>
+          </div>
+          <p>Students travel from BTM, Yelahanka, Kengeri, Electronic City, Bannerghatta, and beyond. A reputation-sensitive institution needs transport that feels as disciplined as the campus itself.</p>
+        </div>
+        <div class="grid three">
+          <article class="card reveal">
+            <div class="icon"><i class="fa-solid fa-building-columns"></i></div>
+            <h3>Campus Complexity</h3>
+            <p>Multiple campuses and different class windows require route planning beyond a single bus schedule.</p>
+          </article>
+          <article class="card reveal">
+            <div class="icon"><i class="fa-solid fa-calendar-days"></i></div>
+            <h3>7 AM-4 PM Timings</h3>
+            <p>Cars and mini-vans support flexible batches where buses alone are not enough.</p>
+          </article>
+          <article class="card reveal">
+            <div class="icon"><i class="fa-solid fa-award"></i></div>
+            <h3>Institutional Trust</h3>
+            <p>Safety, discipline, and grievance resolution strengthen the student experience.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section id="plan">
+      <div class="wrap">
+        <div class="section-head reveal">
+          <div>
+            <div class="kicker">Operational Plan</div>
+            <h2>Start small, validate fast, scale by route demand.</h2>
+          </div>
+          <p>The rollout keeps risk low while collecting usage data, route efficiency, and parent-student feedback before full expansion.</p>
+        </div>
+        <div class="grid three">
+          <article class="card reveal">
+            <div class="phase-number">01</div>
+            <span class="phase-tag">Pilot - 30 Days</span>
+            <h3>100-150 students</h3>
+            <p>3-5 routes across BTM, Electronic City, and Bannerghatta with tracking, logs, and issue response.</p>
+          </article>
+          <article class="card reveal">
+            <div class="phase-number">02</div>
+            <span class="phase-tag">Scale - 3 Months</span>
+            <h3>500-800 students</h3>
+            <p>10-15 routes with mini-vans and cars added for flexible timing and demand clusters.</p>
+          </article>
+          <article class="card reveal">
+            <div class="phase-number">03</div>
+            <span class="phase-tag">Full Deployment</span>
+            <h3>1500+ students</h3>
+            <p>Full Bangalore coverage with modular route expansion and campus-aligned operations.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section id="flow">
+      <div class="wrap">
+        <div class="section-head reveal">
+          <div>
+            <div class="kicker">How It Works</div>
+            <h2>Simple onboarding. Controlled daily operations.</h2>
+          </div>
+          <p>Students register on BURGRENTAL.COM, get mapped to routes, and ride with live operational visibility from pickup to drop.</p>
+        </div>
+        <div class="steps">
+          <div class="step reveal"><i class="fa-solid fa-user-plus"></i><h3>Register</h3><p>Student signs up through BURGRENTAL.COM.</p></div>
+          <div class="step reveal"><i class="fa-solid fa-location-crosshairs"></i><h3>Assign Route</h3><p>Pickup point is mapped from location clustering.</p></div>
+          <div class="step reveal"><i class="fa-solid fa-van-shuttle"></i><h3>Allocate Vehicle</h3><p>Driver and vehicle are assigned based on timing.</p></div>
+          <div class="step reveal"><i class="fa-solid fa-satellite-dish"></i><h3>Track Trip</h3><p>Live location, delay alerts, and daily logs run in-app.</p></div>
+          <div class="step reveal"><i class="fa-solid fa-message"></i><h3>Resolve Support</h3><p>Complaints and exceptions are handled inside the system.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="safety" id="safety">
+      <div class="wrap split">
+        <div class="reveal">
+          <div class="kicker">Core Differentiator</div>
+          <h2>Safety is the operating system, not a checkbox.</h2>
+          <p class="muted">RideSafe creates a documented accountability chain across drivers, vehicles, trips, emergency response, and complaint resolution.</p>
+        </div>
+        <div class="safety-grid">
+          <div class="safety-item reveal"><i class="fa-solid fa-fingerprint"></i><div><strong>Driver KYC</strong><p class="muted">Identity checks and background verification.</p></div></div>
+          <div class="safety-item reveal"><i class="fa-solid fa-file-shield"></i><div><strong>Vehicle Verification</strong><p class="muted">RC, insurance, and fitness documents.</p></div></div>
+          <div class="safety-item reveal"><i class="fa-solid fa-bell"></i><div><strong>SOS System</strong><p class="muted">Emergency contact access and escalation.</p></div></div>
+          <div class="safety-item reveal"><i class="fa-solid fa-headset"></i><div><strong>24-Hour Resolution</strong><p class="muted">In-app complaints with clear closure standards.</p></div></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="cost">
+      <div class="wrap">
+        <div class="section-head reveal">
+          <div>
+            <div class="kicker">Cost Structure</div>
+            <h2>Competitive with private transport, with stronger reliability.</h2>
+          </div>
+          <p>Vehicle economics remain practical for Bangalore while adding safety, tracking, and operations control.</p>
+        </div>
+        <div class="table-wrap reveal">
+          <table>
+            <thead>
+              <tr>
+                <th>Component</th>
+                <th>Monthly Cost Per Vehicle</th>
+                <th>Operating Purpose</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td>Driver salary</td><td>Rs. 18,000-Rs. 25,000</td><td>Verified daily operations</td></tr>
+              <tr><td>Fuel</td><td>Rs. 15,000-Rs. 25,000</td><td>Route execution</td></tr>
+              <tr><td>Maintenance</td><td>Rs. 5,000</td><td>Vehicle readiness</td></tr>
+              <tr><td>Tech + Ops</td><td>Rs. 5,000</td><td>Tracking, support, dashboards</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="price-grid">
+          <div class="price reveal"><strong>Bus</strong><span class="muted">Rs. 2,500-Rs. 3,500/month per student</span></div>
+          <div class="price reveal"><strong>Mini-van</strong><span class="muted">Rs. 3,500-Rs. 5,000/month per student</span></div>
+          <div class="price reveal"><strong>Shared car</strong><span class="muted">Rs. 5,000-Rs. 7,000/month per student</span></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="role" id="role">
+      <div class="wrap">
+        <div class="role-box reveal">
+          <div class="kicker">CICF Role</div>
+          <h2>No financial involvement required from CICF.</h2>
+          <p class="muted">BURG handles end-to-end operations, compliance documentation, fleet coordination, and student support. CICF enables the pilot to reach the right students with the right campus context.</p>
+          <div class="role-list">
+            <div><i class="fa-solid fa-door-open"></i><span>Allow pilot access to interested students.</span></div>
+            <div><i class="fa-solid fa-database"></i><span>Share campus timing and clustering inputs.</span></div>
+            <div><i class="fa-solid fa-bullhorn"></i><span>Permit an awareness stall inside campus.</span></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="impact">
+      <div class="wrap">
+        <div class="section-head reveal">
+          <div>
+            <div class="kicker">Expected Impact</div>
+            <h2>Visible improvement in punctuality, safety, and trust.</h2>
+          </div>
+          <p>Success is measured through attendance support, on-time arrival, ride confidence, and faster issue resolution.</p>
+        </div>
+        <div class="metrics">
+          <div class="metric reveal"><strong data-count="90" data-suffix="%+">0</strong><span>On-time arrival target</span></div>
+          <div class="metric reveal"><strong data-count="24" data-suffix=" hrs">0</strong><span>Complaint resolution</span></div>
+          <div class="metric reveal"><strong data-count="1500" data-suffix="+">0</strong><span>Full deployment capacity</span></div>
+          <div class="metric reveal"><strong data-count="4" data-suffix="">0</strong><span>User dashboards</span></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="faq">
+      <div class="wrap">
+        <div class="section-head reveal">
+          <div>
+            <div class="kicker">FAQs</div>
+            <h2>Clear answers before approval.</h2>
+          </div>
+          <p>Designed to complement current options while adding verification, visibility, and operational discipline.</p>
+        </div>
+        <div class="faq-list">
+          <div class="faq-item reveal"><button class="faq-question">Is this replacing existing transport?<i class="fa-solid fa-plus"></i></button><div class="faq-answer"><p>No. It complements and improves student transport options.</p></div></div>
+          <div class="faq-item reveal"><button class="faq-question">Who manages operations?<i class="fa-solid fa-plus"></i></button><div class="faq-answer"><p>BURG handles end-to-end operations, including fleet coordination, support, documentation, and compliance.</p></div></div>
+          <div class="faq-item reveal"><button class="faq-question">What if a student misses the bus?<i class="fa-solid fa-plus"></i></button><div class="faq-answer"><p>The app shows the nearest stop or alternate ride option based on route availability.</p></div></div>
+          <div class="faq-item reveal"><button class="faq-question">How are drivers verified?<i class="fa-solid fa-plus"></i></button><div class="faq-answer"><p>Each driver goes through KYC, background checks, document validation, and continuous operational monitoring.</p></div></div>
+          <div class="faq-item reveal"><button class="faq-question">Is it scalable?<i class="fa-solid fa-plus"></i></button><div class="faq-answer"><p>Yes. Routes expand modularly based on demand, student clusters, and campus timing data.</p></div></div>
+          <div class="faq-item reveal"><button class="faq-question">What about varying class timings?<i class="fa-solid fa-plus"></i></button><div class="faq-answer"><p>Cars and mini-vans support flexible schedules where fixed bus routes are not ideal.</p></div></div>
+          <div class="faq-item reveal"><button class="faq-question">How are complaints handled?<i class="fa-solid fa-plus"></i></button><div class="faq-answer"><p>Complaints are handled in-app with a 24-hour resolution standard.</p></div></div>
+          <div class="faq-item reveal"><button class="faq-question">What about liability concerns?<i class="fa-solid fa-plus"></i></button><div class="faq-answer"><p>BURG manages operations, documentation, compliance checks, and service accountability.</p></div></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="final-cta" id="final">
+      <div class="wrap reveal">
+        <div class="kicker">Approval-Ready Pilot</div>
+        <h2>Approve Pilot Deployment</h2>
+        <p>BURG RideSafe provides a structured, scalable, and safe transport solution aligned with Christ University standards without requiring institutional investment.</p>
+        <a class="btn" href="#top"><i class="fa-solid fa-circle-check"></i> Start CICF Pilot Review</a>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="wrap">
+      <span>BURG RideSafe x Christ University - CICF Proposal</span>
+      <span>Safe. Reliable. Guaranteed.</span>
+    </div>
+  </footer>
+
+  <script>
+    const revealItems = document.querySelectorAll(".reveal");
+    const counters = document.querySelectorAll("[data-count]");
+    const seenCounters = new WeakSet();
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (!entry.isIntersecting) return;
+        entry.target.classList.add("visible");
+
+        if (entry.target.matches(".metric") && !seenCounters.has(entry.target)) {
+          seenCounters.add(entry.target);
+          const number = entry.target.querySelector("[data-count]");
+          animateCounter(number);
+        }
+      });
+    }, { threshold: 0.18 });
+
+    revealItems.forEach((item, index) => {
+      item.style.transitionDelay = `${Math.min(index % 4, 3) * 70}ms`;
+      observer.observe(item);
+    });
+
+    document.querySelectorAll(".metric").forEach((metric) => observer.observe(metric));
+
+    function animateCounter(element) {
+      const target = Number(element.dataset.count);
+      const suffix = element.dataset.suffix || "";
+      const duration = 1100;
+      const start = performance.now();
+
+      function tick(now) {
+        const progress = Math.min((now - start) / duration, 1);
+        const eased = 1 - Math.pow(1 - progress, 3);
+        const current = Math.round(target * eased);
+        element.textContent = `${current.toLocaleString("en-IN")}${suffix}`;
+        if (progress < 1) requestAnimationFrame(tick);
+      }
+
+      requestAnimationFrame(tick);
+    }
+
+    document.querySelectorAll(".faq-question").forEach((button) => {
+      button.addEventListener("click", () => {
+        const item = button.closest(".faq-item");
+        const answer = item.querySelector(".faq-answer");
+        const isOpen = item.classList.contains("active");
+
+        document.querySelectorAll(".faq-item.active").forEach((openItem) => {
+          openItem.classList.remove("active");
+          openItem.querySelector(".faq-answer").style.maxHeight = null;
+        });
+
+        if (!isOpen) {
+          item.classList.add("active");
+          answer.style.maxHeight = `${answer.scrollHeight}px`;
+        }
+      });
+    });
+  </script>
+</body>
+</html>

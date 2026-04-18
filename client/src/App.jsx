@@ -21,11 +21,12 @@ import ListYourFirmPage from './pages/ListYourFirmPage';
 import ListYourFirmSuccessPage from './pages/ListYourFirmSuccessPage';
 import Dashboard from './pages/Dashboard';
 import BurgRideSafePage from './pages/BurgRideSafePage';
+import BurgRideSafeCICFProposal from './pages/BurgRideSafeCICFProposal';
 
 function AppContent() {
   const location = useLocation();
   const { toasts, removeToast } = useToast();
-  const showNavbar = location.pathname !== "/vatika-group" && location.pathname !== "/burg-realty" && location.pathname !== "/signin" && location.pathname !== "/signup" && location.pathname !== "/register" && location.pathname !== "/forgot-password" && location.pathname !== "/reset-password" && location.pathname !== "/dashboard" && location.pathname !== "/burgridesafe";
+  const showNavbar = location.pathname !== "/vatika-group" && location.pathname !== "/burg-realty" && location.pathname !== "/signin" && location.pathname !== "/signup" && location.pathname !== "/register" && location.pathname !== "/forgot-password" && location.pathname !== "/reset-password" && location.pathname !== "/dashboard" && !location.pathname.startsWith("/ridesafe");
   
   return (
     <>
@@ -46,7 +47,8 @@ function AppContent() {
         <Route path="/list-your-firm" element={<ListYourFirmPage />} />
         <Route path="/list-your-firm/success" element={<ListYourFirmSuccessPage />} />
         <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/burgridesafe" element={<BurgRideSafePage />} />
+        <Route path="/ridesafe" element={<BurgRideSafePage />} />
+        <Route path="/ridesafe/cicf" element={<BurgRideSafeCICFProposal />} />
       </Routes>
     </>
   );
