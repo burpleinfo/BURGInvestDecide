@@ -1,0 +1,800 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Platform — BURG Rental Services</title>
+  <meta name="description" content="BURG's B2B2C fleet aggregation platform — booking, compliance, real-time analytics, and fleet management for commercial vehicles across India." />
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet" />
+  <style>
+    /* ── Platform-specific styles ── */
+
+    /* How It Works stepper */
+    .stepper {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+      position: relative;
+      max-width: 780px;
+      margin: 0 auto;
+    }
+    .stepper::before {
+      content: '';
+      position: absolute;
+      left: 28px;
+      top: 48px;
+      bottom: 48px;
+      width: 2px;
+      background: linear-gradient(to bottom, var(--blue), rgba(0,85,170,0.1));
+    }
+    .step {
+      display: grid;
+      grid-template-columns: 56px 1fr;
+      gap: 28px;
+      align-items: start;
+      padding: 0 0 48px;
+      position: relative;
+    }
+    .step:last-child { padding-bottom: 0; }
+    .step-num {
+      width: 56px; height: 56px;
+      border-radius: 50%;
+      background: var(--navy);
+      color: var(--white);
+      font-family: 'Syne', sans-serif;
+      font-size: 1.1rem;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      position: relative;
+      z-index: 1;
+      box-shadow: 0 0 0 4px var(--white), 0 0 0 6px rgba(0,51,102,0.2);
+      transition: var(--transition);
+    }
+    .step:hover .step-num {
+      background: var(--blue);
+      box-shadow: 0 0 0 4px var(--white), 0 0 0 6px rgba(0,85,170,0.3);
+    }
+    .step-content {
+      padding-top: 12px;
+    }
+    .step-content h3 {
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: var(--navy);
+      margin-bottom: 8px;
+    }
+    .step-content p {
+      font-size: 0.95rem;
+      color: var(--text-muted);
+      line-height: 1.75;
+    }
+    .step-tag {
+      display: inline-block;
+      font-family: 'Syne', sans-serif;
+      font-size: 0.68rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--blue-bright);
+      background: rgba(26,122,255,0.08);
+      padding: 3px 9px;
+      border-radius: 4px;
+      margin-bottom: 10px;
+    }
+
+    /* User segments tabs */
+    .segments-section { background: var(--off-white); }
+    .segments-tabs {
+      display: flex;
+      gap: 8px;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-bottom: 40px;
+    }
+    .seg-tab {
+      font-family: 'Syne', sans-serif;
+      font-size: 0.85rem;
+      font-weight: 700;
+      padding: 10px 20px;
+      border-radius: 100px;
+      border: 2px solid var(--gray-200);
+      background: var(--white);
+      color: var(--navy);
+      cursor: pointer;
+      transition: var(--transition);
+    }
+    .seg-tab:hover, .seg-tab.active {
+      background: var(--navy);
+      color: var(--white);
+      border-color: var(--navy);
+    }
+    .seg-panel { display: none; }
+    .seg-panel.active { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+
+    .seg-card {
+      background: var(--white);
+      border: 1px solid var(--gray-200);
+      border-radius: var(--radius-lg);
+      padding: 28px;
+      display: flex;
+      gap: 18px;
+      align-items: flex-start;
+      transition: var(--transition);
+    }
+    .seg-card:hover {
+      box-shadow: var(--shadow-md);
+      transform: translateY(-3px);
+    }
+    .seg-card-icon {
+      font-size: 1.8rem;
+      flex-shrink: 0;
+      width: 52px;
+      height: 52px;
+      background: var(--off-white);
+      border-radius: var(--radius-md);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .seg-card-text h4 {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--navy);
+      margin-bottom: 6px;
+    }
+    .seg-card-text p {
+      font-size: 0.87rem;
+      color: var(--text-muted);
+      line-height: 1.65;
+    }
+
+    /* Platform features grid */
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 2px;
+      background: var(--gray-200);
+      border: 2px solid var(--gray-200);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+    }
+    .feat-cell {
+      background: var(--white);
+      padding: 36px 28px;
+      transition: var(--transition);
+    }
+    .feat-cell:hover {
+      background: var(--navy);
+    }
+    .feat-cell:hover .feat-icon,
+    .feat-cell:hover h3,
+    .feat-cell:hover p { color: var(--white); }
+    .feat-cell:hover .feat-icon { filter: grayscale(0) brightness(2); }
+    .feat-icon { font-size: 2rem; margin-bottom: 14px; transition: var(--transition); }
+    .feat-cell h3 {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--navy);
+      margin-bottom: 8px;
+      transition: var(--transition);
+    }
+    .feat-cell p {
+      font-size: 0.87rem;
+      color: var(--text-muted);
+      line-height: 1.65;
+      transition: var(--transition);
+    }
+
+    /* Compliance strip */
+    .compliance-strip {
+      background: var(--navy);
+      padding: 56px 0;
+    }
+    .compliance-inner {
+      display: grid;
+      grid-template-columns: 1fr 2fr;
+      gap: 64px;
+      align-items: center;
+    }
+    .compliance-inner h2 { color: var(--white); margin-bottom: 12px; }
+    .compliance-inner p  { color: rgba(255,255,255,0.6); line-height: 1.75; }
+    .compliance-badges {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+    }
+    .compliance-badge {
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: var(--radius-md);
+      padding: 20px 16px;
+      text-align: center;
+      transition: var(--transition);
+    }
+    .compliance-badge:hover {
+      background: rgba(255,255,255,0.1);
+      border-color: rgba(255,255,255,0.25);
+    }
+    .compliance-badge-icon { font-size: 1.5rem; margin-bottom: 8px; }
+    .compliance-badge span {
+      display: block;
+      font-family: 'Syne', sans-serif;
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: rgba(255,255,255,0.75);
+      line-height: 1.4;
+    }
+
+    /* Analytics preview */
+    .analytics-section { background: var(--off-white); }
+    .analytics-inner {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 64px;
+      align-items: center;
+    }
+    .analytics-visual {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+    .metric-card {
+      background: var(--white);
+      border: 1px solid var(--gray-200);
+      border-radius: var(--radius-md);
+      padding: 22px 18px;
+      transition: var(--transition);
+    }
+    .metric-card:hover { box-shadow: var(--shadow-md); }
+    .metric-card:first-child {
+      grid-column: 1 / -1;
+      background: var(--navy);
+      border-color: var(--navy);
+    }
+    .metric-label {
+      font-family: 'Syne', sans-serif;
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--gray-500);
+      margin-bottom: 8px;
+    }
+    .metric-card:first-child .metric-label { color: rgba(255,255,255,0.5); }
+    .metric-value {
+      font-family: 'Syne', sans-serif;
+      font-size: 2rem;
+      font-weight: 800;
+      color: var(--navy);
+      line-height: 1;
+    }
+    .metric-card:first-child .metric-value { color: var(--accent); font-size: 2.4rem; }
+    .metric-sub {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+    .metric-card:first-child .metric-sub { color: rgba(255,255,255,0.45); }
+    .metric-bar {
+      height: 4px;
+      background: var(--gray-100);
+      border-radius: 2px;
+      margin-top: 12px;
+      overflow: hidden;
+    }
+    .metric-bar-fill {
+      height: 100%;
+      border-radius: 2px;
+      background: linear-gradient(90deg, var(--blue), var(--blue-bright));
+    }
+
+    /* ── Responsive extras ── */
+    @media (max-width: 900px) {
+      .features-grid { grid-template-columns: repeat(2,1fr); }
+      .compliance-inner { grid-template-columns: 1fr; gap: 36px; }
+      .analytics-inner { grid-template-columns: 1fr; gap: 40px; }
+    }
+    @media (max-width: 768px) {
+      .seg-panel.active { grid-template-columns: 1fr; }
+      .compliance-badges { grid-template-columns: repeat(2,1fr); }
+      .stepper::before { left: 22px; }
+      .step-num { width: 44px; height: 44px; font-size: 0.95rem; }
+      .step { grid-template-columns: 44px 1fr; gap: 18px; }
+    }
+    @media (max-width: 480px) {
+      .features-grid { grid-template-columns: 1fr; }
+      .analytics-visual { grid-template-columns: 1fr; }
+      .metric-card:first-child { grid-column: auto; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ═══════════════ NAVBAR ═══════════════ -->
+<header class="navbar" id="navbar">
+  <div class="nav-inner">
+    <a href="index.html" class="nav-logo">
+      <img src="https://i.ibb.co/rKbMhMsY/BURGRENTAL-COM-BADGE-removebg-preview.png" alt="BURG Rental Services" />
+    </a>
+    <nav class="nav-links" id="navLinks">
+      <a href="index.html" class="nav-link">Home</a>
+      <a href="platform.html" class="nav-link active">Platform</a>
+      <a href="services.html" class="nav-link">Services</a>
+      <a href="partners.html" class="nav-link">Partners</a>
+      <a href="drivers.html" class="nav-link">Drivers</a>
+      <a href="technology.html" class="nav-link">Technology</a>
+      <a href="contact.html" class="nav-link nav-cta">Contact Us</a>
+    </nav>
+    <button class="nav-hamburger" id="hamburger" aria-label="Toggle menu">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</header>
+
+<!-- ═══════════════ PAGE HERO ═══════════════ -->
+<section class="page-hero">
+  <div class="page-hero-inner container">
+    <p class="section-eyebrow">The BURG Platform</p>
+    <h1>One Platform.<br />Every Vehicle. Every Need.</h1>
+    <p>Fleet aggregation, intelligent booking, compliance automation, and real-time analytics — unified into a single B2B2C marketplace for commercial mobility in India.</p>
+  </div>
+</section>
+
+<!-- ═══════════════ PLATFORM OVERVIEW ═══════════════ -->
+<section class="section">
+  <div class="container">
+    <div class="section-header fade-in">
+      <p class="section-eyebrow">What The Platform Does</p>
+      <h2 class="section-title">Four Pillars of the BURG Marketplace</h2>
+      <p class="section-subtitle">Every feature is designed to solve a real problem in India's unorganised commercial transport sector.</p>
+    </div>
+    <div class="features-grid fade-in">
+      <div class="feat-cell">
+        <div class="feat-icon">🔗</div>
+        <h3>Fleet Aggregation</h3>
+        <p>We onboard and verify buses, tempos, cabs, trucks, and specialised vehicles from independent operators across cities — creating a single, reliable supply pool.</p>
+      </div>
+      <div class="feat-cell">
+        <div class="feat-icon">📅</div>
+        <h3>Intelligent Booking</h3>
+        <p>Clients book via web portal or direct account managers. Smart matching surfaces the best-fit vehicles based on route, capacity, compliance status, and price.</p>
+      </div>
+      <div class="feat-cell">
+        <div class="feat-icon">✅</div>
+        <h3>Compliance Engine</h3>
+        <p>Vehicle fitness certificates, driver licences, insurance validity, and pollution checks are tracked and auto-flagged — keeping every trip legally sound.</p>
+      </div>
+      <div class="feat-cell">
+        <div class="feat-icon">📊</div>
+        <h3>Analytics &amp; Reporting</h3>
+        <p>Corporate clients get monthly utilisation reports, cost-per-km breakdowns, and safety scorecards. Fleet partners see earnings, trip history, and performance data.</p>
+      </div>
+      <div class="feat-cell">
+        <div class="feat-icon">📡</div>
+        <h3>Live GPS Tracking</h3>
+        <p>Every active vehicle broadcasts real-time location via TONi — our proprietary fleet management system — updating every 3 seconds with route deviation alerts.</p>
+      </div>
+      <div class="feat-cell">
+        <div class="feat-icon">💳</div>
+        <h3>Payments &amp; Billing</h3>
+        <p>Automated invoicing, digital payments via Razorpay, and monthly consolidated billing for corporate accounts. Transparent, auditable, and GST-compliant.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ HOW IT WORKS ═══════════════ -->
+<section class="section" style="background: var(--off-white);">
+  <div class="container">
+    <div class="section-header fade-in">
+      <p class="section-eyebrow">How It Works</p>
+      <h2 class="section-title">From Enquiry to Trip — Seamlessly</h2>
+      <p class="section-subtitle">A streamlined workflow for clients and fleet partners alike.</p>
+    </div>
+    <div class="stepper fade-in">
+
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-content">
+          <span class="step-tag">Client</span>
+          <h3>Submit Your Requirement</h3>
+          <p>A corporate, school, or individual client submits their transport requirement — route, date, vehicle type, and passenger count — via our web portal or by contacting our account team directly.</p>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-content">
+          <span class="step-tag">Platform</span>
+          <h3>Smart Fleet Matching</h3>
+          <p>BURG's platform scans the verified fleet pool, filters for compliance status, checks availability, and surfaces the best-fit options with transparent pricing — within minutes.</p>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-content">
+          <span class="step-tag">Client</span>
+          <h3>Confirm &amp; Pay</h3>
+          <p>The client confirms the booking and pays via our secure Razorpay-integrated payment gateway. Corporate accounts can opt for monthly consolidated invoicing instead.</p>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">4</div>
+        <div class="step-content">
+          <span class="step-tag">Fleet Partner</span>
+          <h3>Trip Assigned to Driver</h3>
+          <p>The assigned fleet operator receives trip details instantly. The driver is notified via the TONi Driver App, confirms with a trip code, and the vehicle is en route.</p>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">5</div>
+        <div class="step-content">
+          <span class="step-tag">Live</span>
+          <h3>Real-Time Monitoring</h3>
+          <p>Throughout the journey, TONi tracks the vehicle live. Clients and administrators can view the bus on a live map. Route deviations or SOS events trigger instant alerts.</p>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">6</div>
+        <div class="step-content">
+          <span class="step-tag">Post-Trip</span>
+          <h3>Report, Pay Out &amp; Rate</h3>
+          <p>On trip completion, the platform auto-generates a trip report. Fleet partners receive their payout per agreed terms. Clients can rate the trip to maintain quality standards.</p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ USER SEGMENTS ═══════════════ -->
+<section class="section segments-section">
+  <div class="container">
+    <div class="section-header fade-in">
+      <p class="section-eyebrow">Who Uses BURG</p>
+      <h2 class="section-title">Built for Every Mobility Stakeholder</h2>
+      <p class="section-subtitle">From large enterprises to daily commuters — explore how each user type benefits.</p>
+    </div>
+    <div class="segments-tabs fade-in" id="segTabs">
+      <button class="seg-tab active" data-panel="corporate">🏢 Corporates</button>
+      <button class="seg-tab" data-panel="school">🏫 Schools</button>
+      <button class="seg-tab" data-panel="retail">👤 Retail</button>
+      <button class="seg-tab" data-panel="vip">💎 VIP</button>
+      
+    </div>
+
+    <div id="panel-corporate" class="seg-panel active fade-in">
+      <div class="seg-card">
+        <div class="seg-card-icon">📋</div>
+        <div class="seg-card-text">
+          <h4>Dedicated Fleet Contracts</h4>
+          <p>Monthly or annual agreements with assigned vehicles, SLA-backed reliability, and a single point of contact for all transport needs.</p>
+        </div>
+      </div>
+      <div class="seg-card">
+        <div class="seg-card-icon">📊</div>
+        <div class="seg-card-text">
+          <h4>Usage Analytics Dashboard</h4>
+          <p>Cost-per-employee, route utilisation, and monthly spend reports delivered automatically to your finance and admin teams.</p>
+        </div>
+      </div>
+      <div class="seg-card">
+        <div class="seg-card-icon">🧾</div>
+        <div class="seg-card-text">
+          <h4>Consolidated GST Billing</h4>
+          <p>One invoice per month covering all trips, fully GST-compliant, and integrated with standard enterprise procurement workflows.</p>
+        </div>
+      </div>
+      <div class="seg-card">
+        <div class="seg-card-icon">🛡️</div>
+        <div class="seg-card-text">
+          <h4>RideSafe Compliance</h4>
+          <p>All corporate fleet vehicles undergo BURG's RideSafe audit — driver background checks, vehicle fitness, and live trip monitoring included.</p>
+        </div>
+      </div>
+    </div>
+
+    <div id="panel-school" class="seg-panel fade-in">
+      <div class="seg-card">
+        <div class="seg-card-icon">📍</div>
+        <div class="seg-card-text">
+          <h4>Live Route Tracking</h4>
+          <p>Parents and school administrators see every bus live on a map. Arrival estimates are pushed via WhatsApp notifications automatically.</p>
+        </div>
+      </div>
+      <div class="seg-card">
+        <div class="seg-card-icon">📋</div>
+        <div class="seg-card-text">
+          <h4>Digital Attendance Logs</h4>
+          <p>Student boarding and alighting is recorded per trip, giving schools a fully auditable attendance trail for every route.</p>
+        </div>
+      </div>
+      <div class="seg-card">
+        <div class="seg-card-icon">🔐</div>
+        <div class="seg-card-text">
+          <h4>Verified Drivers Only</h4>
+          <p>Every driver assigned to school routes completes BURG's enhanced background verification and RideSafe driver safety training.</p>
+        </div>
+      </div>
+      <div class="seg-card">
+        <div class="seg-card-icon">💰</div>
+        <div class="seg-card-text">
+          <h4>Fee Collection &amp; Billing</h4>
+          <p>Schools can collect transport fees from parents digitally through BURG's integrated payment system — reducing admin overhead significantly.</p>
+        </div>
+      </div>
+    </div>
+
+    <div id="panel-retail" class="seg-panel fade-in">
+      <div class="seg-card">
+        <div class="seg-card-icon">📱</div>
+        <div class="seg-card-text">
+          <h4>On-Demand Booking</h4>
+          <p>Individual commuters and small groups can book verified vehicles for outstation trips, events, or regular point-to-point routes without a long-term contract.</p>
+        </div>
+      </div>
+      <div class="seg-card">
+        <div class="seg-card-icon">💸</div>
+        <div class="seg-card-text">
+          <h4>Transparent Pricing</h4>
+          <p>No hidden charges. Distance-based pricing slabs are displayed upfront. Clients pay only for what they use — no surge pricing surprises.</p>
+        </div>
+      </div>
+      <div class="seg-card">
+        <div class="seg-card-icon">🛡️</div>
+        <div class="seg-card-text">
+          <h4>Safety Assurance</h4>
+          <p>Even single-trip retail bookings are covered by BURG's compliance checks — every vehicle is verified before it reaches you.</p>
+        </div>
+      </div>
+      <div class="seg-card">
+        <div class="seg-card-icon">📞</div>
+        <div class="seg-card-text">
+          <h4>Human Support</h4>
+          <p>Our team is reachable by phone and WhatsApp. Retail clients always have a real person to speak to for bookings, changes, or issues.</p>
+        </div>
+      </div>
+    </div>
+
+    <div id="panel-vip" class="seg-panel fade-in">
+      <div class="seg-card">
+        <div class="seg-card-icon">🚗</div>
+        <div class="seg-card-text">
+          <h4>Curated Luxury Fleet</h4>
+          <p>Sedan and SUV options from BURG's premium fleet pool — Innova Crysta, Fortuner, and executive minivans — maintained to the highest standards.</p>
+        </div>
+      </div>
+      <div class="seg-card">
+        <div class="seg-card-icon">👔</div>
+        <div class="seg-card-text">
+          <h4>Professional Chauffeurs</h4>
+          <p>Uniformed, briefed, and background-verified drivers trained specifically in executive hospitality and discretion protocols.</p>
+        </div>
+      </div>
+      <div class="seg-card">
+        <div class="seg-card-icon">🔒</div>
+        <div class="seg-card-text">
+          <h4>Privacy &amp; Confidentiality</h4>
+          <p>Trip data for VIP clients is handled with strict access controls. Driver NDAs are in place for high-profile and diplomatic engagements.</p>
+        </div>
+      </div>
+      <div class="seg-card">
+        <div class="seg-card-icon">🎯</div>
+        <div class="seg-card-text">
+          <h4>Concierge Coordination</h4>
+          <p>Airport pickups, hotel transfers, multi-city itineraries, and last-minute changes are handled by a dedicated VIP coordination team.</p>
+        </div>
+      </div>
+    </div>
+
+    </div>
+      <div class="seg-card">
+        <div class="seg-card-icon">📦</div>
+        <div class="seg-card-text">
+          <h4>Flexible Load Options</h4>
+          <p>From small parcel loads to full-truck loads — BURG matches the right vehicle size and type to the cargo requirement every time.</p>
+        </div>
+      </div>
+      <div class="seg-card">
+        <div class="seg-card-icon">🗓️</div>
+        <div class="seg-card-text">
+          <h4>Scheduled &amp; Ad-Hoc Runs</h4>
+          <p>Set up recurring delivery schedules or place one-off bookings as needed. BURG handles logistics around your operations, not the other way around.</p>
+        </div>
+      </div>
+      <div class="seg-card">
+        <div class="seg-card-icon">📋</div>
+        <div class="seg-card-text">
+          <h4>Proof of Delivery &amp; ePOD</h4>
+          <p>Digital proof-of-delivery with timestamped photos and recipient confirmation — eliminating disputes and simplifying your supply chain records.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ COMPLIANCE ═══════════════ -->
+<section class="compliance-strip">
+  <div class="container compliance-inner fade-in">
+    <div>
+      <p class="section-eyebrow" style="color: var(--accent);">Compliance</p>
+      <h2 class="section-title">Every Vehicle. Every Trip.<br />Fully Verified.</h2>
+      <p style="color:rgba(255,255,255,0.6); margin-top:12px; line-height:1.75;">India's commercial transport sector is plagued by unverified operators and ignored regulations. BURG's compliance engine changes this — tracking every required document and flagging expiries automatically.</p>
+    </div>
+    <div class="compliance-badges">
+      <div class="compliance-badge">
+        <div class="compliance-badge-icon">📄</div>
+        <span>Vehicle Fitness Certificate</span>
+      </div>
+      <div class="compliance-badge">
+        <div class="compliance-badge-icon">🪪</div>
+        <span>Driver Licence Verification</span>
+      </div>
+      <div class="compliance-badge">
+        <div class="compliance-badge-icon">🛡️</div>
+        <span>Third-Party Insurance</span>
+      </div>
+      <div class="compliance-badge">
+        <div class="compliance-badge-icon">🌫️</div>
+        <span>Pollution Under Control</span>
+      </div>
+      <div class="compliance-badge">
+        <div class="compliance-badge-icon">🔍</div>
+        <span>Background Check</span>
+      </div>
+      <div class="compliance-badge">
+        <div class="compliance-badge-icon">📍</div>
+        <span>GPS Device Verified</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ ANALYTICS ═══════════════ -->
+<section class="section analytics-section">
+  <div class="container analytics-inner">
+    <div class="fade-in">
+      <p class="section-eyebrow">Data &amp; Analytics</p>
+      <h2 class="section-title">Decisions Powered by Real Data</h2>
+      <p class="body-text">Corporate clients and fleet partners both have access to live dashboards and monthly reports. No more guessing — track every rupee, every kilometre, and every trip in one place.</p>
+      <ul style="margin-top:1rem; display:flex; flex-direction:column; gap:10px;">
+        <li style="display:flex; gap:10px; align-items:flex-start; font-size:0.93rem; color:var(--text-muted);">
+          <span style="color:var(--blue-bright); font-weight:700; flex-shrink:0;">→</span>
+          Fleet utilisation rates by vehicle type and route
+        </li>
+        <li style="display:flex; gap:10px; align-items:flex-start; font-size:0.93rem; color:var(--text-muted);">
+          <span style="color:var(--blue-bright); font-weight:700; flex-shrink:0;">→</span>
+          Cost-per-kilometre trends across billing periods
+        </li>
+        <li style="display:flex; gap:10px; align-items:flex-start; font-size:0.93rem; color:var(--text-muted);">
+          <span style="color:var(--blue-bright); font-weight:700; flex-shrink:0;">→</span>
+          Driver performance and safety incident logs
+        </li>
+        <li style="display:flex; gap:10px; align-items:flex-start; font-size:0.93rem; color:var(--text-muted);">
+          <span style="color:var(--blue-bright); font-weight:700; flex-shrink:0;">→</span>
+          Compliance expiry calendars with auto-reminders
+        </li>
+        <li style="display:flex; gap:10px; align-items:flex-start; font-size:0.93rem; color:var(--text-muted);">
+          <span style="color:var(--blue-bright); font-weight:700; flex-shrink:0;">→</span>
+          Partner earnings breakdowns and payout history
+        </li>
+      </ul>
+    </div>
+    <div class="analytics-visual fade-in">
+      <div class="metric-card">
+        <div class="metric-label">Fleet Utilisation — Current Month</div>
+        <div class="metric-value">87.5%</div>
+        <div class="metric-sub">↑ 6.2% vs last month</div>
+        <div class="metric-bar"><div class="metric-bar-fill" style="width:87.5%"></div></div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Trips Completed</div>
+        <div class="metric-value">138</div>
+        <div class="metric-sub">This month</div>
+        <div class="metric-bar"><div class="metric-bar-fill" style="width:72%"></div></div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Compliance Rate</div>
+        <div class="metric-value">96%</div>
+        <div class="metric-sub">Verified fleet</div>
+        <div class="metric-bar"><div class="metric-bar-fill" style="width:96%"></div></div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Active Partners</div>
+        <div class="metric-value">24</div>
+        <div class="metric-sub">Onboarded operators</div>
+        <div class="metric-bar"><div class="metric-bar-fill" style="width:60%"></div></div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Avg. Trip Rating</div>
+        <div class="metric-value">4.7</div>
+        <div class="metric-sub">Out of 5.0</div>
+        <div class="metric-bar"><div class="metric-bar-fill" style="width:94%"></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ CTA BANNER ═══════════════ -->
+<section class="cta-banner">
+  <div class="cta-banner-bg"></div>
+  <div class="container cta-banner-inner fade-in">
+    <h2>Ready to Put Your Fleet on BURG?</h2>
+    <p>Join as a fleet partner or register your organisation as a client — setup takes less than a day.</p>
+    <div class="cta-banner-actions">
+      <a href="contact.html" class="btn btn-primary">Register Your Organisation</a>
+      <a href="partners.html" class="btn btn-outline-light">Partner With Us</a>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ FOOTER ═══════════════ -->
+<footer class="footer">
+  <div class="container footer-grid">
+    <div class="footer-brand">
+      <img src="https://i.ibb.co/rKbMhMsY/BURGRENTAL-COM-BADGE-removebg-preview.png" alt="BURG Rental Services" class="footer-logo" />
+      <p>Revolutionizing commercial vehicle rentals since 2024.</p>
+      <p class="footer-legal-small">BURG Rental Services LLP<br />LLPIN: ACR-9256</p>
+    </div>
+    <div class="footer-links-col">
+      <h4>Company</h4>
+      <a href="index.html">Home</a>
+      <a href="platform.html">Platform</a>
+      <a href="technology.html">Technology</a>
+      <a href="contact.html">Contact</a>
+    </div>
+    <div class="footer-links-col">
+      <h4>Solutions</h4>
+      <a href="services.html">RideSafe</a>
+      <a href="services.html">Corporate Leasing</a>
+      <a href="services.html">School Transport</a>
+      <a href="services.html">VIP &amp; Executive</a>
+    </div>
+    <div class="footer-links-col">
+      <h4>Join Us</h4>
+      <a href="partners.html">Partner With Us</a>
+      <a href="drivers.html">Drive With BURG</a>
+      <a href="contact.html">Enquire Now</a>
+    </div>
+    <div class="footer-contact-col">
+      <h4>Contact</h4>
+      <p>📍 Bangalore, Karnataka, India</p>
+      <p>📧 <a href="mailto:hello@burgrental.com">hello@burgrental.com</a></p>
+      <p>📞 <a href="tel:+918778579209">+91 87785 79209</a></p>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <div class="container footer-bottom-inner">
+      <p>© 2024–2025 BURG Rental Services LLP. All rights reserved. LLPIN: ACR-9256 | Registered in India.</p>
+      <p class="footer-disclaimer">Commercial vehicle rental marketplace. All fleet partners independently verified. BURG is a facilitator, not a direct transport operator.</p>
+    </div>
+  </div>
+</footer>
+
+<script src="script.js"></script>
+<script>
+  // Segment tabs interactivity
+  const tabs   = document.querySelectorAll('.seg-tab');
+  const panels = document.querySelectorAll('.seg-panel');
+  tabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      tabs.forEach(t => t.classList.remove('active'));
+      panels.forEach(p => p.classList.remove('active'));
+      tab.classList.add('active');
+      const target = document.getElementById('panel-' + tab.dataset.panel);
+      if (target) target.classList.add('active');
+    });
+  });
+</script>
+</body>
+</html>

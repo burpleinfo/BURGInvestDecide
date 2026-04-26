@@ -1,0 +1,1488 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Technology — BURG Rental Services</title>
+  <meta name="description" content="TONi — BURG's proprietary Transport Oriented Network Interface. Real-time GPS fleet tracking, admin dashboards, driver PWA, and passenger display systems built in-house." />
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+
+    /* ── Tech hero — dark terminal feel ── */
+    .tech-hero {
+      position: relative;
+      min-height: 100vh;
+      background: #010d1a;
+      display: flex;
+      align-items: center;
+      overflow: hidden;
+      padding-top: var(--nav-h);
+    }
+    .tech-hero-grid {
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(26,122,255,0.08) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(26,122,255,0.08) 1px, transparent 1px);
+      background-size: 48px 48px;
+    }
+    .tech-hero-glow {
+      position: absolute;
+      width: 800px; height: 800px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(0,85,170,0.25) 0%, transparent 65%);
+      top: 50%; left: 60%;
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+    }
+    .tech-hero-inner {
+      position: relative;
+      z-index: 2;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 80px 24px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 64px;
+      align-items: center;
+      width: 100%;
+    }
+    .tech-hero-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.75rem;
+      color: rgba(26,122,255,0.9);
+      background: rgba(26,122,255,0.08);
+      border: 1px solid rgba(26,122,255,0.2);
+      padding: 6px 14px;
+      border-radius: 4px;
+      margin-bottom: 24px;
+      letter-spacing: 0.04em;
+    }
+    .tech-hero-label::before {
+      content: '▶';
+      font-size: 0.6rem;
+    }
+    .tech-hero-title {
+      font-family: 'Syne', sans-serif;
+      font-size: clamp(2.4rem, 5.5vw, 4.4rem);
+      font-weight: 800;
+      color: var(--white);
+      line-height: 1.08;
+      margin-bottom: 8px;
+    }
+    .tech-hero-title-sub {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: clamp(0.75rem, 1.5vw, 0.95rem);
+      color: rgba(26,122,255,0.7);
+      letter-spacing: 0.12em;
+      margin-bottom: 24px;
+      display: block;
+    }
+    .tech-hero-desc {
+      font-size: 1.05rem;
+      color: rgba(255,255,255,0.55);
+      line-height: 1.8;
+      max-width: 480px;
+      margin-bottom: 36px;
+    }
+    .tech-hero-actions {
+      display: flex;
+      gap: 14px;
+      flex-wrap: wrap;
+    }
+
+    /* Live terminal animation */
+    .terminal {
+      background: #0a0f1a;
+      border: 1px solid rgba(26,122,255,0.2);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      font-family: 'JetBrains Mono', monospace;
+      box-shadow: 0 0 60px rgba(0,85,170,0.2), 0 24px 48px rgba(0,0,0,0.5);
+    }
+    .terminal-bar {
+      background: rgba(255,255,255,0.04);
+      border-bottom: 1px solid rgba(255,255,255,0.07);
+      padding: 12px 18px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .t-dot { width: 10px; height: 10px; border-radius: 50%; }
+    .t-dot-r { background: #ff5f57; }
+    .t-dot-y { background: #febc2e; }
+    .t-dot-g { background: #28c840; }
+    .terminal-title {
+      font-size: 0.72rem;
+      color: rgba(255,255,255,0.3);
+      margin-left: 8px;
+      letter-spacing: 0.06em;
+    }
+    .terminal-body {
+      padding: 24px 20px;
+      min-height: 320px;
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+    }
+    .t-line {
+      font-size: 0.8rem;
+      line-height: 1.9;
+      opacity: 0;
+      animation: terminalFade 0.3s ease forwards;
+    }
+    .t-line:nth-child(1)  { animation-delay: 0.3s; }
+    .t-line:nth-child(2)  { animation-delay: 0.7s; }
+    .t-line:nth-child(3)  { animation-delay: 1.1s; }
+    .t-line:nth-child(4)  { animation-delay: 1.5s; }
+    .t-line:nth-child(5)  { animation-delay: 1.9s; }
+    .t-line:nth-child(6)  { animation-delay: 2.3s; }
+    .t-line:nth-child(7)  { animation-delay: 2.7s; }
+    .t-line:nth-child(8)  { animation-delay: 3.1s; }
+    .t-line:nth-child(9)  { animation-delay: 3.5s; }
+    .t-line:nth-child(10) { animation-delay: 3.9s; }
+    .t-line:nth-child(11) { animation-delay: 4.3s; }
+    .t-line:nth-child(12) { animation-delay: 4.7s; }
+    @keyframes terminalFade {
+      from { opacity: 0; transform: translateX(-6px); }
+      to   { opacity: 1; transform: translateX(0); }
+    }
+    .t-prompt { color: rgba(26,122,255,0.8); }
+    .t-cmd    { color: rgba(255,255,255,0.85); }
+    .t-ok     { color: #4ade80; }
+    .t-info   { color: rgba(255,255,255,0.4); }
+    .t-warn   { color: #fb923c; }
+    .t-accent { color: #ffd166; }
+    .t-cursor {
+      display: inline-block;
+      width: 8px; height: 14px;
+      background: rgba(26,122,255,0.8);
+      vertical-align: middle;
+      animation: blink 1s step-end infinite;
+      margin-left: 2px;
+    }
+    @keyframes blink {
+      0%,100% { opacity:1; } 50% { opacity:0; }
+    }
+
+    /* ── TONi portals section ── */
+    .portals-section { background: var(--navy-deep); padding: 96px 0; }
+    .portals-section .section-title  { color: var(--white); }
+    .portals-section .section-eyebrow { color: var(--accent); }
+    .portals-section .section-subtitle { color: rgba(255,255,255,0.5); }
+
+    .portals-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+    }
+    .portal-card {
+      border-radius: var(--radius-xl);
+      overflow: hidden;
+      border: 1px solid rgba(255,255,255,0.1);
+      transition: var(--transition);
+    }
+    .portal-card:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 24px 48px rgba(0,0,0,0.4);
+      border-color: rgba(255,255,255,0.2);
+    }
+    .portal-header {
+      padding: 24px 24px 20px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .portal-header-dots {
+      display: flex; gap: 6px;
+    }
+    .portal-icon-lg {
+      font-size: 1.6rem;
+      margin-left: auto;
+    }
+    .portal-body { padding: 0 24px 28px; }
+    .portal-tag {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.68rem;
+      letter-spacing: 0.1em;
+      padding: 4px 10px;
+      border-radius: 4px;
+      display: inline-block;
+      margin-bottom: 12px;
+    }
+    .portal-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.3rem;
+      font-weight: 800;
+      color: var(--white);
+      margin-bottom: 10px;
+    }
+    .portal-desc {
+      font-size: 0.88rem;
+      color: rgba(255,255,255,0.5);
+      line-height: 1.7;
+      margin-bottom: 20px;
+    }
+    .portal-features {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .portal-feat {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 0.82rem;
+      color: rgba(255,255,255,0.65);
+    }
+    .portal-feat::before {
+      content: '';
+      width: 5px; height: 5px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    /* Admin portal */
+    .portal-card--admin { background: linear-gradient(160deg, #001228 0%, #001e3d 100%); }
+    .portal-card--admin .portal-header { background: rgba(0,85,170,0.15); border-bottom: 1px solid rgba(0,85,170,0.2); }
+    .portal-card--admin .portal-tag { background: rgba(0,85,170,0.2); color: #6eb3ff; }
+    .portal-card--admin .portal-feat::before { background: #6eb3ff; }
+
+    /* Driver portal */
+    .portal-card--driver { background: linear-gradient(160deg, #001a0d 0%, #002d18 100%); }
+    .portal-card--driver .portal-header { background: rgba(74,222,128,0.08); border-bottom: 1px solid rgba(74,222,128,0.12); }
+    .portal-card--driver .portal-tag { background: rgba(74,222,128,0.12); color: #4ade80; }
+    .portal-card--driver .portal-feat::before { background: #4ade80; }
+
+    /* Passenger portal */
+    .portal-card--passenger { background: linear-gradient(160deg, #1a1000 0%, #2d1e00 100%); }
+    .portal-card--passenger .portal-header { background: rgba(240,165,0,0.08); border-bottom: 1px solid rgba(240,165,0,0.12); }
+    .portal-card--passenger .portal-tag { background: rgba(240,165,0,0.12); color: #ffd166; }
+    .portal-card--passenger .portal-feat::before { background: #ffd166; }
+
+    /* ── Architecture diagram section ── */
+    .arch-section { background: var(--off-white); padding: 96px 0; }
+    .arch-inner {
+      display: grid;
+      grid-template-columns: 1fr 1.3fr;
+      gap: 72px;
+      align-items: center;
+    }
+
+    /* SVG-style architecture visual */
+    .arch-visual {
+      background: #010d1a;
+      border-radius: var(--radius-xl);
+      padding: 36px 28px;
+      border: 1px solid rgba(26,122,255,0.15);
+      box-shadow: var(--shadow-lg);
+    }
+    .arch-visual-title {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.7rem;
+      color: rgba(26,122,255,0.6);
+      letter-spacing: 0.1em;
+      margin-bottom: 24px;
+      text-transform: uppercase;
+    }
+    .arch-layers {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .arch-layer {
+      border-radius: var(--radius-md);
+      padding: 14px 18px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      position: relative;
+      border: 1px solid transparent;
+      transition: var(--transition);
+      cursor: default;
+    }
+    .arch-layer:hover { transform: translateX(4px); }
+    .arch-layer--client   { background: rgba(26,122,255,0.08);  border-color: rgba(26,122,255,0.2); }
+    .arch-layer--api      { background: rgba(0,170,255,0.06);   border-color: rgba(0,170,255,0.15); }
+    .arch-layer--core     { background: rgba(0,85,170,0.12);    border-color: rgba(0,85,170,0.25); }
+    .arch-layer--data     { background: rgba(240,165,0,0.06);   border-color: rgba(240,165,0,0.18); }
+    .arch-layer--infra    { background: rgba(74,222,128,0.05);  border-color: rgba(74,222,128,0.14); }
+
+    .arch-layer-icon { font-size: 1.1rem; flex-shrink: 0; }
+    .arch-layer-info { flex: 1; }
+    .arch-layer-name {
+      font-family: 'Syne', sans-serif;
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: var(--white);
+      margin-bottom: 2px;
+    }
+    .arch-layer-desc {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.68rem;
+      color: rgba(255,255,255,0.35);
+      letter-spacing: 0.04em;
+    }
+    .arch-layer-badge {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.65rem;
+      padding: 3px 8px;
+      border-radius: 4px;
+      flex-shrink: 0;
+    }
+    .arch-layer--client .arch-layer-badge   { background: rgba(26,122,255,0.2);  color: #6eb3ff; }
+    .arch-layer--api    .arch-layer-badge   { background: rgba(0,170,255,0.15);  color: #66ccff; }
+    .arch-layer--core   .arch-layer-badge   { background: rgba(0,85,170,0.25);   color: #99ccff; }
+    .arch-layer--data   .arch-layer-badge   { background: rgba(240,165,0,0.15);  color: #ffd166; }
+    .arch-layer--infra  .arch-layer-badge   { background: rgba(74,222,128,0.12); color: #86efac; }
+
+    .arch-arrow {
+      text-align: center;
+      color: rgba(255,255,255,0.12);
+      font-size: 0.75rem;
+      margin: 2px 0;
+      letter-spacing: 0.1em;
+    }
+
+    /* ── Tech specs grid ── */
+    .specs-section { background: var(--white); padding: 96px 0; }
+    .specs-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 32px;
+    }
+    .spec-group {
+      background: var(--off-white);
+      border: 1px solid var(--gray-200);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+    }
+    .spec-group-header {
+      padding: 18px 24px;
+      background: var(--navy);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .spec-group-icon { font-size: 1rem; }
+    .spec-group-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 0.82rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--white);
+    }
+    .spec-rows { padding: 0; }
+    .spec-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      padding: 13px 24px;
+      border-bottom: 1px solid var(--gray-200);
+      font-size: 0.85rem;
+      gap: 12px;
+    }
+    .spec-row:last-child { border-bottom: none; }
+    .spec-key {
+      color: var(--text-muted);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.78rem;
+    }
+    .spec-val {
+      font-weight: 600;
+      color: var(--navy);
+      font-size: 0.85rem;
+    }
+    .spec-val.mono {
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 500;
+      font-size: 0.78rem;
+      color: var(--blue-bright);
+    }
+
+    /* ── GPS tracking section ── */
+    .gps-section { background: var(--navy-deep); padding: 96px 0; }
+    .gps-section .section-title { color: var(--white); }
+    .gps-section .section-eyebrow { color: var(--accent); }
+
+    .gps-inner {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 72px;
+      align-items: center;
+    }
+    .gps-text p { color: rgba(255,255,255,0.6); line-height: 1.8; margin-bottom: 1rem; }
+
+    .gps-features {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      margin-top: 28px;
+    }
+    .gps-feat {
+      display: flex;
+      gap: 14px;
+      align-items: flex-start;
+      padding: 16px 18px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: var(--radius-md);
+      transition: var(--transition);
+    }
+    .gps-feat:hover {
+      background: rgba(255,255,255,0.07);
+      border-color: rgba(255,255,255,0.14);
+    }
+    .gps-feat-icon {
+      font-size: 1.2rem;
+      flex-shrink: 0;
+      width: 40px; height: 40px;
+      background: rgba(26,122,255,0.12);
+      border-radius: var(--radius-sm);
+      display: flex; align-items: center; justify-content: center;
+    }
+    .gps-feat-text h4 {
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: var(--white);
+      margin-bottom: 4px;
+    }
+    .gps-feat-text p {
+      font-size: 0.82rem;
+      color: rgba(255,255,255,0.45) !important;
+      line-height: 1.55 !important;
+      margin-bottom: 0 !important;
+    }
+
+    /* Map mock */
+    .map-mock {
+      background: #0d1f35;
+      border: 1px solid rgba(26,122,255,0.2);
+      border-radius: var(--radius-xl);
+      overflow: hidden;
+      box-shadow: 0 0 40px rgba(0,85,170,0.25);
+      min-height: 380px;
+      position: relative;
+    }
+    .map-mock-grid {
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(26,122,255,0.07) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(26,122,255,0.07) 1px, transparent 1px);
+      background-size: 36px 36px;
+    }
+    .map-mock-roads {
+      position: absolute;
+      inset: 0;
+    }
+    .map-road {
+      position: absolute;
+      background: rgba(255,255,255,0.06);
+    }
+    .map-road-h1 { top: 35%; left: 0; right: 0; height: 6px; border-radius: 3px; }
+    .map-road-h2 { top: 65%; left: 0; right: 0; height: 3px; border-radius: 2px; }
+    .map-road-v1 { left: 30%; top: 0; bottom: 0; width: 5px; border-radius: 3px; }
+    .map-road-v2 { left: 70%; top: 0; bottom: 0; width: 3px; border-radius: 2px; }
+    .map-route {
+      position: absolute;
+      top: 22%; left: 15%;
+      width: 70%; height: 55%;
+      border: 2px dashed rgba(26,122,255,0.5);
+      border-radius: 40% 60% 50% 40% / 40% 40% 60% 50%;
+      animation: routePulse 4s ease-in-out infinite;
+    }
+    @keyframes routePulse {
+      0%,100% { border-color: rgba(26,122,255,0.4); }
+      50%      { border-color: rgba(26,122,255,0.8); }
+    }
+    .map-vehicle {
+      position: absolute;
+      width: 14px; height: 14px;
+      background: #4ade80;
+      border-radius: 50%;
+      border: 2px solid var(--white);
+      box-shadow: 0 0 14px rgba(74,222,128,0.7);
+      animation: vehicleMove 8s ease-in-out infinite;
+    }
+    @keyframes vehicleMove {
+      0%   { top: 30%; left: 20%; }
+      25%  { top: 20%; left: 55%; }
+      50%  { top: 45%; left: 75%; }
+      75%  { top: 65%; left: 40%; }
+      100% { top: 30%; left: 20%; }
+    }
+    .map-pin {
+      position: absolute;
+      width: 10px; height: 10px;
+      background: var(--accent);
+      border-radius: 50%;
+      border: 2px solid var(--white);
+    }
+    .map-pin-1 { top: 28%; left: 18%; }
+    .map-pin-2 { top: 65%; left: 72%; }
+    .map-overlay {
+      position: absolute;
+      bottom: 16px; left: 16px;
+      background: rgba(0,10,25,0.85);
+      border: 1px solid rgba(26,122,255,0.25);
+      border-radius: var(--radius-md);
+      padding: 12px 16px;
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .map-overlay-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 20px;
+      font-size: 0.72rem;
+      color: rgba(255,255,255,0.45);
+      margin-bottom: 4px;
+    }
+    .map-overlay-row:last-child { margin-bottom: 0; }
+    .map-overlay-val {
+      color: #4ade80;
+      font-weight: 500;
+    }
+
+    /* ── RideSafe tech section ── */
+    .ridesafe-tech { background: var(--off-white); padding: 96px 0; }
+    .ridesafe-tech-inner {
+      display: grid;
+      grid-template-columns: 1.2fr 1fr;
+      gap: 72px;
+      align-items: center;
+    }
+    .compliance-flow {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+    }
+    .cf-step {
+      display: grid;
+      grid-template-columns: 48px 1fr;
+      gap: 20px;
+      align-items: stretch;
+    }
+    .cf-left {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .cf-dot {
+      width: 48px; height: 48px;
+      border-radius: 50%;
+      background: var(--white);
+      border: 2px solid var(--gray-200);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
+      flex-shrink: 0;
+      transition: var(--transition);
+      z-index: 1;
+    }
+    .cf-step:hover .cf-dot {
+      background: var(--navy);
+      border-color: var(--navy);
+      transform: scale(1.1);
+    }
+    .cf-line {
+      width: 2px;
+      flex: 1;
+      background: var(--gray-200);
+      margin: 0 auto;
+      min-height: 20px;
+    }
+    .cf-step:last-child .cf-line { display: none; }
+    .cf-content {
+      padding-bottom: 28px;
+    }
+    .cf-step:last-child .cf-content { padding-bottom: 0; }
+    .cf-content h4 {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--navy);
+      margin-bottom: 5px;
+      margin-top: 10px;
+    }
+    .cf-content p {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      line-height: 1.65;
+    }
+
+    /* ── Roadmap section ── */
+    .roadmap-section { background: var(--white); padding: 96px 0; }
+    .roadmap-timeline {
+      position: relative;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    .roadmap-timeline::before {
+      content: '';
+      position: absolute;
+      left: 50%;
+      top: 0; bottom: 0;
+      width: 2px;
+      background: linear-gradient(to bottom, var(--navy), rgba(0,51,102,0.1));
+      transform: translateX(-50%);
+    }
+    .rm-item {
+      display: grid;
+      grid-template-columns: 1fr 48px 1fr;
+      gap: 24px;
+      align-items: center;
+      margin-bottom: 40px;
+    }
+    .rm-item:last-child { margin-bottom: 0; }
+    .rm-item.right .rm-left  { order: 3; text-align: left; }
+    .rm-item.right .rm-dot   { order: 2; }
+    .rm-item.right .rm-right { order: 1; text-align: right; }
+    .rm-left  { text-align: right; }
+    .rm-right { text-align: left; }
+    .rm-dot {
+      width: 48px; height: 48px;
+      border-radius: 50%;
+      background: var(--navy);
+      border: 3px solid var(--white);
+      box-shadow: 0 0 0 3px rgba(0,51,102,0.2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1rem;
+      flex-shrink: 0;
+      margin: 0 auto;
+      z-index: 1;
+      position: relative;
+    }
+    .rm-dot.live {
+      background: var(--blue);
+      box-shadow: 0 0 0 3px rgba(0,85,170,0.25), 0 0 20px rgba(26,122,255,0.4);
+    }
+    .rm-dot.done {
+      background: #16a34a;
+      box-shadow: 0 0 0 3px rgba(22,163,74,0.2);
+    }
+    .rm-card {
+      background: var(--off-white);
+      border: 1px solid var(--gray-200);
+      border-radius: var(--radius-md);
+      padding: 20px 22px;
+      transition: var(--transition);
+    }
+    .rm-card:hover {
+      border-color: var(--blue);
+      box-shadow: var(--shadow-sm);
+    }
+    .rm-period {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.7rem;
+      color: var(--blue-bright);
+      letter-spacing: 0.08em;
+      margin-bottom: 6px;
+    }
+    .rm-card h4 {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--navy);
+      margin-bottom: 5px;
+    }
+    .rm-card p {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      line-height: 1.6;
+    }
+    .rm-status {
+      display: inline-block;
+      font-family: 'Syne', sans-serif;
+      font-size: 0.65rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      padding: 3px 8px;
+      border-radius: 4px;
+      margin-bottom: 6px;
+    }
+    .rm-status.live   { background: rgba(26,122,255,0.1);  color: var(--blue-bright); }
+    .rm-status.done   { background: rgba(22,163,74,0.1);   color: #16a34a; }
+    .rm-status.next   { background: rgba(240,165,0,0.12);  color: #a07000; }
+    .rm-status.future { background: rgba(0,0,0,0.05);      color: var(--gray-500); }
+
+    /* ── Open source / API note ── */
+    .api-strip {
+      background: #010d1a;
+      padding: 56px 0;
+      border-top: 1px solid rgba(26,122,255,0.15);
+    }
+    .api-strip-inner {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 40px;
+      align-items: center;
+    }
+    .api-strip h2 {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: var(--white);
+      margin-bottom: 8px;
+    }
+    .api-strip p {
+      color: rgba(255,255,255,0.5);
+      font-size: 0.95rem;
+      line-height: 1.7;
+    }
+    .api-code {
+      background: rgba(26,122,255,0.08);
+      border: 1px solid rgba(26,122,255,0.2);
+      border-radius: var(--radius-md);
+      padding: 14px 20px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.82rem;
+      color: rgba(26,122,255,0.9);
+      white-space: nowrap;
+    }
+
+    /* ── Responsive ── */
+    @media (max-width: 1024px) {
+      .specs-grid { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 900px) {
+      .tech-hero-inner     { grid-template-columns: 1fr; gap: 40px; }
+      .portals-grid        { grid-template-columns: 1fr; }
+      .arch-inner          { grid-template-columns: 1fr; gap: 40px; }
+      .gps-inner           { grid-template-columns: 1fr; gap: 40px; }
+      .ridesafe-tech-inner { grid-template-columns: 1fr; gap: 40px; }
+      .roadmap-timeline::before { left: 24px; }
+      .rm-item {
+        grid-template-columns: 48px 1fr;
+        grid-template-rows: auto;
+      }
+      .rm-item .rm-left,
+      .rm-item.right .rm-left  { order: 2; text-align: left; grid-column: 2; }
+      .rm-item .rm-dot,
+      .rm-item.right .rm-dot   { order: 1; grid-column: 1; grid-row: 1; }
+      .rm-item .rm-right,
+      .rm-item.right .rm-right { display: none; }
+      .api-strip-inner { grid-template-columns: 1fr; }
+      .api-code { white-space: normal; word-break: break-all; }
+    }
+    @media (max-width: 768px) {
+      .portals-grid { grid-template-columns: 1fr; }
+      .specs-grid   { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 480px) {
+      .tech-hero-actions { flex-direction: column; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ═══════════════ NAVBAR ═══════════════ -->
+<header class="navbar" id="navbar">
+  <div class="nav-inner">
+    <a href="index.html" class="nav-logo">
+      <img src="https://i.ibb.co/rKbMhMsY/BURGRENTAL-COM-BADGE-removebg-preview.png" alt="BURG Rental Services" />
+    </a>
+    <nav class="nav-links" id="navLinks">
+      <a href="index.html" class="nav-link">Home</a>
+      <a href="platform.html" class="nav-link">Platform</a>
+      <a href="services.html" class="nav-link">Services</a>
+      <a href="partners.html" class="nav-link">Partners</a>
+      <a href="drivers.html" class="nav-link">Drivers</a>
+      <a href="technology.html" class="nav-link active">Technology</a>
+      <a href="contact.html" class="nav-link nav-cta">Contact Us</a>
+    </nav>
+    <button class="nav-hamburger" id="hamburger" aria-label="Toggle menu">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</header>
+
+<!-- ═══════════════ TECH HERO ═══════════════ -->
+<section class="tech-hero">
+  <div class="tech-hero-grid"></div>
+  <div class="tech-hero-glow"></div>
+  <div class="tech-hero-inner">
+    <div class="tech-hero-text">
+      <div class="tech-hero-label">BURG Proprietary Technology</div>
+      <h1 class="tech-hero-title">TONi</h1>
+      <span class="tech-hero-title-sub">TRANSPORT ORIENTED NETWORK INTERFACE</span>
+      <p class="tech-hero-desc">India's commercial fleet sector runs on phone calls and paper logs. TONi changes that — a three-portal fleet management system built in-house at BURG, synced in real time, deployable anywhere.</p>
+      <div class="tech-hero-actions">
+        <a href="#portals" class="btn btn-primary">Explore TONi →</a>
+        <a href="contact.html" class="btn btn-outline-light">Request a Demo</a>
+      </div>
+    </div>
+
+    <div class="terminal">
+      <div class="terminal-bar">
+        <span class="t-dot t-dot-r"></span>
+        <span class="t-dot t-dot-y"></span>
+        <span class="t-dot t-dot-g"></span>
+        <span class="terminal-title">toni — fleet-manager v2.1.0</span>
+      </div>
+      <div class="terminal-body">
+        <div class="t-line"><span class="t-prompt">$</span> <span class="t-cmd">toni init --env production</span></div>
+        <div class="t-line"><span class="t-info">  Connecting to Firebase Realtime DB...</span></div>
+        <div class="t-line"><span class="t-ok">  ✓ Database connection established</span></div>
+        <div class="t-line"><span class="t-info">  Loading fleet registry...</span></div>
+        <div class="t-line"><span class="t-ok">  ✓ 24 active vehicles loaded</span></div>
+        <div class="t-line"><span class="t-info">  Syncing GPS streams...</span></div>
+        <div class="t-line"><span class="t-ok">  ✓ GPS sync active — 3s interval</span></div>
+        <div class="t-line"><span class="t-info">  Starting compliance monitor...</span></div>
+        <div class="t-line"><span class="t-warn">  ⚠ 2 vehicles: insurance expiring in 14d</span></div>
+        <div class="t-line"><span class="t-ok">  ✓ Alert queue dispatched via WhatsApp</span></div>
+        <div class="t-line"><span class="t-accent">  ━━━ TONi is live. All systems operational ━━━</span></div>
+        <div class="t-line"><span class="t-prompt">$</span> <span class="t-cursor"></span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ THREE PORTALS ═══════════════ -->
+<section class="portals-section" id="portals">
+  <div class="container">
+    <div class="section-header fade-in">
+      <p class="section-eyebrow">System Architecture</p>
+      <h2 class="section-title">Three Portals. One Sync.</h2>
+      <p class="section-subtitle">TONi is deployed as three distinct interfaces — Admin, Driver, and Passenger — all synced in real time via Firebase Realtime Database.</p>
+    </div>
+    <div class="portals-grid fade-in">
+
+      <!-- Admin Portal -->
+      <div class="portal-card portal-card--admin">
+        <div class="portal-header">
+          <div class="portal-header-dots">
+            <span class="t-dot t-dot-r"></span>
+            <span class="t-dot t-dot-y"></span>
+            <span class="t-dot t-dot-g"></span>
+          </div>
+          <span class="portal-icon-lg">🖥️</span>
+        </div>
+        <div class="portal-body">
+          <span class="portal-tag">Web App — Admin</span>
+          <div class="portal-title">TONi Admin Dashboard</div>
+          <p class="portal-desc">The operations nerve centre. BURG fleet managers and client administrators monitor all active vehicles, manage trips, track compliance, and broadcast announcements from a single web interface.</p>
+          <div class="portal-features">
+            <div class="portal-feat">Live map with all active vehicle positions</div>
+            <div class="portal-feat">Trip assignment and driver dispatch</div>
+            <div class="portal-feat">Fleet compliance document status</div>
+            <div class="portal-feat">Driver announcements &amp; broadcasts</div>
+            <div class="portal-feat">Trip history and analytics export</div>
+            <div class="portal-feat">SOS alert management and escalation</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Driver Portal -->
+      <div class="portal-card portal-card--driver">
+        <div class="portal-header">
+          <div class="portal-header-dots">
+            <span class="t-dot t-dot-r"></span>
+            <span class="t-dot t-dot-y"></span>
+            <span class="t-dot t-dot-g"></span>
+          </div>
+          <span class="portal-icon-lg">📱</span>
+        </div>
+        <div class="portal-body">
+          <span class="portal-tag">PWA — Driver</span>
+          <div class="portal-title">TONi Driver App</div>
+          <p class="portal-desc">A Progressive Web App installable from Chrome on Android. Drivers get turn-by-turn navigation, trip codes, GPS broadcasting, and one-tap SOS — no app store download required.</p>
+          <div class="portal-features">
+            <div class="portal-feat">GPS location broadcast every 3 seconds</div>
+            <div class="portal-feat">Trip code verification on boarding</div>
+            <div class="portal-feat">Google Maps navigation integration</div>
+            <div class="portal-feat">One-tap emergency SOS to BURG ops</div>
+            <div class="portal-feat">Admin announcements and alerts</div>
+            <div class="portal-feat">Offline-capable PWA — no Play Store needed</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Passenger Portal -->
+      <div class="portal-card portal-card--passenger">
+        <div class="portal-header">
+          <div class="portal-header-dots">
+            <span class="t-dot t-dot-r"></span>
+            <span class="t-dot t-dot-y"></span>
+            <span class="t-dot t-dot-g"></span>
+          </div>
+          <span class="portal-icon-lg">📺</span>
+        </div>
+        <div class="portal-body">
+          <span class="portal-tag">Display — Passenger</span>
+          <div class="portal-title">Passenger Display System</div>
+          <p class="portal-desc">Mounted on a screen inside the vehicle or at a bus bay, the Passenger Display shows live route info, stop ETAs, driver details, and BURG announcements — updated in real time from the Firebase sync.</p>
+          <div class="portal-features">
+            <div class="portal-feat">Live route and next-stop ETA display</div>
+            <div class="portal-feat">Driver name and vehicle number visible</div>
+            <div class="portal-feat">BURG announcements and safety tips</div>
+            <div class="portal-feat">Runs on any screen — tablet, monitor, TV</div>
+            <div class="portal-feat">Ad-slot support for future monetisation</div>
+            <div class="portal-feat">Auto-refreshes from live Firebase feed</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ ARCHITECTURE ═══════════════ -->
+<section class="arch-section">
+  <div class="container arch-inner">
+    <div class="fade-in">
+      <p class="section-eyebrow">Technical Architecture</p>
+      <h2 class="section-title">How TONi Is Built</h2>
+      <p class="body-text">TONi is a serverless, real-time architecture built on Firebase — chosen for its zero-infrastructure overhead, sub-second sync, and offline PWA support. The entire system is deployed as a single static web application with no backend servers to manage.</p>
+      <p class="body-text">GPS data flows from the Driver App to Firebase Realtime Database and propagates instantly to Admin and Passenger portals. The Eicher Fleet API serves as a fallback GPS source for vehicles with onboard telematics.</p>
+      <p class="body-text">Hosting is on Firebase Hosting with a custom domain. The build is a single HTML file per portal — maximally portable, zero framework dependency for the deployed output.</p>
+    </div>
+    <div class="arch-visual fade-in">
+      <div class="arch-visual-title">// TONi System Architecture</div>
+      <div class="arch-layers">
+
+        <div class="arch-layer arch-layer--client">
+          <span class="arch-layer-icon">🖥️</span>
+          <div class="arch-layer-info">
+            <div class="arch-layer-name">Client Layer</div>
+            <div class="arch-layer-desc">Admin Web · Driver PWA · Passenger Display</div>
+          </div>
+          <span class="arch-layer-badge">HTML / JS</span>
+        </div>
+
+        <div class="arch-arrow">↕ Real-time sync</div>
+
+        <div class="arch-layer arch-layer--api">
+          <span class="arch-layer-icon">🔌</span>
+          <div class="arch-layer-info">
+            <div class="arch-layer-name">API &amp; Integration Layer</div>
+            <div class="arch-layer-desc">Google Maps API · Eicher Fleet API · Razorpay · WhatsApp</div>
+          </div>
+          <span class="arch-layer-badge">REST / SDK</span>
+        </div>
+
+        <div class="arch-arrow">↕ Reads / Writes</div>
+
+        <div class="arch-layer arch-layer--core">
+          <span class="arch-layer-icon">⚡</span>
+          <div class="arch-layer-info">
+            <div class="arch-layer-name">Firebase Core</div>
+            <div class="arch-layer-desc">Realtime Database · Firebase Hosting · Auth</div>
+          </div>
+          <span class="arch-layer-badge">Firebase</span>
+        </div>
+
+        <div class="arch-arrow">↕ Persistence</div>
+
+        <div class="arch-layer arch-layer--data">
+          <span class="arch-layer-icon">🗄️</span>
+          <div class="arch-layer-info">
+            <div class="arch-layer-name">Data Layer</div>
+            <div class="arch-layer-desc">Fleet registry · Trip logs · Compliance records · GPS history</div>
+          </div>
+          <span class="arch-layer-badge">JSON / NoSQL</span>
+        </div>
+
+        <div class="arch-arrow">↕ Deploy</div>
+
+        <div class="arch-layer arch-layer--infra">
+          <span class="arch-layer-icon">🌐</span>
+          <div class="arch-layer-info">
+            <div class="arch-layer-name">Hosting &amp; CDN</div>
+            <div class="arch-layer-desc">Firebase Hosting · Custom domain · Global CDN</div>
+          </div>
+          <span class="arch-layer-badge">toni.burgrental.com</span>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ GPS TRACKING ═══════════════ -->
+<section class="gps-section">
+  <div class="container gps-inner">
+    <div class="gps-text fade-in">
+      <p class="section-eyebrow" style="color:var(--accent);">Live Tracking</p>
+      <h2 class="section-title">GPS That Actually Works<br />in Indian Conditions</h2>
+      <p>TONi's GPS engine is designed for real-world Indian network conditions — where signal drops, urban canyons, and data throttling are everyday realities.</p>
+      <p>Primary GPS is sourced from the driver's phone via the Chrome Geolocation API, updating every 3 seconds. When phone signal is weak or the operator's vehicles have onboard telematics, the Eicher Fleet API provides a seamless hardware-based fallback.</p>
+      <div class="gps-features">
+        <div class="gps-feat">
+          <div class="gps-feat-icon">📡</div>
+          <div class="gps-feat-text">
+            <h4>3-Second GPS Update Rate</h4>
+            <p>Position data refreshes every 3 seconds from the TONi Driver App — fast enough for live map tracking without excessive data use.</p>
+          </div>
+        </div>
+        <div class="gps-feat">
+          <div class="gps-feat-icon">🔄</div>
+          <div class="gps-feat-text">
+            <h4>Eicher Fleet API Fallback</h4>
+            <p>For fleet operators running Eicher vehicles with onboard telematics, TONi pulls GPS data directly from the Eicher API as a hardware-grade backup.</p>
+          </div>
+        </div>
+        <div class="gps-feat">
+          <div class="gps-feat-icon">🗺️</div>
+          <div class="gps-feat-text">
+            <h4>Google Maps Integration</h4>
+            <p>All map rendering, routing, and turn-by-turn navigation is powered by Google Maps API — familiar, reliable, and India-optimised.</p>
+          </div>
+        </div>
+        <div class="gps-feat">
+          <div class="gps-feat-icon">⚠️</div>
+          <div class="gps-feat-text">
+            <h4>Route Deviation Alerts</h4>
+            <p>Geofenced corridors trigger automatic alerts to the admin portal and — for school routes — to parent WhatsApp groups when a vehicle leaves its assigned path.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="map-mock fade-in">
+      <div class="map-mock-grid"></div>
+      <div class="map-mock-roads">
+        <div class="map-road map-road-h1"></div>
+        <div class="map-road map-road-h2"></div>
+        <div class="map-road map-road-v1"></div>
+        <div class="map-road map-road-v2"></div>
+      </div>
+      <div class="map-route"></div>
+      <div class="map-vehicle"></div>
+      <div class="map-pin map-pin-1"></div>
+      <div class="map-pin map-pin-2"></div>
+      <div class="map-overlay">
+        <div class="map-overlay-row">
+          <span>Status</span>
+          <span class="map-overlay-val">● Live</span>
+        </div>
+        <div class="map-overlay-row">
+          <span>Last ping</span>
+          <span class="map-overlay-val">2s ago</span>
+        </div>
+        <div class="map-overlay-row">
+          <span>Speed</span>
+          <span class="map-overlay-val">38 km/h</span>
+        </div>
+        <div class="map-overlay-row">
+          <span>ETA</span>
+          <span class="map-overlay-val">7 min</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ TECH SPECS ═══════════════ -->
+<section class="specs-section">
+  <div class="container">
+    <div class="section-header fade-in">
+      <p class="section-eyebrow">Tech Stack</p>
+      <h2 class="section-title">What TONi Runs On</h2>
+      <p class="section-subtitle">Deliberately minimal. No framework bloat. Every dependency chosen for a reason.</p>
+    </div>
+    <div class="specs-grid fade-in">
+
+      <div class="spec-group">
+        <div class="spec-group-header">
+          <span class="spec-group-icon">🖥️</span>
+          <span class="spec-group-title">Frontend</span>
+        </div>
+        <div class="spec-rows">
+          <div class="spec-row">
+            <span class="spec-key">Framework</span>
+            <span class="spec-val">Vanilla JS + HTML5</span>
+          </div>
+          <div class="spec-row">
+            <span class="spec-key">Styling</span>
+            <span class="spec-val">CSS3 — no preprocessor</span>
+          </div>
+          <div class="spec-row">
+            <span class="spec-key">Maps</span>
+            <span class="spec-val mono">Google Maps JS API v3</span>
+          </div>
+          <div class="spec-row">
+            <span class="spec-key">PWA manifest</span>
+            <span class="spec-val">Service Worker + manifest.json</span>
+          </div>
+          <div class="spec-row">
+            <span class="spec-key">Output format</span>
+            <span class="spec-val">Single HTML file per portal</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="spec-group">
+        <div class="spec-group-header">
+          <span class="spec-group-icon">🔥</span>
+          <span class="spec-group-title">Firebase</span>
+        </div>
+        <div class="spec-rows">
+          <div class="spec-row">
+            <span class="spec-key">Database</span>
+            <span class="spec-val">Realtime Database (NoSQL)</span>
+          </div>
+          <div class="spec-row">
+            <span class="spec-key">Hosting</span>
+            <span class="spec-val">Firebase Hosting + CDN</span>
+          </div>
+          <div class="spec-row">
+            <span class="spec-key">Auth</span>
+            <span class="spec-val">Firebase Auth (PIN-based)</span>
+          </div>
+          <div class="spec-row">
+            <span class="spec-key">Project ID</span>
+            <span class="spec-val mono">burgtoni-560c1</span>
+          </div>
+          <div class="spec-row">
+            <span class="spec-key">Live domain</span>
+            <span class="spec-val mono">toni.burgrental.com</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="spec-group">
+        <div class="spec-group-header">
+          <span class="spec-group-icon">🔌</span>
+          <span class="spec-group-title">Integrations</span>
+        </div>
+        <div class="spec-rows">
+          <div class="spec-row">
+            <span class="spec-key">GPS primary</span>
+            <span class="spec-val">Chrome Geolocation API</span>
+          </div>
+          <div class="spec-row">
+            <span class="spec-key">GPS fallback</span>
+            <span class="spec-val">Eicher Fleet Telematics API</span>
+          </div>
+          <div class="spec-row">
+            <span class="spec-key">Payments</span>
+            <span class="spec-val">Razorpay Payment Gateway</span>
+          </div>
+          <div class="spec-row">
+            <span class="spec-key">Notifications</span>
+            <span class="spec-val">WhatsApp API (form &amp; alerts)</span>
+          </div>
+          <div class="spec-row">
+            <span class="spec-key">Identity (upcoming)</span>
+            <span class="spec-val">DigiLocker OTP Verification</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="spec-group">
+        <div class="spec-group-header">
+          <span class="spec-group-icon">⚙️</span>
+          <span class="spec-group-title">Deployment &amp; Ops</span>
+        </div>
+        <div class="spec-rows">
+          <div class="spec-row">
+            <span class="spec-key">CI / Deploy</span>
+            <span class="spec-val">Firebase CLI</span>
+          </div>
+          <div class="spec-row">
+            <span class="spec-key">DNS</span>
+            <span class="spec-val">Custom domain via Firebase</span>
+          </div>
+          <div class="spec-row">
+            <span class="spec-key">SSL</span>
+            <span class="spec-val">Auto-provisioned (Firebase)</span>
+          </div>
+          <div class="spec-row">
+            <span class="spec-key">GPS sync rate</span>
+            <span class="spec-val mono">3,000ms interval</span>
+          </div>
+          <div class="spec-row">
+            <span class="spec-key">Infrastructure</span>
+            <span class="spec-val">Serverless — zero backend</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ RIDESAFE TECH FLOW ═══════════════ -->
+<section class="ridesafe-tech">
+  <div class="container ridesafe-tech-inner">
+    <div class="fade-in">
+      <p class="section-eyebrow">RideSafe Technology</p>
+      <h2 class="section-title">How the Compliance Engine Works</h2>
+      <p class="body-text">RideSafe isn't just a checklist — it's an automated compliance loop that runs continuously across every vehicle in the BURG network, surfacing issues before they become problems.</p>
+      <div class="compliance-flow">
+        <div class="cf-step">
+          <div class="cf-left">
+            <div class="cf-dot">📥</div>
+            <div class="cf-line"></div>
+          </div>
+          <div class="cf-content">
+            <h4>Document Ingestion</h4>
+            <p>Fleet operators upload vehicle fitness certificates, insurance, PUC, and driver documents during onboarding. Each document is stored with its expiry date.</p>
+          </div>
+        </div>
+        <div class="cf-step">
+          <div class="cf-left">
+            <div class="cf-dot">🔍</div>
+            <div class="cf-line"></div>
+          </div>
+          <div class="cf-content">
+            <h4>Continuous Monitoring</h4>
+            <p>The compliance engine checks document expiry dates daily, flagging items expiring within 30, 14, and 7 days with increasing urgency.</p>
+          </div>
+        </div>
+        <div class="cf-step">
+          <div class="cf-left">
+            <div class="cf-dot">📲</div>
+            <div class="cf-line"></div>
+          </div>
+          <div class="cf-content">
+            <h4>Automated Alerts</h4>
+            <p>WhatsApp alerts go to fleet operators on each threshold. BURG's operations team receives a parallel notification to follow up if renewal isn't confirmed.</p>
+          </div>
+        </div>
+        <div class="cf-step">
+          <div class="cf-left">
+            <div class="cf-dot">🚫</div>
+            <div class="cf-line"></div>
+          </div>
+          <div class="cf-content">
+            <h4>Trip Blocking</h4>
+            <p>Vehicles with any expired critical document are automatically blocked from trip assignment in the admin portal until renewal is verified.</p>
+          </div>
+        </div>
+        <div class="cf-step">
+          <div class="cf-left">
+            <div class="cf-dot">✅</div>
+            <div class="cf-line"></div>
+          </div>
+          <div class="cf-content">
+            <h4>Reinstatement</h4>
+            <p>Once the renewed document is uploaded and verified by BURG's compliance team, the vehicle is automatically reinstated in the active fleet pool.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="fade-in">
+      <p class="section-eyebrow" style="margin-bottom:20px;">What Gets Tracked</p>
+      <div style="display:flex; flex-direction:column; gap:12px;">
+        <div style="background:var(--white); border:1px solid var(--gray-200); border-radius:var(--radius-md); padding:18px 20px; display:flex; align-items:center; gap:14px; transition:var(--transition);">
+          <span style="font-size:1.2rem;">📄</span>
+          <div>
+            <div style="font-weight:700; font-size:0.92rem; color:var(--navy);">Vehicle Fitness Certificate (FC)</div>
+            <div style="font-size:0.8rem; color:var(--text-muted);">Annual — RTO issued, mandatory for commercial operation</div>
+          </div>
+        </div>
+        <div style="background:var(--white); border:1px solid var(--gray-200); border-radius:var(--radius-md); padding:18px 20px; display:flex; align-items:center; gap:14px;">
+          <span style="font-size:1.2rem;">🛡️</span>
+          <div>
+            <div style="font-weight:700; font-size:0.92rem; color:var(--navy);">Third-Party Insurance</div>
+            <div style="font-size:0.8rem; color:var(--text-muted);">Annual — mandatory for all commercial vehicles on road</div>
+          </div>
+        </div>
+        <div style="background:var(--white); border:1px solid var(--gray-200); border-radius:var(--radius-md); padding:18px 20px; display:flex; align-items:center; gap:14px;">
+          <span style="font-size:1.2rem;">🌫️</span>
+          <div>
+            <div style="font-weight:700; font-size:0.92rem; color:var(--navy);">Pollution Under Control (PUC)</div>
+            <div style="font-size:0.8rem; color:var(--text-muted);">6-monthly — emission compliance for all vehicles</div>
+          </div>
+        </div>
+        <div style="background:var(--white); border:1px solid var(--gray-200); border-radius:var(--radius-md); padding:18px 20px; display:flex; align-items:center; gap:14px;">
+          <span style="font-size:1.2rem;">🪪</span>
+          <div>
+            <div style="font-weight:700; font-size:0.92rem; color:var(--navy);">Driver Licence</div>
+            <div style="font-size:0.8rem; color:var(--text-muted);">Validity tracked per driver — HMV / LMV-T classification verified</div>
+          </div>
+        </div>
+        <div style="background:var(--white); border:1px solid var(--gray-200); border-radius:var(--radius-md); padding:18px 20px; display:flex; align-items:center; gap:14px;">
+          <span style="font-size:1.2rem;">🔍</span>
+          <div>
+            <div style="font-weight:700; font-size:0.92rem; color:var(--navy);">Driver Background Check</div>
+            <div style="font-size:0.8rem; color:var(--text-muted);">One-time on onboarding — enhanced checks for school and VIP routes</div>
+          </div>
+        </div>
+        <div style="background:var(--white); border:1px solid var(--gray-200); border-radius:var(--radius-md); padding:18px 20px; display:flex; align-items:center; gap:14px;">
+          <span style="font-size:1.2rem;">📡</span>
+          <div>
+            <div style="font-weight:700; font-size:0.92rem; color:var(--navy);">GPS Device Status</div>
+            <div style="font-size:0.8rem; color:var(--text-muted);">Continuous — vehicle blocked from trips if GPS signal lost for &gt;10 minutes</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ ROADMAP ═══════════════ -->
+<section class="roadmap-section">
+  <div class="container">
+    <div class="section-header fade-in">
+      <p class="section-eyebrow">Product Roadmap</p>
+      <h2 class="section-title">Where TONi Is Going</h2>
+      <p class="section-subtitle">Built fast, evolving faster. Here's what's shipped, live, and coming next.</p>
+    </div>
+    <div class="roadmap-timeline fade-in">
+
+      <div class="rm-item">
+        <div class="rm-left">
+          <div class="rm-card">
+            <div class="rm-status done">Shipped</div>
+            <div class="rm-period">// Q3 2024</div>
+            <h4>TONi v1 — Core Platform</h4>
+            <p>Admin dashboard, Driver PWA, Passenger display. Firebase Realtime DB sync. Google Maps GPS tracking. Firebase Hosting deployment.</p>
+          </div>
+        </div>
+        <div class="rm-dot done">✓</div>
+        <div class="rm-right"></div>
+      </div>
+
+      <div class="rm-item right">
+        <div class="rm-left"></div>
+        <div class="rm-dot done">✓</div>
+        <div class="rm-right">
+          <div class="rm-card">
+            <div class="rm-status done">Shipped</div>
+            <div class="rm-period">// Q4 2024</div>
+            <h4>RideSafe Compliance Engine</h4>
+            <p>Document tracking, expiry alerts, trip blocking for non-compliant vehicles. WhatsApp notification integration for operators.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="rm-item">
+        <div class="rm-left">
+          <div class="rm-card">
+            <div class="rm-status live">Live</div>
+            <div class="rm-period">// Q1 2025</div>
+            <h4>Eicher Fleet API &amp; SOS</h4>
+            <p>Hardware GPS fallback via Eicher Fleet telematics API. Driver emergency SOS with instant ops-team alert. Trip code verification system.</p>
+          </div>
+        </div>
+        <div class="rm-dot live">▶</div>
+        <div class="rm-right"></div>
+      </div>
+
+      <div class="rm-item right">
+        <div class="rm-left"></div>
+        <div class="rm-dot" style="background:var(--accent); box-shadow: 0 0 0 3px rgba(240,165,0,0.25);">→</div>
+        <div class="rm-right">
+          <div class="rm-card">
+            <div class="rm-status next">Up Next</div>
+            <div class="rm-period">// Q2 2025</div>
+            <h4>DigiLocker Identity Verification</h4>
+            <p>OTP-based Aadhaar and licence verification replacing manual document uploads. Removes friction from driver and operator onboarding.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="rm-item">
+        <div class="rm-left">
+          <div class="rm-card">
+            <div class="rm-status next">Up Next</div>
+            <div class="rm-period">// Q3 2025</div>
+            <h4>RideSafe Enrollment SaaS</h4>
+            <p>Multi-page school and corporate transport enrollment portal with Razorpay-integrated fee collection and distance-slab pricing engine.</p>
+          </div>
+        </div>
+        <div class="rm-dot" style="background:var(--accent); box-shadow: 0 0 0 3px rgba(240,165,0,0.25);">→</div>
+        <div class="rm-right"></div>
+      </div>
+
+      <div class="rm-item right">
+        <div class="rm-left"></div>
+        <div class="rm-dot" style="background:rgba(255,255,255,0.1); border:2px solid rgba(255,255,255,0.15);">○</div>
+        <div class="rm-right">
+          <div class="rm-card">
+            <div class="rm-status future">Planned</div>
+            <div class="rm-period">// Q4 2025</div>
+            <h4>TONi Passenger WiFi &amp; Ad Platform</h4>
+            <p>4G LTE captive portal WiFi for buses. Ad-supported free connectivity monetised through targeted in-vehicle advertising on the Passenger Display.</p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ API / INTEGRATION STRIP ═══════════════ -->
+<section class="api-strip">
+  <div class="container api-strip-inner fade-in">
+    <div>
+      <h2>Building Something on Top of TONi?</h2>
+      <p>BURG's technology stack is integration-ready. Whether you're an OEM with telematics data, an insurer looking for GPS-verified fleet records, or a SaaS company with a complementary product — we're open to technical partnerships. Contact our team to discuss API access and co-integration opportunities.</p>
+    </div>
+    <div style="display:flex; flex-direction:column; gap:12px; align-items:flex-end;">
+      <div class="api-code">GET /toni/fleet/live → GPS positions</div>
+      <a href="contact.html" class="btn btn-primary">Discuss Integration →</a>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ CTA BANNER ═══════════════ -->
+<section class="cta-banner">
+  <div class="cta-banner-bg"></div>
+  <div class="container cta-banner-inner fade-in">
+    <h2>Want to See TONi in Action?</h2>
+    <p>Request a live demo of the admin dashboard, driver app, and passenger display running together in real time.</p>
+    <div class="cta-banner-actions">
+      <a href="contact.html" class="btn btn-primary">Request a Demo</a>
+      <a href="partners.html" class="btn btn-outline-light">Explore Partnerships</a>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ FOOTER ═══════════════ -->
+<footer class="footer">
+  <div class="container footer-grid">
+    <div class="footer-brand">
+      <img src="https://i.ibb.co/rKbMhMsY/BURGRENTAL-COM-BADGE-removebg-preview.png" alt="BURG Rental Services" class="footer-logo" />
+      <p>Revolutionizing commercial vehicle rentals since 2024.</p>
+      <p class="footer-legal-small">BURG Rental Services LLP<br />LLPIN: ACR-9256</p>
+    </div>
+    <div class="footer-links-col">
+      <h4>Company</h4>
+      <a href="index.html">Home</a>
+      <a href="platform.html">Platform</a>
+      <a href="technology.html">Technology</a>
+      <a href="contact.html">Contact</a>
+    </div>
+    <div class="footer-links-col">
+      <h4>Solutions</h4>
+      <a href="services.html">RideSafe</a>
+      <a href="services.html">Corporate Leasing</a>
+      <a href="services.html">School Transport</a>
+      <a href="services.html">VIP &amp; Executive</a>
+    </div>
+    <div class="footer-links-col">
+      <h4>Join Us</h4>
+      <a href="partners.html">Partner With Us</a>
+      <a href="drivers.html">Drive With BURG</a>
+      <a href="contact.html">Enquire Now</a>
+    </div>
+    <div class="footer-contact-col">
+      <h4>Contact</h4>
+      <p>📍 Bangalore, Karnataka, India</p>
+      <p>📧 <a href="mailto:hello@burgrental.com">hello@burgrental.com</a></p>
+      <p>📞 <a href="tel:+918778579209">+91 87785 79209</a></p>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <div class="container footer-bottom-inner">
+      <p>© 2024–2025 BURG Rental Services LLP. All rights reserved. LLPIN: ACR-9256 | Registered in India.</p>
+      <p class="footer-disclaimer">Commercial vehicle rental marketplace. All fleet partners independently verified. BURG is a facilitator, not a direct transport operator.</p>
+    </div>
+  </div>
+</footer>
+
+<script src="script.js"></script>
+</body>
+</html>

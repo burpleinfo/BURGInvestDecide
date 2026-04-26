@@ -1,0 +1,1154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Contact — BURG Rental Services</title>
+  <meta name="description" content="Get in touch with BURG Rental Services. Enquire about corporate transport, fleet partnerships, driver onboarding, or any service query." />
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet" />
+  <style>
+
+    /* ── Contact hero — split layout ── */
+    .contact-hero {
+      background: var(--navy-deep);
+      padding: calc(var(--nav-h) + 72px) 0 80px;
+      position: relative;
+      overflow: hidden;
+    }
+    .contact-hero-grid-bg {
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(26,122,255,0.06) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(26,122,255,0.06) 1px, transparent 1px);
+      background-size: 60px 60px;
+    }
+    .contact-hero-orb {
+      position: absolute;
+      width: 700px; height: 700px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(0,85,170,0.2) 0%, transparent 65%);
+      top: -200px; right: -150px;
+      pointer-events: none;
+    }
+    .contact-hero-inner {
+      position: relative;
+      z-index: 2;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 80px;
+      align-items: center;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+    .contact-hero-text .section-eyebrow { margin-bottom: 14px; }
+    .contact-hero-text h1 {
+      font-family: 'Syne', sans-serif;
+      font-size: clamp(2.2rem, 4.5vw, 3.6rem);
+      font-weight: 800;
+      color: var(--white);
+      line-height: 1.12;
+      margin-bottom: 20px;
+    }
+    .contact-hero-text h1 span { color: var(--accent); }
+    .contact-hero-text p {
+      font-size: 1.05rem;
+      color: rgba(255,255,255,0.58);
+      line-height: 1.8;
+      max-width: 440px;
+      margin-bottom: 36px;
+    }
+
+    /* Quick contact cards on hero */
+    .quick-contacts {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .quick-contact-card {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: var(--radius-md);
+      padding: 18px 20px;
+      transition: var(--transition);
+      text-decoration: none;
+    }
+    .quick-contact-card:hover {
+      background: rgba(255,255,255,0.09);
+      border-color: rgba(255,255,255,0.2);
+      transform: translateX(4px);
+    }
+    .qc-icon {
+      width: 44px; height: 44px;
+      border-radius: var(--radius-sm);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.2rem;
+      flex-shrink: 0;
+    }
+    .qc-icon--email  { background: rgba(26,122,255,0.18); }
+    .qc-icon--phone  { background: rgba(74,222,128,0.12); }
+    .qc-icon--wa     { background: rgba(37,211,102,0.15); }
+    .qc-icon--office { background: rgba(240,165,0,0.12); }
+    .qc-text {}
+    .qc-label {
+      font-family: 'Syne', sans-serif;
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: rgba(255,255,255,0.4);
+      margin-bottom: 3px;
+    }
+    .qc-value {
+      font-size: 0.92rem;
+      font-weight: 500;
+      color: rgba(255,255,255,0.88);
+    }
+    .qc-sub {
+      font-size: 0.76rem;
+      color: rgba(255,255,255,0.38);
+      margin-top: 1px;
+    }
+
+    /* ── Main form section ── */
+    .contact-form-section {
+      background: var(--off-white);
+      padding: 96px 0;
+    }
+    .contact-form-inner {
+      display: grid;
+      grid-template-columns: 1fr 1.5fr;
+      gap: 72px;
+      align-items: start;
+    }
+
+    /* Sidebar info */
+    .contact-sidebar {}
+    .contact-sidebar h2 {
+      font-size: 1.6rem;
+      font-weight: 800;
+      color: var(--navy);
+      margin-bottom: 14px;
+    }
+    .contact-sidebar p {
+      font-size: 0.95rem;
+      color: var(--text-muted);
+      line-height: 1.75;
+      margin-bottom: 1rem;
+    }
+
+    .enquiry-types {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-top: 28px;
+    }
+    .enq-type {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 16px;
+      background: var(--white);
+      border: 1px solid var(--gray-200);
+      border-radius: var(--radius-md);
+      cursor: pointer;
+      transition: var(--transition);
+      text-align: left;
+      width: 100%;
+    }
+    .enq-type:hover, .enq-type.selected {
+      border-color: var(--navy);
+      background: var(--navy);
+    }
+    .enq-type:hover .enq-type-icon,
+    .enq-type.selected .enq-type-icon { background: rgba(255,255,255,0.1); }
+    .enq-type:hover .enq-type-name,
+    .enq-type.selected .enq-type-name { color: var(--white); }
+    .enq-type:hover .enq-type-desc,
+    .enq-type.selected .enq-type-desc { color: rgba(255,255,255,0.55); }
+    .enq-type-icon {
+      width: 36px; height: 36px;
+      border-radius: var(--radius-sm);
+      background: var(--off-white);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1rem;
+      flex-shrink: 0;
+      transition: var(--transition);
+    }
+    .enq-type-name {
+      font-family: 'Syne', sans-serif;
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--navy);
+      transition: var(--transition);
+    }
+    .enq-type-desc {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-top: 1px;
+      transition: var(--transition);
+    }
+
+    /* Response time badge */
+    .response-badge {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: rgba(74,222,128,0.08);
+      border: 1px solid rgba(74,222,128,0.2);
+      border-radius: var(--radius-md);
+      padding: 14px 16px;
+      margin-top: 28px;
+    }
+    .response-badge-dot {
+      width: 10px; height: 10px;
+      background: #4ade80;
+      border-radius: 50%;
+      flex-shrink: 0;
+      animation: pulse 2s infinite;
+    }
+    .response-badge-text {
+      font-size: 0.85rem;
+      color: var(--text);
+      line-height: 1.5;
+    }
+    .response-badge-text strong {
+      color: #16a34a;
+      font-weight: 700;
+    }
+
+    /* Legal info block */
+    .legal-block {
+      margin-top: 28px;
+      padding: 20px;
+      background: var(--white);
+      border: 1px solid var(--gray-200);
+      border-radius: var(--radius-md);
+    }
+    .legal-block-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--navy);
+      margin-bottom: 10px;
+    }
+    .legal-block p {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      line-height: 1.7;
+      margin-bottom: 0;
+    }
+
+    /* The main contact form */
+    .contact-form-box {
+      background: var(--white);
+      border-radius: var(--radius-xl);
+      padding: 52px 48px;
+      box-shadow: var(--shadow-lg);
+      border: 1px solid var(--gray-200);
+    }
+    .form-section-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.2rem;
+      font-weight: 800;
+      color: var(--navy);
+      margin-bottom: 6px;
+    }
+    .form-section-sub {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      margin-bottom: 32px;
+      line-height: 1.6;
+    }
+
+    /* Enquiry type selector inside form */
+    .form-type-selector {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin-bottom: 28px;
+    }
+    .fts-opt {
+      padding: 11px 8px;
+      text-align: center;
+      background: var(--off-white);
+      border: 1.5px solid var(--gray-200);
+      border-radius: var(--radius-md);
+      font-family: 'Syne', sans-serif;
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: var(--transition);
+      user-select: none;
+      line-height: 1.4;
+    }
+    .fts-opt:hover {
+      border-color: var(--navy);
+      color: var(--navy);
+    }
+    .fts-opt.active {
+      background: var(--navy);
+      border-color: var(--navy);
+      color: var(--white);
+    }
+    .fts-opt .fts-icon { display: block; font-size: 1.1rem; margin-bottom: 4px; }
+
+    /* Hidden input for enquiry type */
+    #enquiry_type_input { display: none; }
+
+    /* Dynamic message placeholder swap */
+    .form-divider {
+      border: none;
+      border-top: 1px solid var(--gray-100);
+      margin: 28px 0;
+    }
+
+    /* Success state */
+    .form-success {
+      display: none;
+      text-align: center;
+      padding: 40px 20px;
+    }
+    .form-success-icon { font-size: 3rem; margin-bottom: 16px; }
+    .form-success h3 {
+      font-size: 1.4rem;
+      font-weight: 800;
+      color: var(--navy);
+      margin-bottom: 10px;
+    }
+    .form-success p {
+      font-size: 0.95rem;
+      color: var(--text-muted);
+      line-height: 1.7;
+    }
+
+    /* ── Map / office section ── */
+    .office-section { background: var(--white); padding: 96px 0; }
+    .office-inner {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 64px;
+      align-items: center;
+    }
+    .office-details { }
+    .office-details h2 {
+      font-size: 1.8rem;
+      font-weight: 800;
+      color: var(--navy);
+      margin-bottom: 20px;
+    }
+    .office-info-rows {
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      margin-bottom: 32px;
+    }
+    .office-info-row {
+      display: flex;
+      gap: 16px;
+      align-items: flex-start;
+    }
+    .ofi-icon {
+      width: 42px; height: 42px;
+      background: var(--off-white);
+      border: 1px solid var(--gray-200);
+      border-radius: var(--radius-md);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.1rem;
+      flex-shrink: 0;
+    }
+    .ofi-text {}
+    .ofi-label {
+      font-family: 'Syne', sans-serif;
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--gray-500);
+      margin-bottom: 3px;
+    }
+    .ofi-value {
+      font-size: 0.95rem;
+      color: var(--text);
+      font-weight: 500;
+    }
+    .ofi-value a {
+      color: var(--blue);
+      transition: var(--transition);
+    }
+    .ofi-value a:hover { color: var(--navy); }
+    .ofi-sub {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    /* Stylised map placeholder */
+    .map-placeholder {
+      background: var(--navy-deep);
+      border-radius: var(--radius-xl);
+      overflow: hidden;
+      position: relative;
+      min-height: 380px;
+      border: 1px solid rgba(26,122,255,0.15);
+      box-shadow: var(--shadow-lg);
+    }
+    .mp-grid {
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(26,122,255,0.06) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(26,122,255,0.06) 1px, transparent 1px);
+      background-size: 40px 40px;
+    }
+    .mp-roads {
+      position: absolute;
+      inset: 0;
+    }
+    .mp-road {
+      position: absolute;
+      background: rgba(255,255,255,0.07);
+      border-radius: 2px;
+    }
+    .mp-road-h1 { top: 40%; left:0; right:0; height:8px; }
+    .mp-road-h2 { top: 70%; left:0; right:0; height:4px; }
+    .mp-road-v1 { left: 35%; top:0; bottom:0; width:6px; }
+    .mp-road-v2 { left: 65%; top:0; bottom:0; width:3px; }
+    .mp-pin {
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      z-index: 2;
+    }
+    .mp-pin-dot {
+      width: 20px; height: 20px;
+      background: var(--accent);
+      border-radius: 50%;
+      border: 3px solid var(--white);
+      box-shadow: 0 0 20px rgba(240,165,0,0.5);
+      animation: pinPulse 2s ease-in-out infinite;
+    }
+    @keyframes pinPulse {
+      0%,100% { box-shadow: 0 0 20px rgba(240,165,0,0.5); transform: scale(1); }
+      50%      { box-shadow: 0 0 32px rgba(240,165,0,0.8); transform: scale(1.1); }
+    }
+    .mp-pin-line {
+      width: 2px;
+      height: 24px;
+      background: linear-gradient(to bottom, var(--accent), transparent);
+    }
+    .mp-label {
+      position: absolute;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(0,10,25,0.88);
+      border: 1px solid rgba(26,122,255,0.2);
+      border-radius: var(--radius-md);
+      padding: 12px 20px;
+      text-align: center;
+      white-space: nowrap;
+      z-index: 2;
+    }
+    .mp-label-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: var(--white);
+      margin-bottom: 2px;
+    }
+    .mp-label-sub {
+      font-size: 0.72rem;
+      color: rgba(255,255,255,0.45);
+    }
+
+    /* ── FAQ section ── */
+    .faq-section { background: var(--off-white); padding: 96px 0; }
+    .faq-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+      max-width: 960px;
+      margin: 0 auto;
+    }
+    .faq-item {
+      background: var(--white);
+      border: 1px solid var(--gray-200);
+      border-radius: var(--radius-md);
+      overflow: hidden;
+    }
+    .faq-q {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 20px 22px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      text-align: left;
+      font-family: 'Syne', sans-serif;
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: var(--navy);
+      transition: var(--transition);
+    }
+    .faq-q:hover { background: var(--off-white); }
+    .faq-chevron {
+      font-size: 0.7rem;
+      color: var(--gray-500);
+      transition: var(--transition);
+      flex-shrink: 0;
+    }
+    .faq-item.open .faq-chevron { transform: rotate(180deg); }
+    .faq-a {
+      display: none;
+      padding: 0 22px 20px;
+      font-size: 0.88rem;
+      color: var(--text-muted);
+      line-height: 1.75;
+      border-top: 1px solid var(--gray-100);
+      padding-top: 14px;
+    }
+    .faq-item.open .faq-a { display: block; }
+
+    /* ── Social / final strip ── */
+    .connect-strip {
+      background: var(--navy);
+      padding: 64px 0;
+    }
+    .connect-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 40px;
+      flex-wrap: wrap;
+    }
+    .connect-text h2 {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: var(--white);
+      margin-bottom: 6px;
+    }
+    .connect-text p {
+      color: rgba(255,255,255,0.55);
+      font-size: 0.9rem;
+    }
+    .connect-channels {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .channel-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 20px;
+      border-radius: var(--radius-md);
+      font-family: 'Syne', sans-serif;
+      font-size: 0.82rem;
+      font-weight: 700;
+      transition: var(--transition);
+      border: 1.5px solid transparent;
+    }
+    .channel-btn--wa {
+      background: rgba(37,211,102,0.12);
+      border-color: rgba(37,211,102,0.25);
+      color: #4ade80;
+    }
+    .channel-btn--wa:hover {
+      background: rgba(37,211,102,0.2);
+      border-color: rgba(37,211,102,0.4);
+    }
+    .channel-btn--email {
+      background: rgba(26,122,255,0.12);
+      border-color: rgba(26,122,255,0.25);
+      color: #6eb3ff;
+    }
+    .channel-btn--email:hover {
+      background: rgba(26,122,255,0.2);
+      border-color: rgba(26,122,255,0.4);
+    }
+    .channel-btn--phone {
+      background: rgba(240,165,0,0.1);
+      border-color: rgba(240,165,0,0.25);
+      color: #ffd166;
+    }
+    .channel-btn--phone:hover {
+      background: rgba(240,165,0,0.18);
+      border-color: rgba(240,165,0,0.4);
+    }
+
+    /* ── Responsive ── */
+    @media (max-width: 1024px) {
+      .contact-form-inner { grid-template-columns: 1fr; gap: 48px; }
+      .contact-form-box { padding: 40px 32px; }
+    }
+    @media (max-width: 900px) {
+      .contact-hero-inner { grid-template-columns: 1fr; gap: 48px; }
+      .office-inner { grid-template-columns: 1fr; gap: 40px; }
+      .faq-grid { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 768px) {
+      .form-type-selector { grid-template-columns: repeat(2, 1fr); }
+      .connect-inner { flex-direction: column; align-items: flex-start; }
+    }
+    @media (max-width: 480px) {
+      .form-type-selector { grid-template-columns: repeat(2, 1fr); }
+      .contact-form-box { padding: 28px 20px; }
+      .channel-btn { font-size: 0.78rem; padding: 10px 14px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ═══════════════ NAVBAR ═══════════════ -->
+<header class="navbar" id="navbar">
+  <div class="nav-inner">
+    <a href="index.html" class="nav-logo">
+      <img src="https://i.ibb.co/rKbMhMsY/BURGRENTAL-COM-BADGE-removebg-preview.png" alt="BURG Rental Services" />
+    </a>
+    <nav class="nav-links" id="navLinks">
+      <a href="index.html" class="nav-link">Home</a>
+      <a href="platform.html" class="nav-link">Platform</a>
+      <a href="services.html" class="nav-link">Services</a>
+      <a href="partners.html" class="nav-link">Partners</a>
+      <a href="drivers.html" class="nav-link">Drivers</a>
+      <a href="technology.html" class="nav-link">Technology</a>
+      <a href="contact.html" class="nav-link active nav-cta">Contact Us</a>
+    </nav>
+    <button class="nav-hamburger" id="hamburger" aria-label="Toggle menu">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</header>
+
+<!-- ═══════════════ CONTACT HERO ═══════════════ -->
+<section class="contact-hero">
+  <div class="contact-hero-grid-bg"></div>
+  <div class="contact-hero-orb"></div>
+  <div class="contact-hero-inner">
+
+    <div class="contact-hero-text fade-in">
+      <p class="section-eyebrow">Get In Touch</p>
+      <h1>Let's Talk<br /><span>Transport.</span></h1>
+      <p>Whether you're a business looking for fleet management, a school needing safe transport, a fleet owner wanting to grow revenue, or a driver ready to join — we want to hear from you.</p>
+      <div style="display:flex; gap:12px; flex-wrap:wrap;">
+        <a href="#contact-form" class="btn btn-primary">Send a Message →</a>
+        <a href="tel:+918778579209" class="btn btn-outline-light">📞 Call Us Now</a>
+      </div>
+    </div>
+
+    <div class="quick-contacts fade-in">
+      <a href="mailto:hello@burgrental.com" class="quick-contact-card">
+        <div class="qc-icon qc-icon--email">📧</div>
+        <div class="qc-text">
+          <div class="qc-label">Email</div>
+          <div class="qc-value">hello@burgrental.com</div>
+          <div class="qc-sub">We respond within 24 hours</div>
+        </div>
+      </a>
+      <a href="tel:+918778579209" class="quick-contact-card">
+        <div class="qc-icon qc-icon--phone">📞</div>
+        <div class="qc-text">
+          <div class="qc-label">Phone</div>
+          <div class="qc-value">+91 87785 79209</div>
+          <div class="qc-sub">Mon – Sat, 9 AM – 6 PM IST</div>
+        </div>
+      </a>
+      <a href="https://wa.me/918778579209" target="_blank" rel="noopener" class="quick-contact-card">
+        <div class="qc-icon qc-icon--wa">💬</div>
+        <div class="qc-text">
+          <div class="qc-label">WhatsApp</div>
+          <div class="qc-value">+91 87785 79209</div>
+          <div class="qc-sub">Quickest response channel</div>
+        </div>
+      </a>
+      <div class="quick-contact-card" style="cursor:default;">
+        <div class="qc-icon qc-icon--office">📍</div>
+        <div class="qc-text">
+          <div class="qc-label">Registered Office</div>
+          <div class="qc-value">Bangalore, Karnataka, India</div>
+          <div class="qc-sub">LLPIN: ACR-9256</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ═══════════════ MAIN CONTACT FORM ═══════════════ -->
+<section class="contact-form-section" id="contact-form">
+  <div class="container contact-form-inner">
+
+    <!-- Sidebar -->
+    <div class="contact-sidebar fade-in">
+      <h2>What Can We Help You With?</h2>
+      <p>Select the type of enquiry that best matches your need. Our team routes messages to the right person so you get a faster, more relevant response.</p>
+
+      <div class="enquiry-types" id="sidebarTypes">
+        <button class="enq-type selected" data-type="client">
+          <div class="enq-type-icon">🏢</div>
+          <div>
+            <div class="enq-type-name">Client Enquiry</div>
+            <div class="enq-type-desc">Book transport for your organisation</div>
+          </div>
+        </button>
+        <button class="enq-type" data-type="partner">
+          <div class="enq-type-icon">🚌</div>
+          <div>
+            <div class="enq-type-name">Fleet Partnership</div>
+            <div class="enq-type-desc">List your vehicles on BURG</div>
+          </div>
+        </button>
+        <button class="enq-type" data-type="driver">
+          <div class="enq-type-icon">🚗</div>
+          <div>
+            <div class="enq-type-name">Driver Application</div>
+            <div class="enq-type-desc">Join BURG as a commercial driver</div>
+          </div>
+        </button>
+        <button class="enq-type" data-type="tech">
+          <div class="enq-type-icon">💻</div>
+          <div>
+            <div class="enq-type-name">Technology / Integration</div>
+            <div class="enq-type-desc">TONi API, partnerships, demo</div>
+          </div>
+        </button>
+        <button class="enq-type" data-type="media">
+          <div class="enq-type-icon">📰</div>
+          <div>
+            <div class="enq-type-name">Press &amp; Media</div>
+            <div class="enq-type-desc">Interviews, coverage, PR</div>
+          </div>
+        </button>
+        <button class="enq-type" data-type="other">
+          <div class="enq-type-icon">✉️</div>
+          <div>
+            <div class="enq-type-name">General</div>
+            <div class="enq-type-desc">Anything else</div>
+          </div>
+        </button>
+      </div>
+
+      <div class="response-badge">
+        <div class="response-badge-dot"></div>
+        <div class="response-badge-text">
+          <strong>We're actively responding.</strong> Most messages receive a reply within <strong>24 hours</strong> on business days.
+        </div>
+      </div>
+
+      <div class="legal-block">
+        <div class="legal-block-title">Legal &amp; Registration</div>
+        <p>
+          BURG Rental Services LLP<br />
+          LLPIN: ACR-9256<br />
+          Registered in India under the Limited Liability Partnership Act, 2008.<br />
+          Bangalore, Karnataka — 560 000.
+        </p>
+      </div>
+    </div>
+
+    <!-- Form box -->
+    <div class="contact-form-box fade-in" id="formBox">
+      <div class="form-section-title">Send Us a Message</div>
+      <p class="form-section-sub">Fill in the form below and the right person at BURG will get back to you directly.</p>
+
+      <!-- Enquiry type visual selector (inside form) -->
+      <div class="form-type-selector" id="formTypeSelector">
+        <label class="fts-opt active" data-type="client">
+          <span class="fts-icon">🏢</span>Client
+        </label>
+        <label class="fts-opt" data-type="partner">
+          <span class="fts-icon">🚌</span>Fleet Partner
+        </label>
+        <label class="fts-opt" data-type="driver">
+          <span class="fts-icon">🚗</span>Driver
+        </label>
+        <label class="fts-opt" data-type="tech">
+          <span class="fts-icon">💻</span>Technology
+        </label>
+        <label class="fts-opt" data-type="media">
+          <span class="fts-icon">📰</span>Press
+        </label>
+        <label class="fts-opt" data-type="other">
+          <span class="fts-icon">✉️</span>General
+        </label>
+      </div>
+
+      <!-- Netlify form — required -->
+      <form
+        name="contact"
+        method="POST"
+        id="contactForm"
+      >        <!-- Hidden enquiry type -->
+        <input type="hidden" name="enquiry_type" id="enquiry_type_input" value="client" />
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="c-name">Full Name *</label>
+            <input type="text" id="c-name" name="name" placeholder="Your full name" required />
+          </div>
+          <div class="form-group">
+            <label for="c-phone">Phone Number *</label>
+            <input type="tel" id="c-phone" name="phone" placeholder="+91 XXXXX XXXXX" required />
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="c-email">Email Address *</label>
+            <input type="email" id="c-email" name="email" placeholder="you@company.com" required />
+          </div>
+          <div class="form-group">
+            <label for="c-org">Organisation / Company</label>
+            <input type="text" id="c-org" name="organisation" placeholder="Your company or school name" />
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="c-city">City</label>
+            <input type="text" id="c-city" name="city" placeholder="e.g. Bangalore" />
+          </div>
+          <div class="form-group">
+            <label for="c-service">Service of Interest</label>
+            <select id="c-service" name="service">
+              <option value="" disabled selected>Select a service</option>
+              <option value="ridesafe">RideSafe</option>
+              <option value="corporate">Corporate Leasing</option>
+              <option value="school">School Transport</option>
+              <option value="vip">VIP &amp; Executive</option>
+              <option value="platform">Platform / Technology</option>
+              <option value="other">Other / Not Sure</option>
+            </select>
+          </div>
+        </div>
+
+        <hr class="form-divider" />
+
+        <div class="form-group">
+          <label for="c-subject">Subject *</label>
+          <input type="text" id="c-subject" name="subject" placeholder="What's this about?" required />
+        </div>
+
+        <div class="form-group">
+          <label for="c-message">Your Message *</label>
+          <textarea
+            id="c-message"
+            name="message"
+            rows="6"
+            placeholder="Tell us about your transport requirement, fleet size, route, timeline, or any other details that will help us respond accurately."
+            required
+          ></textarea>
+        </div>
+
+        <div style="display:flex; align-items:center; gap:12px; margin-bottom:24px;">
+          <input type="checkbox" id="c-consent" name="consent" required style="width:16px; height:16px; accent-color:var(--navy); cursor:pointer;" />
+          <label for="c-consent" style="font-size:0.82rem; color:var(--text-muted); cursor:pointer; line-height:1.5;">
+            I agree that BURG Rental Services may contact me in response to this enquiry. My details will not be shared with third parties.
+          </label>
+        </div>
+
+        <button type="submit" class="btn btn-primary form-submit" id="submitBtn">
+          Send Message →
+        </button>
+      </form>
+
+      <!-- Success message (shown after JS submit handling) -->
+      <div class="form-success" id="formSuccess">
+        <div class="form-success-icon">✅</div>
+        <h3>Message Sent!</h3>
+        <p>Thanks for reaching out. A member of the BURG team will be in touch within 24 hours on business days.<br /><br />For urgent matters, call us directly at <a href="tel:+918778579209" style="color:var(--blue); font-weight:600;">+91 87785 79209</a>.</p>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ═══════════════ OFFICE / MAP ═══════════════ -->
+<section class="office-section">
+  <div class="container office-inner">
+    <div class="office-details fade-in">
+      <p class="section-eyebrow">Our Office</p>
+      <h2>Find BURG in Bangalore</h2>
+      <div class="office-info-rows">
+        <div class="office-info-row">
+          <div class="ofi-icon">📍</div>
+          <div class="ofi-text">
+            <div class="ofi-label">Registered Address</div>
+            <div class="ofi-value">Bangalore, Karnataka, India — 560 000</div>
+            <div class="ofi-sub">Operations across Bangalore city and suburbs</div>
+          </div>
+        </div>
+        <div class="office-info-row">
+          <div class="ofi-icon">📧</div>
+          <div class="ofi-text">
+            <div class="ofi-label">General Enquiries</div>
+            <div class="ofi-value"><a href="mailto:hello@burgrental.com">hello@burgrental.com</a></div>
+            <div class="ofi-sub">For all client, partner, and press queries</div>
+          </div>
+        </div>
+        <div class="office-info-row">
+          <div class="ofi-icon">📞</div>
+          <div class="ofi-text">
+            <div class="ofi-label">Phone &amp; WhatsApp</div>
+            <div class="ofi-value"><a href="tel:+918778579209">+91 87785 79209</a></div>
+            <div class="ofi-sub">Mon – Sat, 9:00 AM – 6:00 PM IST</div>
+          </div>
+        </div>
+        <div class="office-info-row">
+          <div class="ofi-icon">🏛️</div>
+          <div class="ofi-text">
+            <div class="ofi-label">Legal Registration</div>
+            <div class="ofi-value">BURG Rental Services LLP</div>
+            <div class="ofi-sub">LLPIN: ACR-9256 · Registered under LLP Act, 2008</div>
+          </div>
+        </div>
+        <div class="office-info-row">
+          <div class="ofi-icon">🌐</div>
+          <div class="ofi-text">
+            <div class="ofi-label">Technology Platform</div>
+            <div class="ofi-value"><a href="https://toni.burgrental.com" target="_blank" rel="noopener">toni.burgrental.com</a></div>
+            <div class="ofi-sub">TONi Fleet Management System — live</div>
+          </div>
+        </div>
+      </div>
+      <div style="display:flex; gap:12px; flex-wrap:wrap;">
+        <a href="https://wa.me/918778579209" target="_blank" rel="noopener" class="btn btn-primary">💬 WhatsApp Us</a>
+        <a href="mailto:hello@burgrental.com" class="btn btn-outline">📧 Send Email</a>
+      </div>
+    </div>
+
+    <div class="map-placeholder fade-in">
+      <div class="mp-grid"></div>
+      <div class="mp-roads">
+        <div class="mp-road mp-road-h1"></div>
+        <div class="mp-road mp-road-h2"></div>
+        <div class="mp-road mp-road-v1"></div>
+        <div class="mp-road mp-road-v2"></div>
+      </div>
+      <div class="mp-pin">
+        <div class="mp-pin-dot"></div>
+        <div class="mp-pin-line"></div>
+      </div>
+      <div class="mp-label">
+        <div class="mp-label-title">BURG Rental Services LLP</div>
+        <div class="mp-label-sub">Bangalore, Karnataka, India</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ FAQ ═══════════════ -->
+<section class="faq-section">
+  <div class="container">
+    <div class="section-header fade-in">
+      <p class="section-eyebrow">FAQs</p>
+      <h2 class="section-title">Common Questions</h2>
+      <p class="section-subtitle">Can't find what you need? Use the contact form above or call us directly.</p>
+    </div>
+    <div class="faq-grid fade-in" id="faqGrid">
+
+      <div class="faq-item">
+        <button class="faq-q">
+          How quickly can BURG arrange a vehicle?
+          <span class="faq-chevron">▼</span>
+        </button>
+        <div class="faq-a">For ad-hoc bookings, we typically confirm and assign a vehicle within 2–4 hours for standard requests in Bangalore. For long-term contracts and school route setup, allow 3–5 working days for onboarding and route planning.</div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-q">
+          Do you operate outside Bangalore?
+          <span class="faq-chevron">▼</span>
+        </button>
+        <div class="faq-a">Currently our active fleet network is concentrated in Bangalore. We do handle outstation and intercity trip bookings from Bangalore. Expansion to other cities is on the roadmap — contact us to discuss your requirement.</div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-q">
+          Is there a minimum contract period?
+          <span class="faq-chevron">▼</span>
+        </button>
+        <div class="faq-a">No minimum for one-off trip bookings. For dedicated fleet contracts (Corporate Leasing, School Transport), agreements typically start at 3 months. Custom terms are available for large enterprise requirements.</div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-q">
+          What payment methods does BURG accept?
+          <span class="faq-chevron">▼</span>
+        </button>
+        <div class="faq-a">We accept UPI, NEFT/RTGS, credit and debit cards via Razorpay, and standard bank transfers. Corporate clients can opt for monthly consolidated invoicing with 15-day payment terms.</div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-q">
+          How does BURG verify fleet operators?
+          <span class="faq-chevron">▼</span>
+        </button>
+        <div class="faq-a">Every fleet operator goes through a document verification process — vehicle fitness certificate, insurance, PUC, and driver licence checks — before their first trip. Our RideSafe compliance engine tracks these continuously post-onboarding.</div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-q">
+          Can I track my booked vehicle in real time?
+          <span class="faq-chevron">▼</span>
+        </button>
+        <div class="faq-a">Yes. Corporate clients and schools with active contracts get admin access to the TONi dashboard, where they can see all assigned vehicles live on a map, updated every 3 seconds.</div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-q">
+          How are driver background checks conducted?
+          <span class="faq-chevron">▼</span>
+        </button>
+        <div class="faq-a">BURG's driver verification includes Aadhaar-linked identity check, driving licence validity confirmation, address verification, and a criminal record check. For school and VIP routes, enhanced background verification is standard.</div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-q">
+          I own buses. How do I earn with BURG?
+          <span class="faq-chevron">▼</span>
+        </button>
+        <div class="faq-a">Visit our Partners page and submit the fleet enquiry form. BURG will schedule a verification call within 24 hours. Once your vehicles pass compliance checks and your drivers complete TONi orientation, you start receiving trip assignments automatically.</div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ CONNECT STRIP ═══════════════ -->
+<section class="connect-strip">
+  <div class="container connect-inner fade-in">
+    <div class="connect-text">
+      <h2>Reach Us Your Way</h2>
+      <p>Phone, WhatsApp, or email — we're reachable on all channels on business days.</p>
+    </div>
+    <div class="connect-channels">
+      <a href="https://wa.me/918778579209" target="_blank" rel="noopener" class="channel-btn channel-btn--wa">
+        💬 WhatsApp
+      </a>
+      <a href="mailto:hello@burgrental.com" class="channel-btn channel-btn--email">
+        📧 hello@burgrental.com
+      </a>
+      <a href="tel:+918778579209" class="channel-btn channel-btn--phone">
+        📞 +91 87785 79209
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ FOOTER ═══════════════ -->
+<footer class="footer">
+  <div class="container footer-grid">
+    <div class="footer-brand">
+      <img src="https://i.ibb.co/rKbMhMsY/BURGRENTAL-COM-BADGE-removebg-preview.png" alt="BURG Rental Services" class="footer-logo" />
+      <p>Revolutionizing commercial vehicle rentals since 2024.</p>
+      <p class="footer-legal-small">BURG Rental Services LLP<br />LLPIN: ACR-9256</p>
+    </div>
+    <div class="footer-links-col">
+      <h4>Company</h4>
+      <a href="index.html">Home</a>
+      <a href="platform.html">Platform</a>
+      <a href="technology.html">Technology</a>
+      <a href="contact.html">Contact</a>
+    </div>
+    <div class="footer-links-col">
+      <h4>Solutions</h4>
+      <a href="services.html">RideSafe</a>
+      <a href="services.html">Corporate Leasing</a>
+      <a href="services.html">School Transport</a>
+      <a href="services.html">VIP &amp; Executive</a>
+    </div>
+    <div class="footer-links-col">
+      <h4>Join Us</h4>
+      <a href="partners.html">Partner With Us</a>
+      <a href="drivers.html">Drive With BURG</a>
+      <a href="contact.html">Enquire Now</a>
+    </div>
+    <div class="footer-contact-col">
+      <h4>Contact</h4>
+      <p>📍 Bangalore, Karnataka, India</p>
+      <p>📧 <a href="mailto:hello@burgrental.com">hello@burgrental.com</a></p>
+      <p>📞 <a href="tel:+918778579209">+91 87785 79209</a></p>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <div class="container footer-bottom-inner">
+      <p>© 2024–2025 BURG Rental Services LLP. All rights reserved. LLPIN: ACR-9256 | Registered in India.</p>
+      <p class="footer-disclaimer">Commercial vehicle rental marketplace. All fleet partners independently verified. BURG is a facilitator, not a direct transport operator.</p>
+    </div>
+  </div>
+</footer>
+
+<script src="script.js"></script>
+<script>
+  // ── Enquiry type sync: sidebar ↔ form selector ──
+  const sidebarBtns  = document.querySelectorAll('.enq-type');
+  const formOpts     = document.querySelectorAll('.fts-opt');
+  const hiddenType   = document.getElementById('enquiry_type_input');
+
+  function setType(type) {
+    hiddenType.value = type;
+    sidebarBtns.forEach(b => b.classList.toggle('selected', b.dataset.type === type));
+    formOpts.forEach(o => o.classList.toggle('active', o.dataset.type === type));
+  }
+
+  sidebarBtns.forEach(btn => btn.addEventListener('click', () => setType(btn.dataset.type)));
+  formOpts.forEach(opt => opt.addEventListener('click', () => setType(opt.dataset.type)));
+
+  // ── FAQ accordion ──
+  document.querySelectorAll('.faq-q').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const item = btn.closest('.faq-item');
+      const isOpen = item.classList.contains('open');
+      // Close all
+      document.querySelectorAll('.faq-item').forEach(i => i.classList.remove('open'));
+      // Open clicked unless it was already open
+      if (!isOpen) item.classList.add('open');
+    });
+  });
+
+  // ── Netlify form: show success state ──
+  const form       = document.getElementById('contactForm');
+  const formSuccess = document.getElementById('formSuccess');
+  const submitBtn  = document.getElementById('submitBtn');
+
+  if (form) {
+    form.addEventListener('submit', function(e) {
+      // Netlify handles the POST; we just update UI
+      submitBtn.textContent = 'Sending…';
+      submitBtn.disabled = true;
+      // Show success after brief delay (Netlify redirects, but for SPA feel)
+      setTimeout(() => {
+        form.style.display = 'none';
+        formSuccess.style.display = 'block';
+      }, 1200);
+    });
+  }
+
+  // ── Scroll to form on hash ──
+  if (window.location.hash === '#contact-form') {
+    setTimeout(() => {
+      document.getElementById('contact-form')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 300);
+  }
+</script>
+</body>
+</html>

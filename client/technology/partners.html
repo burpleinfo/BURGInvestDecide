@@ -1,0 +1,969 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Partners — BURG Rental Services</title>
+  <meta name="description" content="Partner with BURG — fleet owners, OEMs, workshops, insurers, and tech providers. Join India's fastest-growing commercial vehicle rental marketplace." />
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet" />
+  <style>
+
+    /* ── Partner type selector ── */
+    .partner-selector {
+      background: var(--off-white);
+      padding: 56px 0 0;
+    }
+    .partner-tabs {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      flex-wrap: wrap;
+      padding-bottom: 0;
+    }
+    .ptab {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      padding: 20px 28px;
+      border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+      background: var(--white);
+      border: 1px solid var(--gray-200);
+      border-bottom: none;
+      cursor: pointer;
+      transition: var(--transition);
+      min-width: 140px;
+      position: relative;
+      bottom: -1px;
+    }
+    .ptab:not(.active) {
+      background: rgba(255,255,255,0.5);
+      border-color: var(--gray-200);
+    }
+    .ptab.active {
+      background: var(--white);
+      border-color: var(--gray-200);
+      border-bottom-color: var(--white);
+      box-shadow: var(--shadow-sm);
+    }
+    .ptab-icon { font-size: 1.6rem; }
+    .ptab-label {
+      font-family: 'Syne', sans-serif;
+      font-size: 0.78rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--gray-500);
+    }
+    .ptab.active .ptab-label { color: var(--navy); }
+
+    /* ── Partner panels ── */
+    .partner-panel-wrap {
+      background: var(--white);
+      border-top: 1px solid var(--gray-200);
+    }
+    .partner-panel { display: none; padding: 72px 0; }
+    .partner-panel.active { display: block; }
+
+    .partner-panel-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 72px;
+      align-items: start;
+    }
+
+    .partner-panel h2 {
+      font-size: clamp(1.8rem, 3vw, 2.6rem);
+      font-weight: 800;
+      color: var(--navy);
+      margin-bottom: 16px;
+      line-height: 1.2;
+    }
+    .partner-panel .body-text { margin-bottom: 1rem; }
+
+    /* Earnings / benefit highlight box */
+    .benefit-box {
+      background: var(--navy);
+      border-radius: var(--radius-lg);
+      padding: 32px;
+      margin-top: 28px;
+    }
+    .benefit-box-label {
+      font-family: 'Syne', sans-serif;
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      color: var(--accent);
+      margin-bottom: 14px;
+    }
+    .benefit-box-items {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .benefit-box-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 0.9rem;
+      color: rgba(255,255,255,0.8);
+    }
+    .benefit-box-item::before {
+      content: '→';
+      color: var(--accent);
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+
+    /* Process steps — horizontal */
+    .h-stepper {
+      display: grid;
+      gap: 0;
+    }
+    .h-step {
+      display: flex;
+      gap: 18px;
+      align-items: flex-start;
+      padding: 20px 0;
+      border-bottom: 1px solid var(--gray-100);
+    }
+    .h-step:last-child { border-bottom: none; }
+    .h-step-num {
+      width: 36px; height: 36px;
+      border-radius: 50%;
+      background: var(--navy);
+      color: var(--white);
+      font-family: 'Syne', sans-serif;
+      font-size: 0.85rem;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+    .h-step-text h4 {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--navy);
+      margin-bottom: 4px;
+    }
+    .h-step-text p {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      line-height: 1.6;
+    }
+
+    /* ── Why partner section ── */
+    .why-partner { background: var(--navy); padding: 96px 0; }
+    .why-partner .section-title { color: var(--white); }
+    .why-partner .section-eyebrow { color: var(--accent); }
+    .why-partner .section-subtitle { color: rgba(255,255,255,0.55); }
+
+    .why-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+      margin-top: 16px;
+    }
+    .why-card {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: var(--radius-lg);
+      padding: 32px 28px;
+      transition: var(--transition);
+    }
+    .why-card:hover {
+      background: rgba(255,255,255,0.09);
+      border-color: rgba(255,255,255,0.2);
+      transform: translateY(-4px);
+    }
+    .why-card-icon { font-size: 2rem; margin-bottom: 14px; }
+    .why-card h3 {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--white);
+      margin-bottom: 10px;
+    }
+    .why-card p {
+      font-size: 0.88rem;
+      color: rgba(255,255,255,0.55);
+      line-height: 1.7;
+    }
+    .why-card-num {
+      font-family: 'Syne', sans-serif;
+      font-size: 2.4rem;
+      font-weight: 800;
+      color: var(--accent);
+      display: block;
+      margin-bottom: 6px;
+      line-height: 1;
+    }
+
+    /* ── Ecosystem map ── */
+    .ecosystem-section { background: var(--off-white); padding: 96px 0; }
+    .ecosystem-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 16px;
+      position: relative;
+    }
+    .eco-card {
+      background: var(--white);
+      border: 1px solid var(--gray-200);
+      border-radius: var(--radius-lg);
+      padding: 28px 20px;
+      text-align: center;
+      transition: var(--transition);
+      position: relative;
+    }
+    .eco-card:hover {
+      border-color: var(--blue);
+      box-shadow: var(--shadow-md);
+      transform: translateY(-4px);
+    }
+    .eco-card-icon { font-size: 2rem; margin-bottom: 12px; }
+    .eco-card h3 {
+      font-size: 0.92rem;
+      font-weight: 700;
+      color: var(--navy);
+      margin-bottom: 8px;
+    }
+    .eco-card p {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      line-height: 1.6;
+    }
+    .eco-card-center {
+      background: var(--navy);
+      border-color: var(--navy);
+    }
+    .eco-card-center h3 { color: var(--white); }
+    .eco-card-center p  { color: rgba(255,255,255,0.6); }
+
+    /* ── Testimonial / quote strip ── */
+    .quote-strip {
+      background: var(--white);
+      padding: 72px 0;
+      border-top: 1px solid var(--gray-100);
+      border-bottom: 1px solid var(--gray-100);
+    }
+    .quote-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+    }
+    .quote-card {
+      background: var(--off-white);
+      border-radius: var(--radius-lg);
+      padding: 32px 28px;
+      position: relative;
+    }
+    .quote-card::before {
+      content: '"';
+      font-family: 'Syne', sans-serif;
+      font-size: 4rem;
+      color: var(--blue);
+      opacity: 0.15;
+      line-height: 1;
+      position: absolute;
+      top: 12px; left: 24px;
+    }
+    .quote-text {
+      font-size: 0.95rem;
+      color: var(--text);
+      line-height: 1.75;
+      margin-bottom: 20px;
+      padding-top: 16px;
+      font-style: italic;
+    }
+    .quote-author {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .quote-avatar {
+      width: 40px; height: 40px;
+      border-radius: 50%;
+      background: var(--navy);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
+      flex-shrink: 0;
+    }
+    .quote-name {
+      font-family: 'Syne', sans-serif;
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: var(--navy);
+    }
+    .quote-role {
+      font-size: 0.75rem;
+      color: var(--gray-500);
+    }
+
+    /* ── Partner enquiry form ── */
+    .partner-form-section { background: var(--off-white); padding: 96px 0; }
+
+    /* ── Responsive ── */
+    @media (max-width: 1024px) {
+      .ecosystem-grid { grid-template-columns: repeat(3,1fr); }
+      .why-grid { grid-template-columns: repeat(2,1fr); }
+    }
+    @media (max-width: 900px) {
+      .partner-panel-grid { grid-template-columns: 1fr; gap: 40px; }
+      .quote-grid { grid-template-columns: 1fr 1fr; }
+    }
+    @media (max-width: 768px) {
+      .partner-tabs { gap: 8px; }
+      .ptab { min-width: 100px; padding: 16px 16px; }
+      .ptab-icon { font-size: 1.3rem; }
+      .ecosystem-grid { grid-template-columns: repeat(2,1fr); }
+      .quote-grid { grid-template-columns: 1fr; }
+      .why-grid { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 480px) {
+      .partner-tabs { justify-content: flex-start; overflow-x: auto; flex-wrap: nowrap; padding-bottom: 0; }
+      .ptab { border-radius: var(--radius-md) var(--radius-md) 0 0; }
+      .ecosystem-grid { grid-template-columns: 1fr 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ═══════════════ NAVBAR ═══════════════ -->
+<header class="navbar" id="navbar">
+  <div class="nav-inner">
+    <a href="index.html" class="nav-logo">
+      <img src="https://i.ibb.co/rKbMhMsY/BURGRENTAL-COM-BADGE-removebg-preview.png" alt="BURG Rental Services" />
+    </a>
+    <nav class="nav-links" id="navLinks">
+      <a href="index.html" class="nav-link">Home</a>
+      <a href="platform.html" class="nav-link">Platform</a>
+      <a href="services.html" class="nav-link">Services</a>
+      <a href="partners.html" class="nav-link active">Partners</a>
+      <a href="drivers.html" class="nav-link">Drivers</a>
+      <a href="technology.html" class="nav-link">Technology</a>
+      <a href="contact.html" class="nav-link nav-cta">Contact Us</a>
+    </nav>
+    <button class="nav-hamburger" id="hamburger" aria-label="Toggle menu">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</header>
+
+<!-- ═══════════════ PAGE HERO ═══════════════ -->
+<section class="page-hero">
+  <div class="page-hero-inner container">
+    <p class="section-eyebrow">Partner With BURG</p>
+    <h1>Grow With India's<br />Commercial Fleet Network</h1>
+    <p>Whether you own vehicles, service them, insure them, or build for them — BURG has a partnership model that turns your asset or expertise into a revenue stream.</p>
+  </div>
+</section>
+
+<!-- ═══════════════ PARTNER TYPE TABS ═══════════════ -->
+<div class="partner-selector">
+  <div class="container">
+    <div class="partner-tabs" id="partnerTabs">
+      <button class="ptab active" data-panel="fleet">
+        <span class="ptab-icon">🚌</span>
+        <span class="ptab-label">Fleet Owners</span>
+      </button>
+      <button class="ptab" data-panel="oem">
+        <span class="ptab-icon">🏭</span>
+        <span class="ptab-label">OEMs</span>
+      </button>
+      <button class="ptab" data-panel="workshop">
+        <span class="ptab-icon">🔧</span>
+        <span class="ptab-label">Workshops</span>
+      </button>
+      <button class="ptab" data-panel="insurance">
+        <span class="ptab-icon">🛡️</span>
+        <span class="ptab-label">Insurance</span>
+      </button>
+      <button class="ptab" data-panel="tech">
+        <span class="ptab-icon">💻</span>
+        <span class="ptab-label">Tech Partners</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ PARTNER PANELS ═══════════════ -->
+<div class="partner-panel-wrap">
+  <div class="container">
+
+    <!-- FLEET OWNERS -->
+    <div class="partner-panel active" id="panel-fleet">
+      <div class="partner-panel-grid">
+        <div class="fade-in">
+          <p class="section-eyebrow">Fleet Owners</p>
+          <h2>Your Vehicles.<br />Our Clients.<br />Steady Revenue.</h2>
+          <p class="body-text">If you own buses, tempos, cabs, or trucks sitting idle between contracts, BURG turns that downtime into income. We connect your fleet to a consistent pipeline of corporate clients, schools, and logistics customers — with no sales effort required from you.</p>
+          <p class="body-text">You focus on maintaining your vehicles and keeping drivers ready. BURG handles bookings, billing, compliance tracking, and client relationships.</p>
+
+          <div class="benefit-box">
+            <div class="benefit-box-label">What You Get</div>
+            <div class="benefit-box-items">
+              <div class="benefit-box-item">Guaranteed trip assignments — no cold-calling for clients</div>
+              <div class="benefit-box-item">Transparent payout per trip with monthly settlement</div>
+              <div class="benefit-box-item">Compliance document tracking and renewal reminders</div>
+              <div class="benefit-box-item">TONi Driver App for your drivers — GPS and trip management</div>
+              <div class="benefit-box-item">BURG brand backing — clients trust the platform, not just you</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="fade-in">
+          <p class="section-eyebrow" style="margin-bottom:20px;">Onboarding Process</p>
+          <div class="h-stepper">
+            <div class="h-step">
+              <div class="h-step-num">1</div>
+              <div class="h-step-text">
+                <h4>Submit Your Fleet Details</h4>
+                <p>Fill in the partner enquiry form below with your vehicle count, types, and operating area. Takes under 5 minutes.</p>
+              </div>
+            </div>
+            <div class="h-step">
+              <div class="h-step-num">2</div>
+              <div class="h-step-text">
+                <h4>Verification Call</h4>
+                <p>A BURG partner manager will call within 24 hours to understand your fleet and discuss the agreement terms.</p>
+              </div>
+            </div>
+            <div class="h-step">
+              <div class="h-step-num">3</div>
+              <div class="h-step-text">
+                <h4>Document Submission</h4>
+                <p>Upload vehicle fitness certificates, insurance documents, and driver licences via our onboarding portal. We verify within 48 hours.</p>
+              </div>
+            </div>
+            <div class="h-step">
+              <div class="h-step-num">4</div>
+              <div class="h-step-text">
+                <h4>Install TONi &amp; Go Live</h4>
+                <p>Your drivers install the TONi Driver App, complete a 30-minute orientation, and your fleet appears on the BURG network.</p>
+              </div>
+            </div>
+            <div class="h-step">
+              <div class="h-step-num">5</div>
+              <div class="h-step-text">
+                <h4>Start Earning</h4>
+                <p>Trips are assigned automatically. You accept, driver executes, BURG settles your payout by the agreed date each month.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- OEMs -->
+    <div class="partner-panel" id="panel-oem">
+      <div class="partner-panel-grid">
+        <div class="fade-in">
+          <p class="section-eyebrow">OEM Partners</p>
+          <h2>Put Your Vehicles<br />in Front of<br />Real Fleet Buyers.</h2>
+          <p class="body-text">BURG works with bus and commercial vehicle manufacturers to integrate their product specifications into our fleet recommendation engine — so when a client needs a 35-seater or a 1-tonne tempo, your vehicles are surfaced first to verified fleet operators looking to invest.</p>
+          <p class="body-text">For OEMs with their own fleet management portals, BURG offers API integration so your telematics data can feed directly into the TONi platform — giving your customers a unified experience.</p>
+
+          <div class="benefit-box">
+            <div class="benefit-box-label">Partnership Benefits</div>
+            <div class="benefit-box-items">
+              <div class="benefit-box-item">Direct access to BURG's growing operator network</div>
+              <div class="benefit-box-item">Vehicle spec pages on the BURG platform with operator reach</div>
+              <div class="benefit-box-item">Telematics API integration with TONi (Eicher Fleet API supported)</div>
+              <div class="benefit-box-item">Co-branded fleet financing conversations with operators</div>
+              <div class="benefit-box-item">Data on actual usage patterns to inform product development</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="fade-in">
+          <p class="section-eyebrow" style="margin-bottom:20px;">Integration Path</p>
+          <div class="h-stepper">
+            <div class="h-step">
+              <div class="h-step-num">1</div>
+              <div class="h-step-text">
+                <h4>Partnership Discussion</h4>
+                <p>Connect with the BURG founding team to align on integration depth — from vehicle listings to full API telematics.</p>
+              </div>
+            </div>
+            <div class="h-step">
+              <div class="h-step-num">2</div>
+              <div class="h-step-text">
+                <h4>Technical Scoping</h4>
+                <p>Our tech team maps your existing telematics or fleet API to the TONi integration layer. We support REST and fleet-standard protocols.</p>
+              </div>
+            </div>
+            <div class="h-step">
+              <div class="h-step-num">3</div>
+              <div class="h-step-text">
+                <h4>Pilot with Existing Operators</h4>
+                <p>Run a pilot with 3–5 BURG fleet operators who already use your vehicles to validate the integrated experience.</p>
+              </div>
+            </div>
+            <div class="h-step">
+              <div class="h-step-num">4</div>
+              <div class="h-step-text">
+                <h4>Full Network Rollout</h4>
+                <p>Launch the integration across the full BURG platform with co-announced operator outreach.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- WORKSHOPS -->
+    <div class="partner-panel" id="panel-workshop">
+      <div class="partner-panel-grid">
+        <div class="fade-in">
+          <p class="section-eyebrow">Workshop Partners</p>
+          <h2>Service the Fleet.<br />Grow Your Bay<br />Utilisation.</h2>
+          <p class="body-text">BURG's compliance engine tracks vehicle fitness certificate expiry, tyre replacement intervals, and scheduled maintenance windows for every vehicle in the network. We refer operators to our verified workshop partners when service is due — delivering a steady stream of commercial vehicle work to your bay.</p>
+          <p class="body-text">In return, your workshop gets listed on the BURG platform as a certified service partner, with preferential access to multi-vehicle fleet service contracts from operators in your city.</p>
+
+          <div class="benefit-box">
+            <div class="benefit-box-label">What Workshop Partners Get</div>
+            <div class="benefit-box-items">
+              <div class="benefit-box-item">Scheduled service referrals from BURG's fleet compliance engine</div>
+              <div class="benefit-box-item">"BURG Certified Workshop" badge for your facility</div>
+              <div class="benefit-box-item">Multi-vehicle annual maintenance contract opportunities</div>
+              <div class="benefit-box-item">Digital job card system integrated with BURG's platform</div>
+              <div class="benefit-box-item">Priority listing in BURG's operator-facing partner directory</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="fade-in">
+          <p class="section-eyebrow" style="margin-bottom:20px;">Certification Process</p>
+          <div class="h-stepper">
+            <div class="h-step">
+              <div class="h-step-num">1</div>
+              <div class="h-step-text">
+                <h4>Workshop Audit</h4>
+                <p>BURG's partner team visits your facility to verify bay capacity, equipment, and mechanic certifications for commercial vehicles.</p>
+              </div>
+            </div>
+            <div class="h-step">
+              <div class="h-step-num">2</div>
+              <div class="h-step-text">
+                <h4>Rate Card Agreement</h4>
+                <p>Agree on standardised labour and parts rates for common service items — giving BURG operators pricing transparency.</p>
+              </div>
+            </div>
+            <div class="h-step">
+              <div class="h-step-num">3</div>
+              <div class="h-step-text">
+                <h4>Certification &amp; Listing</h4>
+                <p>Receive your BURG Certified Workshop badge, get listed on the operator-facing platform, and start receiving referrals.</p>
+              </div>
+            </div>
+            <div class="h-step">
+              <div class="h-step-num">4</div>
+              <div class="h-step-text">
+                <h4>Annual Re-certification</h4>
+                <p>Annual audit to maintain standards. Workshops with top operator ratings receive premium placement in the directory.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- INSURANCE -->
+    <div class="partner-panel" id="panel-insurance">
+      <div class="partner-panel-grid">
+        <div class="fade-in">
+          <p class="section-eyebrow">Insurance Partners</p>
+          <h2>Cover a Verified,<br />Compliant Fleet<br />at Scale.</h2>
+          <p class="body-text">Every vehicle on BURG has a documented compliance profile — fitness certificate, driver history, GPS tracking record, and trip data. For insurance providers, this is exactly the kind of verified, low-opacity risk that enables better underwriting and lower claim rates.</p>
+          <p class="body-text">BURG partners with commercial vehicle insurers to offer fleet operators on-platform insurance renewal — making the purchase decision seamless at the moment compliance tracking flags an expiry.</p>
+
+          <div class="benefit-box">
+            <div class="benefit-box-label">Partnership Advantages</div>
+            <div class="benefit-box-items">
+              <div class="benefit-box-item">Access to a verified, GPS-tracked fleet with clean compliance records</div>
+              <div class="benefit-box-item">In-platform insurance renewal triggers at policy expiry</div>
+              <div class="benefit-box-item">Telematics data available to support usage-based insurance models</div>
+              <div class="benefit-box-item">Co-branded fleet insurance products for BURG operators</div>
+              <div class="benefit-box-item">Reduced fraud risk — every vehicle and driver pre-verified by BURG</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="fade-in">
+          <p class="section-eyebrow" style="margin-bottom:20px;">How It Works</p>
+          <div class="h-stepper">
+            <div class="h-step">
+              <div class="h-step-num">1</div>
+              <div class="h-step-text">
+                <h4>MoU &amp; Data Sharing Agreement</h4>
+                <p>Formalise the partnership with a data sharing framework that complies with IRDAI norms for telematics-based insurance.</p>
+              </div>
+            </div>
+            <div class="h-step">
+              <div class="h-step-num">2</div>
+              <div class="h-step-text">
+                <h4>Product Design</h4>
+                <p>Co-design a fleet insurance product (or adapt an existing one) suited to BURG's operator profile — commercial vehicles, verified drivers.</p>
+              </div>
+            </div>
+            <div class="h-step">
+              <div class="h-step-num">3</div>
+              <div class="h-step-text">
+                <h4>In-Platform Integration</h4>
+                <p>Renewal prompts appear in operator dashboards when policies near expiry, linking directly to the insurer's quote flow.</p>
+              </div>
+            </div>
+            <div class="h-step">
+              <div class="h-step-num">4</div>
+              <div class="h-step-text">
+                <h4>Claims Support Channel</h4>
+                <p>BURG's trip data and GPS logs are available to the insurer as supporting evidence for claims — accelerating resolution for operators.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TECH PARTNERS -->
+    <div class="partner-panel" id="panel-tech">
+      <div class="partner-panel-grid">
+        <div class="fade-in">
+          <p class="section-eyebrow">Technology Partners</p>
+          <h2>Build On or<br />Integrate With<br />the BURG Stack.</h2>
+          <p class="body-text">BURG's technology infrastructure — TONi fleet management, GPS tracking, compliance engine, and booking platform — is designed for integration. If you build software for logistics, fleet management, HR, or payments, there's a meaningful integration opportunity here.</p>
+          <p class="body-text">We're also open to strategic technology partnerships where your product enhances BURG's service offering — from driver safety AI to route optimisation tools to passenger experience platforms.</p>
+
+          <div class="benefit-box">
+            <div class="benefit-box-label">Integration Opportunities</div>
+            <div class="benefit-box-items">
+              <div class="benefit-box-item">GPS &amp; telematics API integration (BURG supports Eicher Fleet API)</div>
+              <div class="benefit-box-item">Payments integration — Razorpay and other PG partners</div>
+              <div class="benefit-box-item">HRMS / payroll integration for driver earnings management</div>
+              <div class="benefit-box-item">Route optimisation engine integration into TONi dispatch</div>
+              <div class="benefit-box-item">Passenger app or display system integration with TONi</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="fade-in">
+          <p class="section-eyebrow" style="margin-bottom:20px;">Integration Process</p>
+          <div class="h-stepper">
+            <div class="h-step">
+              <div class="h-step-num">1</div>
+              <div class="h-step-text">
+                <h4>Technical Discovery</h4>
+                <p>Share your API documentation or product spec. Our tech team evaluates fit with BURG's current stack within a week.</p>
+              </div>
+            </div>
+            <div class="h-step">
+              <div class="h-step-num">2</div>
+              <div class="h-step-text">
+                <h4>Sandbox Integration</h4>
+                <p>Build and test the integration in BURG's staging environment before any production deployment.</p>
+              </div>
+            </div>
+            <div class="h-step">
+              <div class="h-step-num">3</div>
+              <div class="h-step-text">
+                <h4>Pilot Deployment</h4>
+                <p>Roll out to a subset of BURG's fleet or clients to validate real-world performance and gather feedback.</p>
+              </div>
+            </div>
+            <div class="h-step">
+              <div class="h-step-num">4</div>
+              <div class="h-step-text">
+                <h4>Production Launch</h4>
+                <p>Full integration goes live across the platform. Co-announce the partnership to operators and clients as relevant.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /container -->
+</div><!-- /panel-wrap -->
+
+<!-- ═══════════════ WHY PARTNER ═══════════════ -->
+<section class="why-partner">
+  <div class="container">
+    <div class="section-header fade-in">
+      <p class="section-eyebrow">Why BURG</p>
+      <h2 class="section-title">The Smartest Place to Park Your Partnership</h2>
+      <p class="section-subtitle">BURG isn't just another aggregator. We're building infrastructure that every partner in the commercial fleet ecosystem benefits from.</p>
+    </div>
+    <div class="why-grid fade-in">
+      <div class="why-card">
+        <div class="why-card-icon">📈</div>
+        <h3>Growing Transaction Volume</h3>
+        <p>Every new corporate client or school BURG signs drives more trip volume through the partner network — more business for everyone in the ecosystem.</p>
+      </div>
+      <div class="why-card">
+        <div class="why-card-icon">🔐</div>
+        <h3>Verified, Trusted Network</h3>
+        <p>BURG's compliance-first onboarding means every operator, driver, and vehicle in the ecosystem has been checked. You're not listed alongside unvetted operators.</p>
+      </div>
+      <div class="why-card">
+        <div class="why-card-icon">📡</div>
+        <h3>Technology Backbone</h3>
+        <p>TONi provides real data — GPS logs, trip records, compliance status — that partners can use to underwrite, service, or sell to fleet operators more effectively.</p>
+      </div>
+      <div class="why-card">
+        <div class="why-card-icon">🤝</div>
+        <h3>Founder-Level Access</h3>
+        <p>BURG is early-stage. Partners get direct access to the founding team — faster decisions, co-design opportunities, and a voice in how the platform evolves.</p>
+      </div>
+      <div class="why-card">
+        <div class="why-card-icon">🌱</div>
+        <h3>First-Mover Positioning</h3>
+        <p>India's commercial fleet sector is consolidating fast. Partnering with BURG now means anchored positioning as the market matures over the next 3–5 years.</p>
+      </div>
+      <div class="why-card">
+        <div class="why-card-icon">🏙️</div>
+        <h3>Bangalore-First, India-Scale</h3>
+        <p>Starting concentrated in Bangalore means deep relationships and real market presence — not thin coverage across too many cities too soon.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ ECOSYSTEM MAP ═══════════════ -->
+<section class="ecosystem-section">
+  <div class="container">
+    <div class="section-header fade-in">
+      <p class="section-eyebrow">The Ecosystem</p>
+      <h2 class="section-title">BURG at the Centre of Commercial Fleet</h2>
+      <p class="section-subtitle">Five partner categories. One unified platform. Every stakeholder wins.</p>
+    </div>
+    <div class="ecosystem-grid fade-in">
+      <div class="eco-card">
+        <div class="eco-card-icon">🚌</div>
+        <h3>Fleet Owners</h3>
+        <p>Steady trip revenue, compliance support, and TONi driver tools</p>
+      </div>
+      <div class="eco-card">
+        <div class="eco-card-icon">🏭</div>
+        <h3>OEMs</h3>
+        <p>Operator reach, telematics integration, and usage data</p>
+      </div>
+      <div class="eco-card eco-card-center">
+        <div class="eco-card-icon">⚡</div>
+        <h3>BURG Platform</h3>
+        <p>The network layer connecting every stakeholder</p>
+      </div>
+      <div class="eco-card">
+        <div class="eco-card-icon">🔧</div>
+        <h3>Workshops</h3>
+        <p>Certified referrals, fleet contracts, and digital job cards</p>
+      </div>
+      <div class="eco-card">
+        <div class="eco-card-icon">🛡️</div>
+        <h3>Insurers</h3>
+        <p>Verified fleet, telematics data, and in-platform renewals</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ TESTIMONIALS ═══════════════ -->
+<section class="quote-strip">
+  <div class="container">
+    <div class="section-header fade-in">
+      <p class="section-eyebrow">From Our Partners</p>
+      <h2 class="section-title">What the Network Says</h2>
+    </div>
+    <div class="quote-grid fade-in">
+      <div class="quote-card">
+        <p class="quote-text">Before BURG, my 8 buses would sit idle 30% of the time. Now I get trip assignments automatically. The compliance reminders alone save me from renewal headaches every month.</p>
+        <div class="quote-author">
+          <div class="quote-avatar">🚌</div>
+          <div>
+            <div class="quote-name">Ravi Kumar S.</div>
+            <div class="quote-role">Fleet Owner, 8 Buses · Bangalore</div>
+          </div>
+        </div>
+      </div>
+      <div class="quote-card">
+        <p class="quote-text">The TONi GPS integration means I can see exactly where every vehicle in my fleet is at any moment. My corporate clients love the live tracking access — it's become a real differentiator.</p>
+        <div class="quote-author">
+          <div class="quote-avatar">🚐</div>
+          <div>
+            <div class="quote-name">Anand Krishnamurthy</div>
+            <div class="quote-role">Transport Operator · South Bangalore</div>
+          </div>
+        </div>
+      </div>
+      <div class="quote-card">
+        <p class="quote-text">As a workshop, we used to rely on word-of-mouth for fleet service work. BURG now sends us 3–4 pre-scheduled service jobs a week from operators in our area. It's changed our business model.</p>
+        <div class="quote-author">
+          <div class="quote-avatar">🔧</div>
+          <div>
+            <div class="quote-name">Mohammed Salim</div>
+            <div class="quote-role">Workshop Owner · Whitefield</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ PARTNER ENQUIRY FORM ═══════════════ -->
+<section class="partner-form-section" id="partner-enquiry">
+  <div class="container">
+    <div class="section-header fade-in">
+      <p class="section-eyebrow">Get Started</p>
+      <h2 class="section-title">Register Your Interest</h2>
+      <p class="section-subtitle">Fill in the form below and a BURG partner manager will be in touch within 24 hours.</p>
+    </div>
+    <div class="form-wrapper fade-in">
+      <form name="partner-enquiry" method="POST" action="/contact.html">        <div class="form-row">
+          <div class="form-group">
+            <label for="p-name">Your Name</label>
+            <input type="text" id="p-name" name="name" placeholder="Full name" required />
+          </div>
+          <div class="form-group">
+            <label for="p-company">Company / Entity Name</label>
+            <input type="text" id="p-company" name="company" placeholder="Business name" required />
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="p-email">Email Address</label>
+            <input type="email" id="p-email" name="email" placeholder="you@company.com" required />
+          </div>
+          <div class="form-group">
+            <label for="p-phone">Phone Number</label>
+            <input type="tel" id="p-phone" name="phone" placeholder="+91 XXXXX XXXXX" required />
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="p-type">Partner Type</label>
+            <select id="p-type" name="partner_type" required>
+              <option value="" disabled selected>Select your category</option>
+              <option value="fleet">Fleet Owner / Operator</option>
+              <option value="oem">OEM / Manufacturer</option>
+              <option value="workshop">Workshop / Service Centre</option>
+              <option value="insurance">Insurance Provider</option>
+              <option value="tech">Technology Partner</option>
+              <option value="other">Other</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="p-city">Operating City</label>
+            <input type="text" id="p-city" name="city" placeholder="e.g. Bangalore" required />
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="p-fleet-size">Fleet Size or Business Scale <span style="font-weight:400; text-transform:none; letter-spacing:0;">(optional)</span></label>
+          <input type="text" id="p-fleet-size" name="fleet_size" placeholder="e.g. 12 buses, 3 bays, ₹5Cr GWP" />
+        </div>
+        <div class="form-group">
+          <label for="p-message">Tell Us About Your Partnership Interest</label>
+          <textarea id="p-message" name="message" placeholder="What kind of partnership are you looking for? What does your business currently do?" rows="5"></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary form-submit">Submit Partnership Enquiry →</button>
+      </form>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ CTA BANNER ═══════════════ -->
+<section class="cta-banner">
+  <div class="cta-banner-bg"></div>
+  <div class="container cta-banner-inner fade-in">
+    <h2>Have Questions Before Enquiring?</h2>
+    <p>Talk directly to the BURG team. We're a founder-led company — you'll speak to someone who knows the platform inside out.</p>
+    <div class="cta-banner-actions">
+      <a href="contact.html" class="btn btn-primary">Contact Us Directly</a>
+      <a href="drivers.html" class="btn btn-outline-light">Drive With BURG Instead</a>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ FOOTER ═══════════════ -->
+<footer class="footer">
+  <div class="container footer-grid">
+    <div class="footer-brand">
+      <img src="https://i.ibb.co/rKbMhMsY/BURGRENTAL-COM-BADGE-removebg-preview.png" alt="BURG Rental Services" class="footer-logo" />
+      <p>Revolutionizing commercial vehicle rentals since 2024.</p>
+      <p class="footer-legal-small">BURG Rental Services LLP<br />LLPIN: ACR-9256</p>
+    </div>
+    <div class="footer-links-col">
+      <h4>Company</h4>
+      <a href="index.html">Home</a>
+      <a href="platform.html">Platform</a>
+      <a href="technology.html">Technology</a>
+      <a href="contact.html">Contact</a>
+    </div>
+    <div class="footer-links-col">
+      <h4>Solutions</h4>
+      <a href="services.html">RideSafe</a>
+      <a href="services.html">Corporate Leasing</a>
+      <a href="services.html">School Transport</a>
+      <a href="services.html">VIP &amp; Executive</a>
+    </div>
+    <div class="footer-links-col">
+      <h4>Join Us</h4>
+      <a href="partners.html">Partner With Us</a>
+      <a href="drivers.html">Drive With BURG</a>
+      <a href="contact.html">Enquire Now</a>
+    </div>
+    <div class="footer-contact-col">
+      <h4>Contact</h4>
+      <p>📍 Bangalore, Karnataka, India</p>
+      <p>📧 <a href="mailto:hello@burgrental.com">hello@burgrental.com</a></p>
+      <p>📞 <a href="tel:+918778579209">+91 87785 79209</a></p>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <div class="container footer-bottom-inner">
+      <p>© 2024–2025 BURG Rental Services LLP. All rights reserved. LLPIN: ACR-9256 | Registered in India.</p>
+      <p class="footer-disclaimer">Commercial vehicle rental marketplace. All fleet partners independently verified. BURG is a facilitator, not a direct transport operator.</p>
+    </div>
+  </div>
+</footer>
+
+<script src="script.js"></script>
+<script>
+  // ── Partner type tab switching ──
+  const ptabs   = document.querySelectorAll('.ptab');
+  const ppanels = document.querySelectorAll('.partner-panel');
+
+  ptabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      ptabs.forEach(t => t.classList.remove('active'));
+      ppanels.forEach(p => p.classList.remove('active'));
+      tab.classList.add('active');
+      const target = document.getElementById('panel-' + tab.dataset.panel);
+      if (target) target.classList.add('active');
+
+      // Re-trigger fade-ins in newly revealed panel
+      target.querySelectorAll('.fade-in').forEach(el => {
+        el.classList.remove('visible');
+        setTimeout(() => el.classList.add('visible'), 60);
+      });
+    });
+  });
+
+  // Trigger initial fade-ins
+  document.querySelectorAll('.fade-in').forEach(el => {
+    const obs = new IntersectionObserver((entries) => {
+      entries.forEach(e => {
+        if (e.isIntersecting) { e.target.classList.add('visible'); obs.unobserve(e.target); }
+      });
+    }, { threshold: 0.1 });
+    obs.observe(el);
+  });
+</script>
+</body>
+</html>

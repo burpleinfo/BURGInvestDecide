@@ -1,0 +1,1164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Drive With BURG — Careers for Drivers</title>
+  <meta name="description" content="Drive with BURG Rental Services — steady income, training, incentives, and a professional network for commercial vehicle drivers across Bangalore." />
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet" />
+  <style>
+
+    /* ── Driver hero — warmer, human feel ── */
+    .driver-hero {
+      position: relative;
+      min-height: 92vh;
+      background: var(--navy-deep);
+      display: flex;
+      align-items: center;
+      overflow: hidden;
+      padding-top: var(--nav-h);
+    }
+    .driver-hero-bg {
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 70% 60% at 80% 50%, rgba(240,165,0,0.12) 0%, transparent 65%),
+        radial-gradient(ellipse 60% 80% at 10% 60%, rgba(0,85,170,0.3) 0%, transparent 70%);
+    }
+    .driver-hero-grid {
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(26,122,255,0.05) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(26,122,255,0.05) 1px, transparent 1px);
+      background-size: 60px 60px;
+    }
+    .driver-hero-inner {
+      position: relative;
+      z-index: 2;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 80px 24px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 64px;
+      align-items: center;
+      width: 100%;
+    }
+    .driver-hero-text {}
+    .driver-hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(240,165,0,0.15);
+      border: 1px solid rgba(240,165,0,0.3);
+      color: var(--accent-lt);
+      font-family: 'Syne', sans-serif;
+      font-size: 0.78rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 7px 16px;
+      border-radius: 100px;
+      margin-bottom: 24px;
+    }
+    .driver-hero-title {
+      font-family: 'Syne', sans-serif;
+      font-size: clamp(2.2rem, 5vw, 4rem);
+      font-weight: 800;
+      color: var(--white);
+      line-height: 1.12;
+      margin-bottom: 20px;
+    }
+    .driver-hero-title span { color: var(--accent); }
+    .driver-hero-sub {
+      font-size: 1.05rem;
+      color: rgba(255,255,255,0.62);
+      line-height: 1.8;
+      margin-bottom: 36px;
+      max-width: 460px;
+    }
+    .driver-hero-actions {
+      display: flex;
+      gap: 14px;
+      flex-wrap: wrap;
+    }
+
+    /* Quick stats panel on hero */
+    .driver-quick-stats {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: var(--radius-xl);
+      padding: 36px 32px;
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+    }
+    .dqs-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      color: var(--accent);
+      margin-bottom: 24px;
+    }
+    .dqs-item {
+      padding: 18px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.07);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+    .dqs-item:last-child { border-bottom: none; padding-bottom: 0; }
+    .dqs-item:first-of-type { padding-top: 0; }
+    .dqs-label {
+      font-size: 0.85rem;
+      color: rgba(255,255,255,0.5);
+    }
+    .dqs-val {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.1rem;
+      font-weight: 800;
+      color: var(--white);
+      text-align: right;
+    }
+    .dqs-val.accent { color: var(--accent); }
+
+    /* ── Why drive with BURG ── */
+    .why-drive { background: var(--off-white); }
+    .why-drive-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+    }
+    .wd-card {
+      background: var(--white);
+      border: 1px solid var(--gray-200);
+      border-radius: var(--radius-lg);
+      padding: 36px 28px;
+      position: relative;
+      overflow: hidden;
+      transition: var(--transition);
+    }
+    .wd-card::after {
+      content: '';
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--navy), var(--blue-bright));
+      transform: scaleX(0);
+      transform-origin: left;
+      transition: var(--transition);
+    }
+    .wd-card:hover {
+      transform: translateY(-5px);
+      box-shadow: var(--shadow-lg);
+    }
+    .wd-card:hover::after { transform: scaleX(1); }
+    .wd-icon { font-size: 2.2rem; margin-bottom: 16px; }
+    .wd-card h3 {
+      font-size: 1.08rem;
+      font-weight: 700;
+      color: var(--navy);
+      margin-bottom: 10px;
+    }
+    .wd-card p {
+      font-size: 0.88rem;
+      color: var(--text-muted);
+      line-height: 1.7;
+    }
+    .wd-card-highlight {
+      background: var(--navy);
+      border-color: var(--navy);
+    }
+    .wd-card-highlight h3 { color: var(--white); }
+    .wd-card-highlight p  { color: rgba(255,255,255,0.65); }
+    .wd-card-highlight::after { background: var(--accent); transform: scaleX(1); }
+
+    /* ── Earnings calculator ── */
+    .earnings-section { background: var(--white); padding: 96px 0; }
+    .earnings-inner {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 72px;
+      align-items: center;
+    }
+    .calc-box {
+      background: var(--off-white);
+      border: 1px solid var(--gray-200);
+      border-radius: var(--radius-xl);
+      padding: 40px 36px;
+    }
+    .calc-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--navy);
+      margin-bottom: 28px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .calc-row {
+      margin-bottom: 24px;
+    }
+    .calc-label {
+      font-family: 'Syne', sans-serif;
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--navy);
+      margin-bottom: 10px;
+      display: flex;
+      justify-content: space-between;
+    }
+    .calc-label span {
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 600;
+      color: var(--blue-bright);
+      text-transform: none;
+      letter-spacing: 0;
+      font-size: 0.88rem;
+    }
+    .calc-slider {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 100%;
+      height: 6px;
+      border-radius: 3px;
+      background: var(--gray-200);
+      outline: none;
+      cursor: pointer;
+    }
+    .calc-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 20px; height: 20px;
+      border-radius: 50%;
+      background: var(--navy);
+      cursor: pointer;
+      border: 3px solid var(--white);
+      box-shadow: 0 2px 8px rgba(0,51,102,0.3);
+    }
+    .calc-slider::-moz-range-thumb {
+      width: 20px; height: 20px;
+      border-radius: 50%;
+      background: var(--navy);
+      cursor: pointer;
+      border: 3px solid var(--white);
+    }
+    .calc-result {
+      background: var(--navy);
+      border-radius: var(--radius-lg);
+      padding: 24px;
+      margin-top: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+    .calc-result-label {
+      font-size: 0.82rem;
+      color: rgba(255,255,255,0.55);
+    }
+    .calc-result-val {
+      font-family: 'Syne', sans-serif;
+      font-size: 2rem;
+      font-weight: 800;
+      color: var(--accent);
+    }
+    .calc-result-sub {
+      font-size: 0.75rem;
+      color: rgba(255,255,255,0.35);
+      margin-top: 2px;
+    }
+    .calc-note {
+      font-size: 0.75rem;
+      color: var(--gray-500);
+      margin-top: 14px;
+      line-height: 1.6;
+    }
+
+    /* ── Training programme ── */
+    .training-section { background: var(--off-white); padding: 96px 0; }
+    .training-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 72px;
+      align-items: start;
+    }
+    .training-modules {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .module-card {
+      background: var(--white);
+      border: 1px solid var(--gray-200);
+      border-radius: var(--radius-md);
+      padding: 22px 24px;
+      display: flex;
+      gap: 16px;
+      align-items: flex-start;
+      transition: var(--transition);
+      cursor: default;
+    }
+    .module-card:hover {
+      border-color: var(--blue);
+      box-shadow: var(--shadow-sm);
+    }
+    .module-num {
+      font-family: 'Syne', sans-serif;
+      font-size: 0.75rem;
+      font-weight: 800;
+      color: var(--blue-bright);
+      background: rgba(26,122,255,0.08);
+      border-radius: var(--radius-sm);
+      padding: 4px 8px;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+    .module-text h4 {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--navy);
+      margin-bottom: 5px;
+    }
+    .module-text p {
+      font-size: 0.84rem;
+      color: var(--text-muted);
+      line-height: 1.6;
+    }
+    .module-duration {
+      margin-left: auto;
+      font-family: 'Syne', sans-serif;
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: var(--gray-500);
+      white-space: nowrap;
+      flex-shrink: 0;
+      padding-top: 2px;
+    }
+
+    .cert-box {
+      background: var(--navy);
+      border-radius: var(--radius-xl);
+      padding: 40px 36px;
+      text-align: center;
+    }
+    .cert-icon { font-size: 3.5rem; margin-bottom: 16px; }
+    .cert-box h3 {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.3rem;
+      font-weight: 800;
+      color: var(--white);
+      margin-bottom: 12px;
+    }
+    .cert-box p {
+      font-size: 0.9rem;
+      color: rgba(255,255,255,0.6);
+      line-height: 1.75;
+      margin-bottom: 24px;
+    }
+    .cert-badges {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 28px;
+    }
+    .cert-badge-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: var(--radius-md);
+      padding: 12px 16px;
+      text-align: left;
+    }
+    .cert-badge-item span {
+      font-size: 0.85rem;
+      color: rgba(255,255,255,0.8);
+    }
+    .cert-badge-check {
+      color: #4ade80;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+
+    /* ── Incentives table ── */
+    .incentives-section { background: var(--white); padding: 96px 0; }
+    .incentive-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      margin-bottom: 48px;
+    }
+    .incentive-card {
+      border-radius: var(--radius-lg);
+      padding: 28px 22px;
+      text-align: center;
+      border: 1px solid var(--gray-200);
+      transition: var(--transition);
+    }
+    .incentive-card:hover {
+      transform: translateY(-4px);
+      box-shadow: var(--shadow-md);
+    }
+    .incentive-card:nth-child(1) { background: var(--off-white); }
+    .incentive-card:nth-child(2) { background: rgba(0,51,102,0.04); border-color: rgba(0,51,102,0.12); }
+    .incentive-card:nth-child(3) { background: rgba(240,165,0,0.05); border-color: rgba(240,165,0,0.2); }
+    .incentive-card:nth-child(4) { background: rgba(26,122,255,0.05); border-color: rgba(26,122,255,0.15); }
+    .incentive-icon { font-size: 2rem; margin-bottom: 12px; }
+    .incentive-val {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: var(--navy);
+      margin-bottom: 4px;
+    }
+    .incentive-label {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+
+    .incentive-tiers {
+      background: var(--off-white);
+      border-radius: var(--radius-xl);
+      padding: 36px;
+      border: 1px solid var(--gray-200);
+    }
+    .incentive-tiers-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 0.78rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--navy);
+      margin-bottom: 20px;
+    }
+    .tier-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr 1fr;
+      gap: 12px;
+      align-items: center;
+      padding: 14px 0;
+      border-bottom: 1px solid var(--gray-200);
+      font-size: 0.88rem;
+    }
+    .tier-row:last-child { border-bottom: none; padding-bottom: 0; }
+    .tier-row.header {
+      font-family: 'Syne', sans-serif;
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--gray-500);
+      padding-top: 0;
+    }
+    .tier-name {
+      font-weight: 700;
+      color: var(--navy);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .tier-val { color: var(--text-muted); }
+    .tier-bonus {
+      font-weight: 700;
+      color: var(--blue-bright);
+    }
+    .tier-badge {
+      font-size: 0.7rem;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 4px;
+      background: var(--gray-100);
+      color: var(--gray-500);
+    }
+    .tier-badge.gold   { background: rgba(240,165,0,0.12); color: #a07000; }
+    .tier-badge.plat   { background: rgba(0,51,102,0.1);   color: var(--navy); }
+    .tier-badge.elite  { background: rgba(26,122,255,0.12); color: var(--blue); }
+
+    /* ── Eligibility ── */
+    .eligibility-section { background: var(--off-white); padding: 96px 0; }
+    .elig-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 40px;
+    }
+    .elig-col h3 {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--navy);
+      margin-bottom: 18px;
+      padding-bottom: 12px;
+      border-bottom: 2px solid var(--gray-200);
+    }
+    .elig-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .elig-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      line-height: 1.6;
+    }
+    .elig-check {
+      width: 22px; height: 22px;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.7rem;
+      font-weight: 700;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+    .elig-check.yes { background: rgba(74,222,128,0.15); color: #16a34a; }
+    .elig-check.no  { background: rgba(248,113,113,0.15); color: #dc2626; }
+
+    /* ── Apply form ── */
+    .apply-section { background: var(--white); padding: 96px 0; }
+
+    /* ── Responsive ── */
+    @media (max-width: 1024px) {
+      .incentive-grid { grid-template-columns: repeat(2,1fr); }
+    }
+    @media (max-width: 900px) {
+      .driver-hero-inner { grid-template-columns: 1fr; gap: 40px; }
+      .earnings-inner    { grid-template-columns: 1fr; }
+      .training-grid     { grid-template-columns: 1fr; }
+      .elig-grid         { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 768px) {
+      .why-drive-grid    { grid-template-columns: 1fr 1fr; }
+      .incentive-grid    { grid-template-columns: 1fr 1fr; }
+      .tier-row          { grid-template-columns: 1fr 1fr; gap: 6px; font-size:0.82rem; }
+      .tier-row .tier-val, .tier-row .tier-badge { display: none; }
+    }
+    @media (max-width: 480px) {
+      .why-drive-grid    { grid-template-columns: 1fr; }
+      .incentive-grid    { grid-template-columns: 1fr 1fr; }
+      .driver-hero-actions { flex-direction: column; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ═══════════════ NAVBAR ═══════════════ -->
+<header class="navbar" id="navbar">
+  <div class="nav-inner">
+    <a href="index.html" class="nav-logo">
+      <img src="https://i.ibb.co/rKbMhMsY/BURGRENTAL-COM-BADGE-removebg-preview.png" alt="BURG Rental Services" />
+    </a>
+    <nav class="nav-links" id="navLinks">
+      <a href="index.html" class="nav-link">Home</a>
+      <a href="platform.html" class="nav-link">Platform</a>
+      <a href="services.html" class="nav-link">Services</a>
+      <a href="partners.html" class="nav-link">Partners</a>
+      <a href="drivers.html" class="nav-link active">Drivers</a>
+      <a href="technology.html" class="nav-link">Technology</a>
+      <a href="contact.html" class="nav-link nav-cta">Contact Us</a>
+    </nav>
+    <button class="nav-hamburger" id="hamburger" aria-label="Toggle menu">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</header>
+
+<!-- ═══════════════ DRIVER HERO ═══════════════ -->
+<section class="driver-hero">
+  <div class="driver-hero-bg"></div>
+  <div class="driver-hero-grid"></div>
+  <div class="driver-hero-inner">
+    <div class="driver-hero-text">
+      <div class="driver-hero-badge">🚗 Now Hiring Drivers in Bangalore</div>
+      <h1 class="driver-hero-title">
+        Drive With <span>BURG</span>.<br />
+        Earn More.<br />
+        Work Smarter.
+      </h1>
+      <p class="driver-hero-sub">
+        Join a professional network of commercial vehicle drivers backed by technology, training, and a company that treats you as a partner — not just a seat behind the wheel.
+      </p>
+      <div class="driver-hero-actions">
+        <a href="#apply" class="btn btn-accent">Apply to Drive →</a>
+        <a href="#earnings" class="btn btn-outline-light">See Earnings</a>
+      </div>
+    </div>
+
+    <div class="driver-quick-stats">
+      <div class="dqs-title">At a Glance — BURG Drivers</div>
+      <div class="dqs-item">
+        <span class="dqs-label">Minimum Guaranteed Trips</span>
+        <span class="dqs-val accent">18 / month</span>
+      </div>
+      <div class="dqs-item">
+        <span class="dqs-label">Average Monthly Earnings</span>
+        <span class="dqs-val accent">₹22,000+</span>
+      </div>
+      <div class="dqs-item">
+        <span class="dqs-label">Payout Cycle</span>
+        <span class="dqs-val">Weekly</span>
+      </div>
+      <div class="dqs-item">
+        <span class="dqs-label">Training Duration</span>
+        <span class="dqs-val">2 Days</span>
+      </div>
+      <div class="dqs-item">
+        <span class="dqs-label">App Required</span>
+        <span class="dqs-val">TONi Driver App</span>
+      </div>
+      <div class="dqs-item">
+        <span class="dqs-label">Licence Requirement</span>
+        <span class="dqs-val">Commercial (HMV/LMV)</span>
+      </div>
+      <div class="dqs-item">
+        <span class="dqs-label">Current Openings</span>
+        <span class="dqs-val accent">Open</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ WHY DRIVE WITH BURG ═══════════════ -->
+<section class="section why-drive">
+  <div class="container">
+    <div class="section-header fade-in">
+      <p class="section-eyebrow">Why Drive With BURG</p>
+      <h2 class="section-title">A Better Deal for Every Driver</h2>
+      <p class="section-subtitle">BURG is built on the belief that drivers who are treated well, paid fairly, and given the right tools perform better — for themselves and for clients.</p>
+    </div>
+    <div class="why-drive-grid fade-in">
+      <div class="wd-card wd-card-highlight">
+        <div class="wd-icon">💰</div>
+        <h3>Steady, Predictable Income</h3>
+        <p>BURG guarantees a minimum number of trip assignments per month — so you're never left waiting for work. Weekly payouts mean money in your account every 7 days.</p>
+      </div>
+      <div class="wd-card">
+        <div class="wd-icon">📱</div>
+        <h3>TONi Driver App</h3>
+        <p>All trip assignments, navigation, trip codes, and SOS come through the BURG TONi Driver App — free to install, simple to use, and built specifically for commercial drivers.</p>
+      </div>
+      <div class="wd-card">
+        <div class="wd-icon">🎓</div>
+        <h3>Paid Training Programme</h3>
+        <p>Every BURG driver completes our 2-day paid training covering safety protocols, TONi app usage, client communication standards, and emergency procedures.</p>
+      </div>
+      <div class="wd-card">
+        <div class="wd-icon">📈</div>
+        <h3>Performance Incentives</h3>
+        <p>Top-rated drivers unlock higher trip allocations, bonus payouts, and tier upgrades — the better you drive, the more you earn. No cap on monthly bonuses.</p>
+      </div>
+      <div class="wd-card">
+        <div class="wd-icon">🛡️</div>
+        <h3>Safety Net &amp; Support</h3>
+        <p>BURG tracks your route live. If something goes wrong, the SOS button connects you to our operations team instantly. You're never alone on the road.</p>
+      </div>
+      <div class="wd-card">
+        <div class="wd-icon">🤝</div>
+        <h3>Respect &amp; Recognition</h3>
+        <p>BURG publicly celebrates top-performing drivers. Monthly recognition, referral bonuses, and a driver community you actually want to be part of.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ EARNINGS CALCULATOR ═══════════════ -->
+<section class="earnings-section" id="earnings">
+  <div class="container earnings-inner">
+    <div class="fade-in">
+      <p class="section-eyebrow">Earnings</p>
+      <h2 class="section-title">See What You Could<br />Earn With BURG</h2>
+      <p class="body-text">Your income depends on the number of trips you complete, your vehicle type, and your performance tier. Use the calculator to get an estimate based on your situation.</p>
+      <p class="body-text">BURG pays weekly — every Friday — with no deductions for platform use. Earnings are fully transparent and itemised per trip in the TONi Driver App.</p>
+      <div style="margin-top: 28px; display:flex; flex-direction:column; gap:12px;">
+        <div style="display:flex; gap:12px; align-items:flex-start; font-size:0.9rem; color:var(--text-muted);">
+          <span style="color:var(--blue-bright); font-weight:700; flex-shrink:0; margin-top:1px;">✓</span>
+          Per-trip rate set transparently in your driver agreement
+        </div>
+        <div style="display:flex; gap:12px; align-items:flex-start; font-size:0.9rem; color:var(--text-muted);">
+          <span style="color:var(--blue-bright); font-weight:700; flex-shrink:0; margin-top:1px;">✓</span>
+          Bonus for 5-star ratings, zero cancellations, and punctuality
+        </div>
+        <div style="display:flex; gap:12px; align-items:flex-start; font-size:0.9rem; color:var(--text-muted);">
+          <span style="color:var(--blue-bright); font-weight:700; flex-shrink:0; margin-top:1px;">✓</span>
+          Referral bonus for bringing other verified drivers to the platform
+        </div>
+        <div style="display:flex; gap:12px; align-items:flex-start; font-size:0.9rem; color:var(--text-muted);">
+          <span style="color:var(--blue-bright); font-weight:700; flex-shrink:0; margin-top:1px;">✓</span>
+          Festival bonuses during Diwali, Dussehra, and major holidays
+        </div>
+      </div>
+    </div>
+
+    <div class="calc-box fade-in">
+      <div class="calc-title">🧮 Earnings Estimator</div>
+
+      <div class="calc-row">
+        <div class="calc-label">
+          Trips per month
+          <span id="tripsVal">22</span>
+        </div>
+        <input type="range" class="calc-slider" id="tripsSlider" min="10" max="40" value="22" />
+      </div>
+
+      <div class="calc-row">
+        <div class="calc-label">
+          Avg. km per trip
+          <span id="kmVal">45 km</span>
+        </div>
+        <input type="range" class="calc-slider" id="kmSlider" min="15" max="120" value="45" />
+      </div>
+
+      <div class="calc-row">
+        <div class="calc-label">
+          Vehicle type
+          <span id="vehVal">Bus / Tempo</span>
+        </div>
+        <input type="range" class="calc-slider" id="vehSlider" min="1" max="3" value="2" step="1" />
+      </div>
+
+      <div class="calc-result">
+        <div>
+          <div class="calc-result-label">Estimated Monthly Earnings</div>
+          <div class="calc-result-sub">Before incentive bonuses</div>
+        </div>
+        <div>
+          <div class="calc-result-val" id="earningsResult">₹21,600</div>
+        </div>
+      </div>
+      <p class="calc-note">* Estimate only. Actual earnings depend on vehicle type, trip length, rating, and applicable bonuses. Fuel and maintenance costs vary by operator arrangement.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ TRAINING ═══════════════ -->
+<section class="training-section">
+  <div class="container training-grid">
+    <div class="fade-in">
+      <p class="section-eyebrow">Training Programme</p>
+      <h2 class="section-title">Two Days That Make You a BURG Driver</h2>
+      <p class="body-text">Every driver on the BURG platform — regardless of experience — completes our 2-day induction programme before their first trip. Training is paid at ₹500/day and conducted at our Bangalore operations centre.</p>
+      <p class="body-text">Drivers who complete advanced training modules unlock access to VIP and school route assignments, which carry higher per-trip rates.</p>
+      <div class="training-modules">
+        <div class="module-card">
+          <span class="module-num">M1</span>
+          <div class="module-text">
+            <h4>BURG Platform &amp; TONi App Orientation</h4>
+            <p>Trip acceptance, navigation, SOS usage, trip codes, and fare visibility in the TONi Driver App.</p>
+          </div>
+          <span class="module-duration">3 hrs</span>
+        </div>
+        <div class="module-card">
+          <span class="module-num">M2</span>
+          <div class="module-text">
+            <h4>RideSafe Driver Protocol</h4>
+            <p>BURG's safety standards — pre-trip vehicle checks, route adherence, passenger conduct, and emergency procedures.</p>
+          </div>
+          <span class="module-duration">2.5 hrs</span>
+        </div>
+        <div class="module-card">
+          <span class="module-num">M3</span>
+          <div class="module-text">
+            <h4>Client Communication Standards</h4>
+            <p>How to interact with corporate clients, school staff, and VIP passengers — tone, punctuality, and escalation paths.</p>
+          </div>
+          <span class="module-duration">2 hrs</span>
+        </div>
+        <div class="module-card">
+          <span class="module-num">M4</span>
+          <div class="module-text">
+            <h4>Compliance &amp; Documentation</h4>
+            <p>How to maintain and upload required documents — licence, medical fitness, and address proof — via the TONi portal.</p>
+          </div>
+          <span class="module-duration">1.5 hrs</span>
+        </div>
+        <div class="module-card">
+          <span class="module-num">M5</span>
+          <div class="module-text">
+            <h4>Advanced: VIP &amp; School Routes</h4>
+            <p>Optional advanced module for drivers seeking VIP or school route assignments. Covers enhanced protocols and uniform standards.</p>
+          </div>
+          <span class="module-duration">3 hrs</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="fade-in">
+      <div class="cert-box">
+        <div class="cert-icon">🏅</div>
+        <h3>BURG Certified Driver</h3>
+        <p>Completing the induction programme earns you the BURG Certified Driver credential — recognised across the full partner fleet network and displayed on your TONi driver profile.</p>
+        <div class="cert-badges">
+          <div class="cert-badge-item">
+            <span class="cert-badge-check">✓</span>
+            <span>Digital certificate issued via TONi profile</span>
+          </div>
+          <div class="cert-badge-item">
+            <span class="cert-badge-check">✓</span>
+            <span>Visible to fleet operators assigning trips</span>
+          </div>
+          <div class="cert-badge-item">
+            <span class="cert-badge-check">✓</span>
+            <span>Priority access to high-value route assignments</span>
+          </div>
+          <div class="cert-badge-item">
+            <span class="cert-badge-check">✓</span>
+            <span>Renewal annual — keeps your profile active</span>
+          </div>
+          <div class="cert-badge-item">
+            <span class="cert-badge-check">✓</span>
+            <span>Training paid at ₹500/day during induction</span>
+          </div>
+        </div>
+        <a href="#apply" class="btn btn-accent" style="width:100%; justify-content:center;">Apply &amp; Start Training →</a>
+      </div>
+
+      <div style="background:var(--white); border:1px solid var(--gray-200); border-radius:var(--radius-lg); padding:28px; margin-top:20px;">
+        <div style="font-family:'Syne',sans-serif; font-size:0.78rem; font-weight:700; text-transform:uppercase; letter-spacing:0.1em; color:var(--navy); margin-bottom:14px;">Training Schedule</div>
+        <div style="display:flex; flex-direction:column; gap:10px;">
+          <div style="display:flex; justify-content:space-between; font-size:0.87rem; color:var(--text-muted); padding:8px 0; border-bottom:1px solid var(--gray-100);">
+            <span>Day 1 — Classroom (M1–M3)</span>
+            <span style="color:var(--navy); font-weight:600;">9 AM – 5 PM</span>
+          </div>
+          <div style="display:flex; justify-content:space-between; font-size:0.87rem; color:var(--text-muted); padding:8px 0; border-bottom:1px solid var(--gray-100);">
+            <span>Day 2 — Practical &amp; App (M4–M5)</span>
+            <span style="color:var(--navy); font-weight:600;">9 AM – 5 PM</span>
+          </div>
+          <div style="display:flex; justify-content:space-between; font-size:0.87rem; color:var(--text-muted); padding:8px 0;">
+            <span>Certification &amp; First Trip Assignment</span>
+            <span style="color:var(--blue-bright); font-weight:600;">Day 3 onward</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ INCENTIVE TIERS ═══════════════ -->
+<section class="incentives-section">
+  <div class="container">
+    <div class="section-header fade-in">
+      <p class="section-eyebrow">Incentives</p>
+      <h2 class="section-title">The More You Drive, The More You Earn</h2>
+      <p class="section-subtitle">BURG's performance tier system rewards consistency, safety, and client satisfaction.</p>
+    </div>
+
+    <div class="incentive-grid fade-in">
+      <div class="incentive-card">
+        <div class="incentive-icon">⭐</div>
+        <div class="incentive-val">5-Star</div>
+        <div class="incentive-label">Rating bonus: ₹200 per perfect-rated trip</div>
+      </div>
+      <div class="incentive-card">
+        <div class="incentive-icon">🎯</div>
+        <div class="incentive-val">Zero Cancel</div>
+        <div class="incentive-label">₹1,000 monthly bonus for no cancellations</div>
+      </div>
+      <div class="incentive-card">
+        <div class="incentive-icon">🤝</div>
+        <div class="incentive-val">₹500</div>
+        <div class="incentive-label">Per referred driver who completes 5 trips</div>
+      </div>
+      <div class="incentive-card">
+        <div class="incentive-icon">🎉</div>
+        <div class="incentive-val">Festival</div>
+        <div class="incentive-label">Seasonal bonuses during major holidays</div>
+      </div>
+    </div>
+
+    <div class="incentive-tiers fade-in">
+      <div class="incentive-tiers-title">Driver Performance Tiers</div>
+      <div class="tier-row header">
+        <span>Tier</span>
+        <span>Trips / Month</span>
+        <span>Monthly Bonus</span>
+        <span>Status</span>
+      </div>
+      <div class="tier-row">
+        <span class="tier-name">🟢 Standard</span>
+        <span class="tier-val">10 – 17</span>
+        <span class="tier-bonus">—</span>
+        <span><span class="tier-badge">Base rate</span></span>
+      </div>
+      <div class="tier-row">
+        <span class="tier-name">🥇 Gold</span>
+        <span class="tier-val">18 – 24</span>
+        <span class="tier-bonus">+₹1,500</span>
+        <span><span class="tier-badge gold">Preferred</span></span>
+      </div>
+      <div class="tier-row">
+        <span class="tier-name">💎 Platinum</span>
+        <span class="tier-val">25 – 32</span>
+        <span class="tier-bonus">+₹3,000</span>
+        <span><span class="tier-badge plat">Priority routes</span></span>
+      </div>
+      <div class="tier-row">
+        <span class="tier-name">🚀 Elite</span>
+        <span class="tier-val">33+</span>
+        <span class="tier-bonus">+₹5,000</span>
+        <span><span class="tier-badge elite">VIP eligible</span></span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ ELIGIBILITY ═══════════════ -->
+<section class="eligibility-section">
+  <div class="container">
+    <div class="section-header fade-in">
+      <p class="section-eyebrow">Eligibility</p>
+      <h2 class="section-title">Do You Qualify?</h2>
+      <p class="section-subtitle">Here's what we need from every driver before onboarding.</p>
+    </div>
+    <div class="elig-grid fade-in">
+      <div class="elig-col">
+        <h3>✅ Requirements</h3>
+        <div class="elig-list">
+          <div class="elig-item">
+            <div class="elig-check yes">✓</div>
+            Valid commercial driving licence (HMV or LMV-Transport)
+          </div>
+          <div class="elig-item">
+            <div class="elig-check yes">✓</div>
+            Minimum 2 years of commercial driving experience
+          </div>
+          <div class="elig-item">
+            <div class="elig-check yes">✓</div>
+            Clean driving record — no major traffic violations in past 3 years
+          </div>
+          <div class="elig-item">
+            <div class="elig-check yes">✓</div>
+            Valid Aadhaar and PAN for background verification
+          </div>
+          <div class="elig-item">
+            <div class="elig-check yes">✓</div>
+            Medical fitness certificate (can be arranged through BURG)
+          </div>
+          <div class="elig-item">
+            <div class="elig-check yes">✓</div>
+            Smartphone running Android 9.0 or above to install TONi Driver App
+          </div>
+          <div class="elig-item">
+            <div class="elig-check yes">✓</div>
+            Willingness to complete the 2-day induction programme
+          </div>
+        </div>
+      </div>
+      <div class="elig-col">
+        <h3>❌ Disqualifiers</h3>
+        <div class="elig-list">
+          <div class="elig-item">
+            <div class="elig-check no">✗</div>
+            Licence suspension in the past 5 years
+          </div>
+          <div class="elig-item">
+            <div class="elig-check no">✗</div>
+            Criminal record involving assault, theft, or substance offences
+          </div>
+          <div class="elig-item">
+            <div class="elig-check no">✗</div>
+            Inability to communicate in basic Kannada or English with clients
+          </div>
+          <div class="elig-item">
+            <div class="elig-check no">✗</div>
+            Failure to pass the background verification check
+          </div>
+          <div class="elig-item">
+            <div class="elig-check no">✗</div>
+            Licence class not valid for the vehicle type being operated
+          </div>
+          <div class="elig-item">
+            <div class="elig-check no">✗</div>
+            Unable to complete or attend the 2-day induction programme
+          </div>
+        </div>
+        <div style="margin-top:24px; padding:18px 20px; background:rgba(26,122,255,0.06); border:1px solid rgba(26,122,255,0.15); border-radius:var(--radius-md); font-size:0.85rem; color:var(--text-muted); line-height:1.7;">
+          <strong style="color:var(--navy);">Not sure if you qualify?</strong> Apply anyway — our team reviews each application individually and will tell you exactly what's needed.
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ APPLY FORM ═══════════════ -->
+<section class="apply-section" id="apply">
+  <div class="container">
+    <div class="section-header fade-in">
+      <p class="section-eyebrow">Apply Now</p>
+      <h2 class="section-title">Start Your BURG Driver Application</h2>
+      <p class="section-subtitle">Takes less than 3 minutes. Our team will contact you within 24 hours to schedule a verification call.</p>
+    </div>
+    <div class="form-wrapper fade-in">
+      <form name="driver-application" method="POST">        <div class="form-row">
+          <div class="form-group">
+            <label for="d-name">Full Name</label>
+            <input type="text" id="d-name" name="name" placeholder="As on your driving licence" required />
+          </div>
+          <div class="form-group">
+            <label for="d-phone">Mobile Number</label>
+            <input type="tel" id="d-phone" name="phone" placeholder="+91 XXXXX XXXXX" required />
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="d-email">Email Address</label>
+            <input type="email" id="d-email" name="email" placeholder="your@email.com" />
+          </div>
+          <div class="form-group">
+            <label for="d-city">Current City</label>
+            <input type="text" id="d-city" name="city" placeholder="e.g. Bangalore" required />
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="d-licence">Licence Type</label>
+            <select id="d-licence" name="licence_type" required>
+              <option value="" disabled selected>Select licence class</option>
+              <option value="hmv">HMV — Heavy Motor Vehicle</option>
+              <option value="lmv-t">LMV-Transport</option>
+              <option value="mcwg">MCWG</option>
+              <option value="other">Other (specify in notes)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="d-exp">Years of Experience</label>
+            <select id="d-exp" name="experience" required>
+              <option value="" disabled selected>Select experience</option>
+              <option value="2-3">2 – 3 years</option>
+              <option value="4-6">4 – 6 years</option>
+              <option value="7-10">7 – 10 years</option>
+              <option value="10+">10+ years</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="d-vehicle">Vehicle You Can Drive</label>
+            <select id="d-vehicle" name="vehicle_type" required>
+              <option value="" disabled selected>Select vehicle type</option>
+              <option value="bus">Bus (30+ seater)</option>
+              <option value="minibus">Mini Bus / Tempo Traveller</option>
+              <option value="cab">Car / Cab</option>
+              <option value="truck">Truck / Goods Vehicle</option>
+              <option value="multiple">Multiple types</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="d-own">Do You Own a Vehicle?</label>
+            <select id="d-own" name="owns_vehicle">
+              <option value="" disabled selected>Select</option>
+              <option value="yes">Yes — I own a vehicle</option>
+              <option value="no">No — I drive for an operator</option>
+              <option value="both">Both</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="d-notes">Anything Else We Should Know? <span style="font-weight:400; text-transform:none; letter-spacing:0;">(optional)</span></label>
+          <textarea id="d-notes" name="notes" placeholder="Previous employers, route experience, special licences, languages spoken..." rows="4"></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary form-submit">Submit My Application →</button>
+      </form>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ CTA BANNER ═══════════════ -->
+<section class="cta-banner">
+  <div class="cta-banner-bg"></div>
+  <div class="container cta-banner-inner fade-in">
+    <h2>Questions Before Applying?</h2>
+    <p>Call or WhatsApp our driver support team directly. We're happy to walk you through eligibility and the onboarding process.</p>
+    <div class="cta-banner-actions">
+      <a href="tel:+918778579209" class="btn btn-primary">📞 Call +91 87785 79209</a>
+      <a href="contact.html" class="btn btn-outline-light">Send a Message</a>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ FOOTER ═══════════════ -->
+<footer class="footer">
+  <div class="container footer-grid">
+    <div class="footer-brand">
+      <img src="https://i.ibb.co/rKbMhMsY/BURGRENTAL-COM-BADGE-removebg-preview.png" alt="BURG Rental Services" class="footer-logo" />
+      <p>Revolutionizing commercial vehicle rentals since 2024.</p>
+      <p class="footer-legal-small">BURG Rental Services LLP<br />LLPIN: ACR-9256</p>
+    </div>
+    <div class="footer-links-col">
+      <h4>Company</h4>
+      <a href="index.html">Home</a>
+      <a href="platform.html">Platform</a>
+      <a href="technology.html">Technology</a>
+      <a href="contact.html">Contact</a>
+    </div>
+    <div class="footer-links-col">
+      <h4>Solutions</h4>
+      <a href="services.html">RideSafe</a>
+      <a href="services.html">Corporate Leasing</a>
+      <a href="services.html">School Transport</a>
+      <a href="services.html">VIP &amp; Executive</a>
+    </div>
+    <div class="footer-links-col">
+      <h4>Join Us</h4>
+      <a href="partners.html">Partner With Us</a>
+      <a href="drivers.html">Drive With BURG</a>
+      <a href="contact.html">Enquire Now</a>
+    </div>
+    <div class="footer-contact-col">
+      <h4>Contact</h4>
+      <p>📍 Bangalore, Karnataka, India</p>
+      <p>📧 <a href="mailto:hello@burgrental.com">hello@burgrental.com</a></p>
+      <p>📞 <a href="tel:+918778579209">+91 87785 79209</a></p>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <div class="container footer-bottom-inner">
+      <p>© 2024–2025 BURG Rental Services LLP. All rights reserved. LLPIN: ACR-9256 | Registered in India.</p>
+      <p class="footer-disclaimer">Commercial vehicle rental marketplace. All fleet partners independently verified. BURG is a facilitator, not a direct transport operator.</p>
+    </div>
+  </div>
+</footer>
+
+<script src="script.js"></script>
+<script>
+  // ── Earnings calculator ──
+  const tripsSlider = document.getElementById('tripsSlider');
+  const kmSlider    = document.getElementById('kmSlider');
+  const vehSlider   = document.getElementById('vehSlider');
+  const tripsVal    = document.getElementById('tripsVal');
+  const kmVal       = document.getElementById('kmVal');
+  const vehVal      = document.getElementById('vehVal');
+  const result      = document.getElementById('earningsResult');
+
+  const vehLabels = { 1: 'Cab / Car', 2: 'Bus / Tempo', 3: 'Truck / HMV' };
+  const vehRates  = { 1: 18, 2: 22, 3: 28 }; // ₹ per km approx driver share
+
+  function calcEarnings() {
+    const trips = parseInt(tripsSlider.value);
+    const km    = parseInt(kmSlider.value);
+    const veh   = parseInt(vehSlider.value);
+    const rate  = vehRates[veh];
+    const est   = trips * km * rate;
+    tripsVal.textContent = trips;
+    kmVal.textContent    = km + ' km';
+    vehVal.textContent   = vehLabels[veh];
+    result.textContent   = '₹' + est.toLocaleString('en-IN');
+  }
+
+  [tripsSlider, kmSlider, vehSlider].forEach(s => s.addEventListener('input', calcEarnings));
+  calcEarnings();
+</script>
+</body>
+</html>

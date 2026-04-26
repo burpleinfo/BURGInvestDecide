@@ -1,0 +1,854 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Services — BURG Rental Services</title>
+  <meta name="description" content="BURG's five service verticals — RideSafe, Corporate Leasing, School Transport, VIP & Executive, and G-FACE Logistics. Safe, tech-driven, and built for India." />
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet" />
+  <style>
+
+    /* ── Service anchor nav ── */
+    .service-nav {
+      position: sticky;
+      top: var(--nav-h);
+      z-index: 100;
+      background: var(--white);
+      border-bottom: 1px solid var(--gray-200);
+      box-shadow: var(--shadow-sm);
+    }
+    .service-nav-inner {
+      display: flex;
+      gap: 0;
+      overflow-x: auto;
+      scrollbar-width: none;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+    .service-nav-inner::-webkit-scrollbar { display: none; }
+    .snav-link {
+      font-family: 'Syne', sans-serif;
+      font-size: 0.82rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--gray-500);
+      padding: 16px 20px;
+      white-space: nowrap;
+      border-bottom: 3px solid transparent;
+      transition: var(--transition);
+      cursor: pointer;
+    }
+    .snav-link:hover, .snav-link.active {
+      color: var(--navy);
+      border-bottom-color: var(--navy);
+    }
+
+    /* ── Service section blocks ── */
+    .service-block {
+      padding: 96px 0;
+      scroll-margin-top: calc(var(--nav-h) + 52px);
+    }
+    .service-block:nth-child(even) { background: var(--off-white); }
+
+    .service-block-inner {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 72px;
+      align-items: center;
+    }
+    .service-block-inner.reverse { direction: rtl; }
+    .service-block-inner.reverse > * { direction: ltr; }
+
+    .service-block-visual {
+      border-radius: var(--radius-xl);
+      overflow: hidden;
+      position: relative;
+    }
+
+    /* Visual panels per service */
+    .vis-panel {
+      border-radius: var(--radius-xl);
+      padding: 40px 36px;
+      min-height: 380px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      position: relative;
+      overflow: hidden;
+    }
+    .vis-panel::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(255,255,255,0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.04) 1px, transparent 1px);
+      background-size: 32px 32px;
+    }
+    .vis-panel--ridesafe  { background: linear-gradient(135deg, #001f40 0%, #003d7a 100%); }
+    .vis-panel--corporate { background: linear-gradient(135deg, #002244 0%, #004488 100%); }
+    .vis-panel--school    { background: linear-gradient(135deg, #00264d 0%, #0066aa 100%); }
+    .vis-panel--vip       { background: linear-gradient(135deg, #1a1000 0%, #3d2800 100%); }
+    .vis-panel--gface     { background: linear-gradient(135deg, #001833 0%, #003366 100%); }
+
+    .vis-header {
+      position: relative; z-index: 1;
+    }
+    .vis-service-label {
+      font-family: 'Syne', sans-serif;
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      padding: 5px 12px;
+      border-radius: 100px;
+      display: inline-block;
+      margin-bottom: 16px;
+    }
+    .vis-service-label--ridesafe  { background: rgba(26,122,255,0.25); color: #7dc4ff; }
+    .vis-service-label--corporate { background: rgba(0,85,170,0.3); color: #a0ccff; }
+    .vis-service-label--school    { background: rgba(0,170,255,0.2); color: #88ddff; }
+    .vis-service-label--vip       { background: rgba(240,165,0,0.2); color: #ffd166; }
+    .vis-service-label--gface     { background: rgba(26,122,255,0.2); color: #99ccff; }
+
+    .vis-headline {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.6rem;
+      font-weight: 800;
+      color: var(--white);
+      line-height: 1.2;
+    }
+
+    .vis-stats {
+      display: flex;
+      gap: 24px;
+      position: relative; z-index: 1;
+    }
+    .vis-stat { }
+    .vis-stat-num {
+      display: block;
+      font-family: 'Syne', sans-serif;
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: var(--accent);
+    }
+    .vis-stat--vip .vis-stat-num { color: #ffd166; }
+    .vis-stat-label {
+      font-size: 0.75rem;
+      color: rgba(255,255,255,0.45);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .vis-checklist {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      position: relative; z-index: 1;
+    }
+    .vis-checklist li {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 0.88rem;
+      color: rgba(255,255,255,0.7);
+    }
+    .vis-checklist li::before {
+      content: '✓';
+      width: 22px; height: 22px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.7rem;
+      font-weight: 700;
+      flex-shrink: 0;
+      color: #4ade80;
+    }
+
+    /* Service text side */
+    .service-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-family: 'Syne', sans-serif;
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      padding: 6px 14px;
+      border-radius: 100px;
+      margin-bottom: 18px;
+    }
+    .service-badge--ridesafe  { background: rgba(0,85,170,0.1);  color: var(--blue); }
+    .service-badge--corporate { background: rgba(0,51,102,0.08); color: var(--navy); }
+    .service-badge--school    { background: rgba(0,119,204,0.1); color: #0077cc; }
+    .service-badge--vip       { background: rgba(240,165,0,0.12); color: #b07800; }
+    .service-badge--gface     { background: rgba(26,122,255,0.1); color: var(--blue-bright); }
+
+    .service-desc {
+      font-size: 1rem;
+      color: var(--text-muted);
+      line-height: 1.8;
+      margin-bottom: 1.5rem;
+    }
+
+    .feature-list {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      margin-bottom: 32px;
+    }
+    .feature-item {
+      display: flex;
+      gap: 14px;
+      align-items: flex-start;
+    }
+    .feature-item-icon {
+      width: 40px; height: 40px;
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
+      flex-shrink: 0;
+      background: var(--off-white);
+      border: 1px solid var(--gray-200);
+    }
+    .feature-item-text h4 {
+      font-size: 0.93rem;
+      font-weight: 700;
+      color: var(--navy);
+      margin-bottom: 3px;
+    }
+    .feature-item-text p {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      line-height: 1.6;
+    }
+
+    /* Who it's for pill row */
+    .who-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 28px;
+    }
+    .who-label {
+      font-family: 'Syne', sans-serif;
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--gray-500);
+      display: flex;
+      align-items: center;
+      margin-right: 4px;
+    }
+    .who-pill {
+      font-size: 0.82rem;
+      background: var(--gray-100);
+      color: var(--navy);
+      padding: 5px 12px;
+      border-radius: 100px;
+      font-weight: 500;
+    }
+
+    /* Comparison table */
+    .comparison-section { background: var(--navy-deep); padding: 96px 0; }
+    .comparison-section .section-title { color: var(--white); }
+    .comparison-section .section-eyebrow { color: var(--accent); }
+    .comparison-section .section-subtitle { color: rgba(255,255,255,0.55); }
+
+    .compare-table-wrap {
+      overflow-x: auto;
+      border-radius: var(--radius-lg);
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+    .compare-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.88rem;
+    }
+    .compare-table th {
+      font-family: 'Syne', sans-serif;
+      font-size: 0.78rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      padding: 18px 20px;
+      text-align: left;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+      color: rgba(255,255,255,0.5);
+      background: rgba(255,255,255,0.03);
+      white-space: nowrap;
+    }
+    .compare-table th:first-child { color: var(--white); }
+    .compare-table td {
+      padding: 16px 20px;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+      color: rgba(255,255,255,0.7);
+      vertical-align: middle;
+    }
+    .compare-table tr:last-child td { border-bottom: none; }
+    .compare-table tr:hover td { background: rgba(255,255,255,0.03); }
+    .compare-table td:first-child {
+      font-weight: 600;
+      color: var(--white);
+    }
+    .check-yes { color: #4ade80; font-size: 1.1rem; }
+    .check-no  { color: rgba(255,255,255,0.2); font-size: 1.1rem; }
+    .check-partial { color: var(--accent-lt); font-size: 0.85rem; font-weight:600; }
+
+    /* ── Responsive ── */
+    @media (max-width: 900px) {
+      .service-block-inner { grid-template-columns: 1fr; gap: 40px; }
+      .service-block-inner.reverse { direction: ltr; }
+      .vis-panel { min-height: 280px; }
+    }
+    @media (max-width: 480px) {
+      .vis-stats { flex-wrap: wrap; gap: 16px; }
+      .snav-link { padding: 14px 14px; font-size: 0.75rem; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ═══════════════ NAVBAR ═══════════════ -->
+<header class="navbar" id="navbar">
+  <div class="nav-inner">
+    <a href="index.html" class="nav-logo">
+      <img src="https://i.ibb.co/rKbMhMsY/BURGRENTAL-COM-BADGE-removebg-preview.png" alt="BURG Rental Services" />
+    </a>
+    <nav class="nav-links" id="navLinks">
+      <a href="index.html" class="nav-link">Home</a>
+      <a href="platform.html" class="nav-link">Platform</a>
+      <a href="services.html" class="nav-link active">Services</a>
+      <a href="partners.html" class="nav-link">Partners</a>
+      <a href="drivers.html" class="nav-link">Drivers</a>
+      <a href="technology.html" class="nav-link">Technology</a>
+      <a href="contact.html" class="nav-link nav-cta">Contact Us</a>
+    </nav>
+    <button class="nav-hamburger" id="hamburger" aria-label="Toggle menu">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</header>
+
+<!-- ═══════════════ PAGE HERO ═══════════════ -->
+<section class="page-hero">
+  <div class="page-hero-inner container">
+    <p class="section-eyebrow">Our Services</p>
+    <h1>Five Verticals.<br />One Unified Standard.</h1>
+    <p>Every BURG service is backed by the same compliance engine, GPS infrastructure, and verified driver network — delivered through a vertical built for your specific need.</p>
+  </div>
+</section>
+
+<!-- ═══════════════ STICKY SERVICE NAV ═══════════════ -->
+<div class="service-nav" id="serviceNav">
+  <div class="service-nav-inner">
+    <a href="#ridesafe"  class="snav-link active" data-section="ridesafe">🛡️ RideSafe</a>
+    <a href="#corporate" class="snav-link" data-section="corporate">🏢 Corporate Leasing</a>
+    <a href="#school"    class="snav-link" data-section="school">🏫 School Transport</a>
+    <a href="#vip"       class="snav-link" data-section="vip">💎 VIP &amp; Executive</a>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════
+     SERVICE 1 — RIDESAFE
+════════════════════════════════════════ -->
+<section class="service-block" id="ridesafe">
+  <div class="container service-block-inner">
+    <div class="fade-in">
+      <span class="service-badge service-badge--ridesafe">🛡️ Safety-as-a-Service</span>
+      <h2 class="section-title">RideSafe</h2>
+      <p class="service-desc">RideSafe is BURG's compliance and safety layer — applied across every vehicle on the platform. For schools and corporates that carry passengers, it's available as a standalone subscription service that wraps your existing or BURG-assigned fleet in a full safety protocol.</p>
+      <p class="service-desc">From driver background verification to real-time route deviation alerts and emergency SOS — RideSafe turns a basic vehicle rental into a managed, accountable transport service.</p>
+
+      <div class="feature-list">
+        <div class="feature-item">
+          <div class="feature-item-icon">🔍</div>
+          <div class="feature-item-text">
+            <h4>Driver Background Verification</h4>
+            <p>Criminal record checks, licence validity, and address verification for every driver on the platform before their first trip.</p>
+          </div>
+        </div>
+        <div class="feature-item">
+          <div class="feature-item-icon">📍</div>
+          <div class="feature-item-text">
+            <h4>Live Route Monitoring</h4>
+            <p>Geofenced route corridors with automatic deviation alerts sent to admins and guardians via WhatsApp and SMS.</p>
+          </div>
+        </div>
+        <div class="feature-item">
+          <div class="feature-item-icon">🆘</div>
+          <div class="feature-item-text">
+            <h4>Emergency SOS</h4>
+            <p>One-tap driver SOS from the TONi Driver App triggers an instant alert to BURG operations and the client's emergency contact.</p>
+          </div>
+        </div>
+        <div class="feature-item">
+          <div class="feature-item-icon">📋</div>
+          <div class="feature-item-text">
+            <h4>Compliance Document Tracking</h4>
+            <p>Vehicle fitness, insurance, PUC, and driver licence expiry dates are monitored automatically with advance renewal reminders.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="who-row">
+        <span class="who-label">Ideal for</span>
+        <span class="who-pill">🏫 Schools</span>
+        <span class="who-pill">🏢 Corporates</span>
+        <span class="who-pill">🏥 Healthcare Orgs</span>
+        <span class="who-pill">🏛️ Institutions</span>
+      </div>
+    </div>
+
+    <div class="service-block-visual fade-in">
+      <div class="vis-panel vis-panel--ridesafe">
+        <div class="vis-header">
+          <span class="vis-service-label vis-service-label--ridesafe">RideSafe Protocol</span>
+          <div class="vis-headline">Safety on<br />Every Route</div>
+        </div>
+        <ul class="vis-checklist">
+          <li>Driver identity verified</li>
+          <li>Vehicle fitness confirmed</li>
+          <li>Insurance active</li>
+          <li>GPS tracking live</li>
+          <li>Route corridor set</li>
+          <li>SOS enabled</li>
+        </ul>
+        <div class="vis-stats">
+          <div class="vis-stat">
+            <span class="vis-stat-num">100%</span>
+            <span class="vis-stat-label">Verified Drivers</span>
+          </div>
+          <div class="vis-stat">
+            <span class="vis-stat-num">3s</span>
+            <span class="vis-stat-label">GPS Update Rate</span>
+          </div>
+          <div class="vis-stat">
+            <span class="vis-stat-num">0</span>
+            <span class="vis-stat-label">Unverified Trips</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════
+     SERVICE 2 — CORPORATE LEASING
+════════════════════════════════════════ -->
+<section class="service-block" id="corporate">
+  <div class="container service-block-inner reverse">
+    <div class="fade-in">
+      <span class="service-badge service-badge--corporate">🏢 Enterprise</span>
+      <h2 class="section-title">Corporate Leasing</h2>
+      <p class="service-desc">Businesses running employee transport, client shuttles, or inter-site logistics need reliability and accountability — not ad-hoc bookings. BURG's Corporate Leasing service delivers dedicated fleet contracts with SLA guarantees, consolidated billing, and full analytics.</p>
+      <p class="service-desc">We handle the fleet, the drivers, the compliance, and the reporting. Your HR and admin teams get one invoice, one dashboard, and one point of contact.</p>
+
+      <div class="feature-list">
+        <div class="feature-item">
+          <div class="feature-item-icon">🤝</div>
+          <div class="feature-item-text">
+            <h4>Dedicated Fleet Allocation</h4>
+            <p>Vehicles assigned exclusively to your organisation for the contract period — no sharing, no last-minute unavailability.</p>
+          </div>
+        </div>
+        <div class="feature-item">
+          <div class="feature-item-icon">📈</div>
+          <div class="feature-item-text">
+            <h4>SLA-Backed Reliability</h4>
+            <p>Contractual uptime and on-time performance commitments with defined escalation paths if standards aren't met.</p>
+          </div>
+        </div>
+        <div class="feature-item">
+          <div class="feature-item-icon">🧾</div>
+          <div class="feature-item-text">
+            <h4>GST-Compliant Monthly Billing</h4>
+            <p>One consolidated invoice per month covering all trips, routes, and vehicles — ready for enterprise procurement and accounting.</p>
+          </div>
+        </div>
+        <div class="feature-item">
+          <div class="feature-item-icon">📊</div>
+          <div class="feature-item-text">
+            <h4>Admin Dashboard Access</h4>
+            <p>Your transport admin gets login access to live fleet tracking, trip reports, and utilisation analytics via the TONi platform.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="who-row">
+        <span class="who-label">Ideal for</span>
+        <span class="who-pill">💼 IT & Tech Firms</span>
+        <span class="who-pill">🏭 Manufacturers</span>
+        <span class="who-pill">🏗️ Construction Cos.</span>
+        <span class="who-pill">🏬 Retail Chains</span>
+      </div>
+    </div>
+
+    <div class="service-block-visual fade-in">
+      <div class="vis-panel vis-panel--corporate">
+        <div class="vis-header">
+          <span class="vis-service-label vis-service-label--corporate">Corporate Portal</span>
+          <div class="vis-headline">Fleet Without<br />the Headache</div>
+        </div>
+        <ul class="vis-checklist">
+          <li>Dedicated vehicle assignment</li>
+          <li>SLA uptime guarantee</li>
+          <li>Monthly GST invoice</li>
+          <li>Live admin dashboard</li>
+          <li>Cost-per-km analytics</li>
+          <li>Single point of contact</li>
+        </ul>
+        <div class="vis-stats">
+          <div class="vis-stat">
+            <span class="vis-stat-num">99%</span>
+            <span class="vis-stat-label">On-Time SLA</span>
+          </div>
+          <div class="vis-stat">
+            <span class="vis-stat-num">1</span>
+            <span class="vis-stat-label">Invoice / Month</span>
+          </div>
+          <div class="vis-stat">
+            <span class="vis-stat-num">24/7</span>
+            <span class="vis-stat-label">Support Access</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════
+     SERVICE 3 — SCHOOL TRANSPORT
+════════════════════════════════════════ -->
+<section class="service-block" id="school">
+  <div class="container service-block-inner">
+    <div class="fade-in">
+      <span class="service-badge service-badge--school">🏫 Education</span>
+      <h2 class="section-title">School Transport</h2>
+      <p class="service-desc">School transport in India is one of the most safety-critical and least regulated categories of commercial vehicle use. BURG's School Transport service brings structure, visibility, and accountability to every route — giving parents peace of mind and schools a defensible safety record.</p>
+      <p class="service-desc">Every school bus on BURG runs under the full RideSafe protocol, with live tracking visible to authorised parents and digital boarding records for every child on every trip.</p>
+
+      <div class="feature-list">
+        <div class="feature-item">
+          <div class="feature-item-icon">📱</div>
+          <div class="feature-item-text">
+            <h4>Parent WhatsApp Alerts</h4>
+            <p>Automated notifications when the bus departs, approaches the stop, and when the child boards or alights — no app download needed.</p>
+          </div>
+        </div>
+        <div class="feature-item">
+          <div class="feature-item-icon">📋</div>
+          <div class="feature-item-text">
+            <h4>Digital Attendance Logs</h4>
+            <p>Boarding and drop-off timestamps recorded per child per trip. Schools get a fully searchable audit trail for every route.</p>
+          </div>
+        </div>
+        <div class="feature-item">
+          <div class="feature-item-icon">🛣️</div>
+          <div class="feature-item-text">
+            <h4>Route Planning &amp; Optimisation</h4>
+            <p>BURG's team maps efficient routes based on student addresses, minimising travel time and fuel costs for the school operator.</p>
+          </div>
+        </div>
+        <div class="feature-item">
+          <div class="feature-item-icon">💰</div>
+          <div class="feature-item-text">
+            <h4>Transport Fee Collection</h4>
+            <p>Schools can collect fees from parents digitally via BURG's integrated Razorpay payment flow — reducing cash handling and admin overhead.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="who-row">
+        <span class="who-label">Ideal for</span>
+        <span class="who-pill">🏫 K-12 Schools</span>
+        <span class="who-pill">🎓 Colleges</span>
+        <span class="who-pill">🏛️ Coaching Centres</span>
+        <span class="who-pill">🏕️ Residential Schools</span>
+      </div>
+    </div>
+
+    <div class="service-block-visual fade-in">
+      <div class="vis-panel vis-panel--school">
+        <div class="vis-header">
+          <span class="vis-service-label vis-service-label--school">School Transport</span>
+          <div class="vis-headline">Every Child.<br />Every Stop.<br />Accounted For.</div>
+        </div>
+        <ul class="vis-checklist">
+          <li>Enhanced driver screening</li>
+          <li>Parent live tracking access</li>
+          <li>Boarding confirmation alerts</li>
+          <li>Digital attendance records</li>
+          <li>Geofenced school zones</li>
+          <li>Fee collection integrated</li>
+        </ul>
+        <div class="vis-stats">
+          <div class="vis-stat">
+            <span class="vis-stat-num">Live</span>
+            <span class="vis-stat-label">Map for Parents</span>
+          </div>
+          <div class="vis-stat">
+            <span class="vis-stat-num">100%</span>
+            <span class="vis-stat-label">Log Coverage</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════
+     SERVICE 4 — VIP & EXECUTIVE
+════════════════════════════════════════ -->
+<section class="service-block" id="vip">
+  <div class="container service-block-inner reverse">
+    <div class="fade-in">
+      <span class="service-badge service-badge--vip">💎 Premium</span>
+      <h2 class="section-title">VIP &amp; Executive</h2>
+      <p class="service-desc">For senior executives, government officials, and high-profile guests who require a transport experience that reflects their standing. BURG's VIP service is discreet, punctual, and handled by trained professionals — not just a cab booking with a nicer car.</p>
+      <p class="service-desc">Every VIP engagement is assigned a dedicated BURG coordinator who manages the itinerary, vehicle, and driver briefing end-to-end.</p>
+
+      <div class="feature-list">
+        <div class="feature-item">
+          <div class="feature-item-icon">🚗</div>
+          <div class="feature-item-text">
+            <h4>Premium Vehicle Selection</h4>
+            <p>Innova Crysta, Toyota Fortuner, luxury SUVs, and executive minivans — all maintained and presented to the highest standards.</p>
+          </div>
+        </div>
+        <div class="feature-item">
+          <div class="feature-item-icon">👔</div>
+          <div class="feature-item-text">
+            <h4>Uniformed Chauffeurs</h4>
+            <p>Drivers are briefed on VIP protocols — formal dress, punctuality standards, mobile silence, and discretion in all interactions.</p>
+          </div>
+        </div>
+        <div class="feature-item">
+          <div class="feature-item-icon">🔒</div>
+          <div class="feature-item-text">
+            <h4>Confidentiality Protocols</h4>
+            <p>Trip data is access-restricted. Driver NDAs are in place for sensitive engagements involving corporate or diplomatic principals.</p>
+          </div>
+        </div>
+        <div class="feature-item">
+          <div class="feature-item-icon">🧭</div>
+          <div class="feature-item-text">
+            <h4>Multi-City Itinerary Management</h4>
+            <p>Airport pickups, hotel transfers, site visits, and inter-city legs all coordinated by one BURG VIP coordinator across the full trip.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="who-row">
+        <span class="who-label">Ideal for</span>
+        <span class="who-pill">👔 C-Suite Executives</span>
+        <span class="who-pill">🏛️ Government Officials</span>
+        <span class="who-pill">✈️ Inbound Delegations</span>
+        <span class="who-pill">🎊 Special Occasions</span>
+      </div>
+    </div>
+
+    <div class="service-block-visual fade-in">
+      <div class="vis-panel vis-panel--vip">
+        <div class="vis-header">
+          <span class="vis-service-label vis-service-label--vip">VIP Service</span>
+          <div class="vis-headline">White-Glove<br />Transport,<br />Redefined.</div>
+        </div>
+        <ul class="vis-checklist">
+          <li>Premium vehicle, immaculate condition</li>
+          <li>Uniformed, briefed chauffeur</li>
+          <li>NDA-backed confidentiality</li>
+          <li>Dedicated BURG coordinator</li>
+          <li>Airport-to-hotel seamless</li>
+          <li>Last-minute changes handled</li>
+        </ul>
+        <div class="vis-stats vis-stat--vip">
+          <div class="vis-stat">
+            <span class="vis-stat-num" style="color:#ffd166;">1</span>
+            <span class="vis-stat-label">Coordinator Assigned</span>
+          </div>
+          <div class="vis-stat">
+            <span class="vis-stat-num" style="color:#ffd166;">24/7</span>
+            <span class="vis-stat-label">On-Call Support</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ COMPARISON TABLE ═══════════════ -->
+<section class="comparison-section">
+  <div class="container">
+    <div class="section-header fade-in">
+      <p class="section-eyebrow">Compare Services</p>
+      <h2 class="section-title">Which Service is Right for You?</h2>
+      <p class="section-subtitle">A quick reference across all four BURG verticals.</p>
+    </div>
+    <div class="compare-table-wrap fade-in">
+      <table class="compare-table">
+        <thead>
+          <tr>
+            <th>Feature</th>
+            <th>RideSafe</th>
+            <th>Corporate</th>
+            <th>School</th>
+            <th>VIP</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Live GPS Tracking</td>
+            <td><span class="check-yes">✓</span></td>
+            <td><span class="check-yes">✓</span></td>
+            <td><span class="check-yes">✓</span></td>
+            <td><span class="check-yes">✓</span></td>
+          </tr>
+          <tr>
+            <td>Driver Verification</td>
+            <td><span class="check-yes">✓</span></td>
+            <td><span class="check-yes">✓</span></td>
+            <td><span class="check-yes">✓ Enhanced</span></td>
+            <td><span class="check-yes">✓ Premium</span></td>
+          </tr>
+          <tr>
+            <td>Monthly GST Billing</td>
+            <td><span class="check-partial">Add-on</span></td>
+            <td><span class="check-yes">✓</span></td>
+            <td><span class="check-yes">✓</span></td>
+            <td><span class="check-yes">✓</span></td>
+          </tr>
+          <tr>
+            <td>Parent / Guardian Alerts</td>
+            <td><span class="check-partial">Optional</span></td>
+            <td><span class="check-no">—</span></td>
+            <td><span class="check-yes">✓</span></td>
+            <td><span class="check-no">—</span></td>
+          </tr>
+          <tr>
+            <td>Dedicated Coordinator</td>
+            <td><span class="check-no">—</span></td>
+            <td><span class="check-yes">✓</span></td>
+            <td><span class="check-yes">✓</span></td>
+            <td><span class="check-yes">✓</span></td>
+          </tr>
+          <tr>
+            <td>Emergency SOS</td>
+            <td><span class="check-yes">✓</span></td>
+            <td><span class="check-yes">✓</span></td>
+            <td><span class="check-yes">✓</span></td>
+            <td><span class="check-yes">✓</span></td>
+          </tr>
+          <tr>
+            <td>Analytics Dashboard</td>
+            <td><span class="check-partial">Basic</span></td>
+            <td><span class="check-yes">✓ Full</span></td>
+            <td><span class="check-yes">✓ Full</span></td>
+            <td><span class="check-partial">Trip reports</span></td>
+          </tr>
+          <tr>
+            <td>Confidentiality / NDA</td>
+            <td><span class="check-no">—</span></td>
+            <td><span class="check-partial">On request</span></td>
+            <td><span class="check-no">—</span></td>
+            <td><span class="check-yes">✓ Standard</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ CTA BANNER ═══════════════ -->
+<section class="cta-banner">
+  <div class="cta-banner-bg"></div>
+  <div class="container cta-banner-inner fade-in">
+    <h2>Not Sure Which Service Fits?</h2>
+    <p>Talk to our team. We'll map the right BURG solution to your exact transport requirement — no pressure, no generic pitch.</p>
+    <div class="cta-banner-actions">
+      <a href="contact.html" class="btn btn-primary">Speak to Our Team</a>
+      <a href="platform.html" class="btn btn-outline-light">Explore the Platform</a>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ FOOTER ═══════════════ -->
+<footer class="footer">
+  <div class="container footer-grid">
+    <div class="footer-brand">
+      <img src="https://i.ibb.co/rKbMhMsY/BURGRENTAL-COM-BADGE-removebg-preview.png" alt="BURG Rental Services" class="footer-logo" />
+      <p>Revolutionizing commercial vehicle rentals since 2024.</p>
+      <p class="footer-legal-small">BURG Rental Services LLP<br />LLPIN: ACR-9256</p>
+    </div>
+    <div class="footer-links-col">
+      <h4>Company</h4>
+      <a href="index.html">Home</a>
+      <a href="platform.html">Platform</a>
+      <a href="technology.html">Technology</a>
+      <a href="contact.html">Contact</a>
+    </div>
+    <div class="footer-links-col">
+      <h4>Solutions</h4>
+      <a href="services.html">RideSafe</a>
+      <a href="services.html">Corporate Leasing</a>
+      <a href="services.html">School Transport</a>
+      <a href="services.html">VIP &amp; Executive</a>
+    </div>
+    <div class="footer-links-col">
+      <h4>Join Us</h4>
+      <a href="partners.html">Partner With Us</a>
+      <a href="drivers.html">Drive With BURG</a>
+      <a href="contact.html">Enquire Now</a>
+    </div>
+    <div class="footer-contact-col">
+      <h4>Contact</h4>
+      <p>📍 Bangalore, Karnataka, India</p>
+      <p>📧 <a href="mailto:hello@burgrental.com">hello@burgrental.com</a></p>
+      <p>📞 <a href="tel:+918778579209">+91 87785 79209</a></p>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <div class="container footer-bottom-inner">
+      <p>© 2024–2025 BURG Rental Services LLP. All rights reserved. LLPIN: ACR-9256 | Registered in India.</p>
+      <p class="footer-disclaimer">Commercial vehicle rental marketplace. All fleet partners independently verified. BURG is a facilitator, not a direct transport operator.</p>
+    </div>
+  </div>
+</footer>
+
+<script src="script.js"></script>
+<script>
+  // ── Sticky service nav active highlight on scroll ──
+  const sections  = document.querySelectorAll('.service-block');
+  const snavLinks = document.querySelectorAll('.snav-link');
+  const snavEl    = document.getElementById('serviceNav');
+
+  const sectionObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const id = entry.target.id;
+        snavLinks.forEach(l => {
+          l.classList.toggle('active', l.dataset.section === id);
+        });
+      }
+    });
+  }, {
+    rootMargin: `-${72 + 52 + 10}px 0px -55% 0px`,
+    threshold: 0
+  });
+
+  sections.forEach(s => sectionObserver.observe(s));
+</script>
+</body>
+</html>
