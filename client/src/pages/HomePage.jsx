@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import Footer from '../widgets/Footer/Footer';
+import vehicleHeroImage from '../assets/vehicle-hero.png';
 
 export default function HomePage() {
   useEffect(() => {
@@ -67,51 +68,61 @@ export default function HomePage() {
         <div className="absolute top-[-100px] left-[-150px] w-[600px] h-[600px] rounded-full filter blur-[80px] pointer-events-none" style={{background: 'radial-gradient(circle, rgba(0,85,170,0.35) 0%, transparent 70%)'}}></div>
         <div className="absolute bottom-[-50px] right-[-100px] w-[500px] h-[500px] rounded-full filter blur-[80px] pointer-events-none" style={{background: 'radial-gradient(circle, rgba(240,165,0,0.15) 0%, transparent 70%)'}}></div>
 
-        <div className="relative z-[2] max-w-[1200px] mx-auto px-6 py-20 flex flex-col items-start gap-0 w-full">
-          {/* Badge */}
-          <div className="inline-flex items-center gap-2 bg-[rgba(255,255,255,0.07)] border border-[rgba(255,255,255,0.15)] text-[rgba(255,255,255,0.85)] font-['DM_Sans'] text-[0.85rem] font-medium px-4 py-[7px] rounded-full mb-7 animate-[fadeSlideDown_0.6s_ease_both]">
-            <span className="w-2 h-2 bg-[#4ade80] rounded-full animate-[pulse_2s_infinite]"></span>
-            <span>Now operating across Bangalore</span>
+        <div className="relative z-[2] max-w-[1200px] mx-auto px-6 py-20 grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_minmax(340px,520px)] items-center gap-12 lg:gap-8 w-full">
+          <div className="flex flex-col items-start">
+            {/* Badge */}
+            <div className="inline-flex items-center gap-2 bg-[rgba(255,255,255,0.07)] border border-[rgba(255,255,255,0.15)] text-[rgba(255,255,255,0.85)] font-['DM_Sans'] text-[0.85rem] font-medium px-4 py-[7px] rounded-full mb-7 animate-[fadeSlideDown_0.6s_ease_both]">
+              <span className="w-2 h-2 bg-[#4ade80] rounded-full animate-[pulse_2s_infinite]"></span>
+              <span>Now operating across Bangalore</span>
+            </div>
+
+            {/* Main Title */}
+            <h1 className="font-['Syne'] text-[clamp(2.4rem,6vw,5rem)] font-extrabold text-white leading-[1.1] mb-6 animate-[fadeSlideDown_0.7s_0.1s_ease_both]">
+              India's Intelligent<br />
+              <span className="text-[#f0a500]">Commercial Vehicle</span><br />
+              Rental Marketplace
+            </h1>
+
+            {/* Subtitle */}
+            <p className="text-[clamp(1rem,2vw,1.2rem)] text-[rgba(255,255,255,0.65)] max-w-[580px] leading-[1.75] mb-9 animate-[fadeSlideDown_0.7s_0.2s_ease_both]">
+              BURG connects businesses, schools, and individuals to a verified fleet network — powered by technology, driven by safety, built to scale.
+            </p>
+
+            {/* CTA Buttons */}
+            <div className="flex flex-wrap gap-3.5 mb-14 animate-[fadeSlideDown_0.7s_0.3s_ease_both]">
+              <Link to="/services" className="inline-flex items-center gap-2 px-7 py-3.5 bg-[#003366] text-white border-2 border-[#003366] rounded-xl font-['Syne'] font-bold text-[0.95rem] tracking-[0.02em] transition-all duration-300 hover:-translate-y-0.5 hover:bg-[#0055aa] hover:border-[#0055aa] hover:shadow-[0_6px_24px_rgba(0,51,102,0.14)]">
+                Explore Services
+              </Link>
+              <Link to="/partners" className="inline-flex items-center gap-2 px-7 py-3.5 bg-transparent text-[#003366] border-2 border-[#003366] rounded-xl font-['Syne'] font-bold text-[0.95rem] tracking-[0.02em] transition-all duration-300 hover:bg-[#003366] hover:text-white hover:-translate-y-0.5">
+                <span className="text-white border-[rgba(255,255,255,0.6)]">List Your Fleet</span>
+              </Link>
+            </div>
+
+            {/* Stats */}
+            <div className="flex items-center gap-8 animate-[fadeSlideDown_0.7s_0.4s_ease_both]">
+              <div className="text-left">
+                <span className="block font-['Syne'] text-[1.6rem] font-extrabold text-[#f0a500]">B2B2C</span>
+                <span className="block text-[0.78rem] text-[rgba(255,255,255,0.5)] uppercase tracking-[0.08em] mt-0.5">Marketplace Model</span>
+              </div>
+              <div className="w-px h-10 bg-[rgba(255,255,255,0.15)]"></div>
+              <div className="text-left">
+                <span className="block font-['Syne'] text-[1.6rem] font-extrabold text-[#f0a500]">4</span>
+                <span className="block text-[0.78rem] text-[rgba(255,255,255,0.5)] uppercase tracking-[0.08em] mt-0.5">Service Verticals</span>
+              </div>
+              <div className="w-px h-10 bg-[rgba(255,255,255,0.15)]"></div>
+              <div className="text-left">
+                <span className="block font-['Syne'] text-[1.6rem] font-extrabold text-[#f0a500]">2024</span>
+                <span className="block text-[0.78rem] text-[rgba(255,255,255,0.5)] uppercase tracking-[0.08em] mt-0.5">Founded, Bangalore</span>
+              </div>
+            </div>
           </div>
 
-          {/* Main Title */}
-          <h1 className="font-['Syne'] text-[clamp(2.4rem,6vw,5rem)] font-extrabold text-white leading-[1.1] mb-6 animate-[fadeSlideDown_0.7s_0.1s_ease_both]">
-            India's Intelligent<br />
-            <span className="text-[#f0a500]">Commercial Vehicle</span><br />
-            Rental Marketplace
-          </h1>
-
-          {/* Subtitle */}
-          <p className="text-[clamp(1rem,2vw,1.2rem)] text-[rgba(255,255,255,0.65)] max-w-[580px] leading-[1.75] mb-9 animate-[fadeSlideDown_0.7s_0.2s_ease_both]">
-            BURG connects businesses, schools, and individuals to a verified fleet network — powered by technology, driven by safety, built to scale.
-          </p>
-
-          {/* CTA Buttons */}
-          <div className="flex flex-wrap gap-3.5 mb-14 animate-[fadeSlideDown_0.7s_0.3s_ease_both]">
-            <Link to="/services" className="inline-flex items-center gap-2 px-7 py-3.5 bg-[#003366] text-white border-2 border-[#003366] rounded-xl font-['Syne'] font-bold text-[0.95rem] tracking-[0.02em] transition-all duration-300 hover:-translate-y-0.5 hover:bg-[#0055aa] hover:border-[#0055aa] hover:shadow-[0_6px_24px_rgba(0,51,102,0.14)]">
-              Explore Services
-            </Link>
-            <Link to="/partners" className="inline-flex items-center gap-2 px-7 py-3.5 bg-transparent text-[#003366] border-2 border-[#003366] rounded-xl font-['Syne'] font-bold text-[0.95rem] tracking-[0.02em] transition-all duration-300 hover:bg-[#003366] hover:text-white hover:-translate-y-0.5 !border-[#003366]">
-              <span className="text-white border-[rgba(255,255,255,0.6)]">List Your Fleet</span>
-            </Link>
-          </div>
-
-          {/* Stats */}
-          <div className="flex items-center gap-8 animate-[fadeSlideDown_0.7s_0.4s_ease_both]">
-            <div className="text-left">
-              <span className="block font-['Syne'] text-[1.6rem] font-extrabold text-[#f0a500]">B2B2C</span>
-              <span className="block text-[0.78rem] text-[rgba(255,255,255,0.5)] uppercase tracking-[0.08em] mt-0.5">Marketplace Model</span>
-            </div>
-            <div className="w-px h-10 bg-[rgba(255,255,255,0.15)]"></div>
-            <div className="text-left">
-              <span className="block font-['Syne'] text-[1.6rem] font-extrabold text-[#f0a500]">4</span>
-              <span className="block text-[0.78rem] text-[rgba(255,255,255,0.5)] uppercase tracking-[0.08em] mt-0.5">Service Verticals</span>
-            </div>
-            <div className="w-px h-10 bg-[rgba(255,255,255,0.15)]"></div>
-            <div className="text-left">
-              <span className="block font-['Syne'] text-[1.6rem] font-extrabold text-[#f0a500]">2024</span>
-              <span className="block text-[0.78rem] text-[rgba(255,255,255,0.5)] uppercase tracking-[0.08em] mt-0.5">Founded, Bangalore</span>
-            </div>
+          <div className="w-full max-w-[540px] justify-self-center lg:justify-self-end lg:w-[150%] lg:max-w-[920px] lg:translate-x-15 lg:-translate-y-27 animate-[fadeSlideDown_0.8s_0.2s_ease_both]">
+            <img
+              src={vehicleHeroImage}
+              alt="BURG commercial vehicle fleet"
+              className="w-full h-auto object-contain drop-shadow-[0_26px_55px_rgba(0,0,0,0.4)]"
+            />
           </div>
         </div>
 
