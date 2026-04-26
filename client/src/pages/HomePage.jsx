@@ -99,17 +99,15 @@ export default function HomePage() {
             </div>
 
             {/* Stats */}
-            <div className="flex items-center gap-8 animate-[fadeSlideDown_0.7s_0.4s_ease_both]">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 sm:gap-8 animate-[fadeSlideDown_0.7s_0.4s_ease_both]">
               <div className="text-left">
                 <span className="block font-['Syne'] text-[1.6rem] font-extrabold text-[#f0a500]">B2B2C</span>
                 <span className="block text-[0.78rem] text-[rgba(255,255,255,0.5)] uppercase tracking-[0.08em] mt-0.5">Marketplace Model</span>
               </div>
-              <div className="w-px h-10 bg-[rgba(255,255,255,0.15)]"></div>
               <div className="text-left">
                 <span className="block font-['Syne'] text-[1.6rem] font-extrabold text-[#f0a500]">4</span>
                 <span className="block text-[0.78rem] text-[rgba(255,255,255,0.5)] uppercase tracking-[0.08em] mt-0.5">Service Verticals</span>
               </div>
-              <div className="w-px h-10 bg-[rgba(255,255,255,0.15)]"></div>
               <div className="text-left">
                 <span className="block font-['Syne'] text-[1.6rem] font-extrabold text-[#f0a500]">2024</span>
                 <span className="block text-[0.78rem] text-[rgba(255,255,255,0.5)] uppercase tracking-[0.08em] mt-0.5">Founded, Bangalore</span>

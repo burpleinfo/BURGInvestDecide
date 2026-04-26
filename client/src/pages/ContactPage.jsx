@@ -286,8 +286,8 @@ const ContactPage = () => {
 
         @media (max-width:1024px) { .contact-form-inner { grid-template-columns:1fr; gap:48px; } .contact-form-box { padding:40px 32px; } }
         @media (max-width:900px) { .contact-hero-inner { grid-template-columns:1fr; gap:48px; } .office-inner { grid-template-columns:1fr; gap:40px; } .faq-grid { grid-template-columns:1fr; } }
-        @media (max-width:768px) { .form-type-selector { grid-template-columns:repeat(2,1fr); } .connect-inner { flex-direction:column; align-items:flex-start; } .form-row { grid-template-columns:1fr; } }
-        @media (max-width:480px) { .contact-form-box { padding:28px 20px; } .channel-btn { font-size:.78rem; padding:10px 14px; } }
+        @media (max-width:768px) { .contact-hero { padding:110px 0 56px; } .form-type-selector { grid-template-columns:repeat(2,1fr); } .connect-inner { flex-direction:column; align-items:flex-start; } .form-row { grid-template-columns:1fr; } }
+        @media (max-width:480px) { .contact-hero { padding:96px 0 48px; } .contact-form-box { padding:28px 20px; } .channel-btn { font-size:.78rem; padding:10px 14px; } .mp-label { width:calc(100% - 32px); white-space:normal; } }
       `}</style>
 
       <section className="contact-hero">

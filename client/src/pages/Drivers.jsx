@@ -218,14 +218,14 @@ const Drivers = () => {
             <p className="text-gray-500 text-lg max-w-2xl mx-auto">BURG's performance tier system rewards consistency, safety, and client satisfaction.</p>
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-12 fade-in">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mb-12 fade-in">
             {[
               { icon: '⭐', bg: 'bg-[#F5F7FB]', border: 'border-gray-200', val: '5-Star', label: 'Rating bonus: ₹200 per perfect-rated trip' },
               { icon: '🎯', bg: 'bg-[#003366]/[0.04]', border: 'border-[#003366]/10', val: 'Zero Cancel', label: '₹1,000 monthly bonus for no cancellations' },
               { icon: '🤝', bg: 'bg-[#f0a500]/5', border: 'border-[#f0a500]/20', val: '₹500', label: 'Per referred driver who completes 5 trips' },
               { icon: '🎉', bg: 'bg-[#1a7aff]/5', border: 'border-[#1a7aff]/15', val: 'Festival', label: 'Seasonal bonuses during major holidays' }
             ].map((inc, i) => (
-              <div key={i} className={`${inc.bg} border ${inc.border} rounded-xl p-7 text-center transition-transform hover:-translate-y-1 hover:shadow-md`}>
+              <div key={i} className={`${inc.bg} border ${inc.border} rounded-xl p-5 sm:p-7 text-center transition-transform hover:-translate-y-1 hover:shadow-md`}>
                 <div className="text-3xl mb-3">{inc.icon}</div>
                 <div className="font-['Syne'] font-extrabold text-2xl text-[#0B1E33] mb-1">{inc.val}</div>
                 <div className="text-xs text-gray-500 leading-relaxed">{inc.label}</div>

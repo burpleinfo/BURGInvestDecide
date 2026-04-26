@@ -386,9 +386,9 @@ const Technology = () => {
                 </header>
                 <div>
                   {group.rows.map(([key, val]) => (
-                    <div key={key} className="grid grid-cols-2 gap-3 border-b border-[#d8dfe9] px-5 py-3 text-sm last:border-b-0">
+                    <div key={key} className="grid grid-cols-1 gap-1 border-b border-[#d8dfe9] px-5 py-3 text-sm last:border-b-0 sm:grid-cols-2 sm:gap-3">
                       <span className="font-mono text-xs text-[#5a6e84]">{key}</span>
-                      <span className="font-semibold text-[#003366]">{val}</span>
+                      <span className="font-semibold text-[#003366] break-words">{val}</span>
                     </div>
                   ))}
                 </div>

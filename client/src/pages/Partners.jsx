@@ -69,12 +69,12 @@ const Partners = () => {
       {/* PARTNER TYPE TABS */}
       <div className="bg-[#F5F7FB] pt-14">
         <div className="max-w-6xl mx-auto px-4">
-          <div className="flex gap-3 justify-start md:justify-center flex-nowrap md:flex-wrap overflow-x-auto pb-0">
+          <div className="flex gap-3 justify-start md:justify-center flex-nowrap md:flex-wrap overflow-x-auto scrollbar-hide pb-2">
             {tabs.map(tab => (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`flex flex-col items-center gap-2 py-5 px-7 min-w-[120px] md:min-w-[140px] transition-all rounded-t-xl border border-gray-200 border-b-0 relative -bottom-px ${activeTab === tab.id ? 'bg-white shadow-sm border-b-white z-10' : 'bg-white/50 hover:bg-white'}`}
+                className={`flex flex-col items-center gap-2 py-4 sm:py-5 px-4 sm:px-7 min-w-[104px] sm:min-w-[120px] md:min-w-[140px] transition-all rounded-t-xl border border-gray-200 border-b-0 relative -bottom-px ${activeTab === tab.id ? 'bg-white shadow-sm border-b-white z-10' : 'bg-white/50 hover:bg-white'}`}
               >
                 <span className="text-2xl">{tab.icon}</span>
                 <span className={`font-['Syne'] text-xs font-bold uppercase tracking-widest ${activeTab === tab.id ? 'text-[#0B1E33]' : 'text-gray-500'}`}>{tab.label}</span>

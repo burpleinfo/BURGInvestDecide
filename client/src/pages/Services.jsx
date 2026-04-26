@@ -239,7 +239,7 @@ const Services = () => {
 
               {/* Visual Panel */}
               <div className={`fade-in ${service.id === 'corporate' || service.id === 'vip' ? 'lg:order-1' : ''}`}>
-                <div className={`${service.visPanelClass} rounded-3xl p-10 min-h-[400px] flex flex-col justify-between relative overflow-hidden`}>
+                <div className={`${service.visPanelClass} rounded-3xl p-6 sm:p-8 lg:p-10 min-h-[320px] sm:min-h-[400px] flex flex-col justify-between relative overflow-hidden`}>
                   {/* Grid Background */}
                   <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.04)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.04)_1px,transparent_1px)] bg-[length:32px_32px]"></div>
 
@@ -262,7 +262,7 @@ const Services = () => {
                   </ul>
 
                   {/* Stats */}
-                  <div className="flex gap-6 relative z-10">
+                  <div className="flex flex-wrap gap-x-6 gap-y-4 relative z-10">
                     {service.visStats.map((stat, idx) => (
                       <div key={idx}>
                         <span className={`block text-2xl font-bold ${stat.isVip ? 'text-[#ffd166]' : 'text-[#f0a500]'}`}>
@@ -379,13 +379,6 @@ const Services = () => {
       </footer>
 
       <style>{`
-        .scrollbar-hide::-webkit-scrollbar {
-          display: none;
-        }
-        .scrollbar-hide {
-          -ms-overflow-style: none;
-          scrollbar-width: none;
-        }
         .fade-in {
           opacity: 0;
           transform: translateY(28px);
