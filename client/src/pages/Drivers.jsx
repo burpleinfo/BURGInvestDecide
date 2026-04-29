@@ -478,8 +478,7 @@ const Drivers = () => {
         </div>
       </section>
 
-      {/* Footer */}
-      {/* Assuming you want Footer included but you might want to switch this based on your previous edit where we removed Navbar from Partners */}
+      <Footer />
     </div>
   );
 };

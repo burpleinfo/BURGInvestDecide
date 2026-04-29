@@ -188,6 +188,13 @@ export default function HomePage() {
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 fade-in">
 
+            <Link to="/services" className="block relative bg-white border border-[#d8dfe9] rounded-[20px] p-8 md:px-[28px] md:py-[32px] overflow-hidden transition-all duration-300 hover:-translate-y-1.5 hover:shadow-[0_16px_48px_rgba(0,51,102,0.18)] hover:border-transparent group before:absolute before:top-0 before:left-0 before:right-0 before:h-1 before:rounded-t-[20px] before:bg-[linear-gradient(90deg,#f0a500,#ffd166)] before:transition-all before:duration-300">
+              <div className="inline-block font-['Syne'] text-[0.7rem] font-bold uppercase tracking-[0.12em] text-[#1a7aff] bg-[rgba(26,122,255,0.07)] px-2.5 py-1 rounded mb-3.5">Premium</div>
+              <h3 className="font-['Syne'] text-[1.2rem] font-extrabold text-[#003366] mb-2.5 leading-tight">VIP &amp; Executive</h3>
+              <p className="text-[0.9rem] text-[#5a6e84] leading-[1.65] mb-5">Chauffeur-driven luxury vehicles for senior executives, dignitaries, and special occasions.</p>
+              <span className="inline-block text-[1.1rem] text-[#0055aa] transition-all duration-300 group-hover:translate-x-1.5">→</span>
+            </Link>
+
             <Link to="/services" className="block relative bg-white border border-[#d8dfe9] rounded-[20px] p-8 md:px-[28px] md:py-[32px] overflow-hidden transition-all duration-300 hover:-translate-y-1.5 hover:shadow-[0_16px_48px_rgba(0,51,102,0.18)] hover:border-transparent group before:absolute before:top-0 before:left-0 before:right-0 before:h-1 before:rounded-t-[20px] before:bg-[linear-gradient(90deg,#0055aa,#1a7aff)] before:transition-all before:duration-300">
               <div className="inline-block font-['Syne'] text-[0.7rem] font-bold uppercase tracking-[0.12em] text-[#1a7aff] bg-[rgba(26,122,255,0.07)] px-2.5 py-1 rounded mb-3.5">Safety-as-a-Service</div>
               <h3 className="font-['Syne'] text-[1.2rem] font-extrabold text-[#003366] mb-2.5 leading-tight">RideSafe</h3>
@@ -206,13 +213,6 @@ export default function HomePage() {
               <div className="inline-block font-['Syne'] text-[0.7rem] font-bold uppercase tracking-[0.12em] text-[#1a7aff] bg-[rgba(26,122,255,0.07)] px-2.5 py-1 rounded mb-3.5">Education</div>
               <h3 className="font-['Syne'] text-[1.2rem] font-extrabold text-[#003366] mb-2.5 leading-tight">School Transport</h3>
               <p className="text-[0.9rem] text-[#5a6e84] leading-[1.65] mb-5">GPS-tracked school buses with parent notifications, attendance logs, and guardian alerts.</p>
-              <span className="inline-block text-[1.1rem] text-[#0055aa] transition-all duration-300 group-hover:translate-x-1.5">→</span>
-            </Link>
-
-            <Link to="/services" className="block lg:col-start-1 lg:col-end-2 md:col-start-1 lg:ml-[calc(50%+10px)] relative bg-white border border-[#d8dfe9] rounded-[20px] p-8 md:px-[28px] md:py-[32px] overflow-hidden transition-all duration-300 hover:-translate-y-1.5 hover:shadow-[0_16px_48px_rgba(0,51,102,0.18)] hover:border-transparent group before:absolute before:top-0 before:left-0 before:right-0 before:h-1 before:rounded-t-[20px] before:bg-[linear-gradient(90deg,#f0a500,#ffd166)] before:transition-all before:duration-300">
-              <div className="inline-block font-['Syne'] text-[0.7rem] font-bold uppercase tracking-[0.12em] text-[#1a7aff] bg-[rgba(26,122,255,0.07)] px-2.5 py-1 rounded mb-3.5">Premium</div>
-              <h3 className="font-['Syne'] text-[1.2rem] font-extrabold text-[#003366] mb-2.5 leading-tight">VIP &amp; Executive</h3>
-              <p className="text-[0.9rem] text-[#5a6e84] leading-[1.65] mb-5">Chauffeur-driven luxury vehicles for senior executives, dignitaries, and special occasions.</p>
               <span className="inline-block text-[1.1rem] text-[#0055aa] transition-all duration-300 group-hover:translate-x-1.5">→</span>
             </Link>
 
@@ -316,61 +316,7 @@ export default function HomePage() {
       </section>
 
       {/* ═══════════════ FOOTER ═══════════════ */}
-      <footer className="bg-[#001f40] pt-[72px] pb-[56px] border-t border-[rgba(255,255,255,0.08)] mt-auto w-full relative z-[10]">
-        <div className="max-w-[1200px] mx-auto px-6 grid grid-cols-1 md:grid-cols-[2fr_1fr_1fr_1fr_1.5fr] gap-[48px] mb-16">
-          <div className="pr-10">
-            <Link to="/" className="inline-block text-white font-['Syne'] text-[1.8rem] font-extrabold tracking-[-0.02em] mb-4 transition-opacity duration-300 hover:opacity-80">
-              BURG
-            </Link>
-            <p className="text-[0.95rem] text-[rgba(255,255,255,0.6)] leading-[1.7] mb-6 max-w-[320px]">
-              India's first B2B2C marketplace for commercial vehicle rentals. Unifying capacity, compliance, and technology.
-            </p>
-            <div className="flex gap-[18px]">
-              <a href="#" className="w-[38px] h-[38px] rounded-full bg-[rgba(255,255,255,0.05)] flex justify-center items-center text-white text-[1.1rem] transition-all duration-300 border border-[rgba(255,255,255,0.1)] hover:bg-[#1a7aff] hover:border-[#1a7aff] hover:-translate-y-[3px]">in</a>
-              <a href="#" className="w-[38px] h-[38px] rounded-full bg-[rgba(255,255,255,0.05)] flex justify-center items-center text-white text-[1.1rem] transition-all duration-300 border border-[rgba(255,255,255,0.1)] hover:bg-[#1a7aff] hover:border-[#1a7aff] hover:-translate-y-[3px]">tw</a>
-              <a href="#" className="w-[38px] h-[38px] rounded-full bg-[rgba(255,255,255,0.05)] flex justify-center items-center text-white text-[1.1rem] transition-all duration-300 border border-[rgba(255,255,255,0.1)] hover:bg-[#1a7aff] hover:border-[#1a7aff] hover:-translate-y-[3px]">ig</a>
-            </div>
-          </div>
-          <div>
-            <h4 className="font-['Syne'] text-[1.05rem] font-bold text-white mb-5">Platform</h4>
-            <ul className="list-none p-0 flex flex-col gap-[14px]">
-              <li><Link to="/services" className="text-[0.95rem] text-[rgba(255,255,255,0.6)] font-medium transition-all duration-300 hover:text-white hover:pl-[5px]">RideSafe</Link></li>
-              <li><Link to="/services" className="text-[0.95rem] text-[rgba(255,255,255,0.6)] font-medium transition-all duration-300 hover:text-white hover:pl-[5px]">Corporate</Link></li>
-              <li><Link to="/services" className="text-[0.95rem] text-[rgba(255,255,255,0.6)] font-medium transition-all duration-300 hover:text-white hover:pl-[5px]">School Transport</Link></li>
-              <li><Link to="/technology" className="text-[0.95rem] text-[rgba(255,255,255,0.6)] font-medium transition-all duration-300 hover:text-white hover:pl-[5px]">TONi Tech Info</Link></li>
-            </ul>
-          </div>
-          <div>
-            <h4 className="font-['Syne'] text-[1.05rem] font-bold text-white mb-5">Company</h4>
-            <ul className="list-none p-0 flex flex-col gap-[14px]">
-              <li><a href="#" className="text-[0.95rem] text-[rgba(255,255,255,0.6)] font-medium transition-all duration-300 hover:text-white hover:pl-[5px]">About Us</a></li>
-              <li><Link to="/partners" className="text-[0.95rem] text-[rgba(255,255,255,0.6)] font-medium transition-all duration-300 hover:text-white hover:pl-[5px]">Partner with Us</Link></li>
-              <li><a href="#" className="text-[0.95rem] text-[rgba(255,255,255,0.6)] font-medium transition-all duration-300 hover:text-white hover:pl-[5px]">Careers</a></li>
-              <li><Link to="/contact" className="text-[0.95rem] text-[rgba(255,255,255,0.6)] font-medium transition-all duration-300 hover:text-white hover:pl-[5px]">Contact</Link></li>
-            </ul>
-          </div>
-          <div>
-            <h4 className="font-['Syne'] text-[1.05rem] font-bold text-white mb-5">ContactHQ</h4>
-            <p className="text-[0.95rem] text-[rgba(255,255,255,0.6)] leading-[1.6] mb-[2px]">
-              Bangalore
-            </p>
-          </div>
-          <div>
-            <h4 className="font-['Syne'] text-[1.05rem] font-bold text-white mb-5">Contact HQ</h4>
-            <p className="text-[0.95rem] text-[rgba(255,255,255,0.6)] leading-[1.6] mb-3">Sector 4, HSR Layout<br />Bangalore, Karnataka 560102</p>
-            <p className="text-[0.95rem] text-[rgba(255,255,255,0.6)] leading-[1.6] mb-[2px]"><strong>Phone:</strong> +91 99000 XXXXX</p>
-            <p className="text-[0.95rem] text-[rgba(255,255,255,0.6)] leading-[1.6]"><strong>Email:</strong> operations@burg.co.in</p>
-          </div>
-        </div>
-        <div className="max-w-[1200px] mx-auto px-6 border-t border-[rgba(255,255,255,0.05)] pt-6 flex flex-col md:flex-row justify-between items-center gap-4 text-[0.85rem] text-[rgba(255,255,255,0.4)]">
-          <p>© {new Date().getFullYear()} BURG Rental Services LLP. All rights reserved.</p>
-          <div className="flex gap-6">
-            <a href="#" className="text-[rgba(255,255,255,0.4)] hover:text-white transition-colors duration-300">Privacy Policy</a>
-            <a href="#" className="text-[rgba(255,255,255,0.4)] hover:text-white transition-colors duration-300">Terms of Service</a>
-            <a href="#" className="text-[rgba(255,255,255,0.4)] hover:text-white transition-colors duration-300">Refund Policy</a>
-          </div>
-        </div>
-      </footer>
+      <Footer />
     </>
   );
 }

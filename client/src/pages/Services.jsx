@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import Navbar from '../widgets/Navbar/Navbar';
+import Footer from '../widgets/Footer/Footer';
 
 const Services = () => {
   const [activeService, setActiveService] = useState('ridesafe');
@@ -342,41 +343,7 @@ const Services = () => {
       </section>
 
       {/* ═══════════════ FOOTER ═══════════════ */}
-      <footer className="bg-[#001f40] text-white/65 py-16 px-6">
-        <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-12 mb-12">
-          <div>
-            <img src="https://i.ibb.co/rKbMhMsY/BURGRENTAL-COM-BADGE-removebg-preview.png" alt="BURG" className="h-12 mb-4" />
-            <p className="text-sm text-white/55 mb-2">Revolutionizing commercial vehicle rentals since 2024.</p>
-            <p className="text-xs text-white/30">BURG Rental Services LLP<br />LLPIN: ACR-9256</p>
-          </div>
-          {[
-            { title: 'Company', links: ['Home', 'Platform', 'Technology', 'Contact'] },
-            { title: 'Solutions', links: ['RideSafe', 'Corporate Leasing', 'School Transport', 'VIP & Executive'] },
-            { title: 'Join Us', links: ['Partner With Us', 'Drive With BURG', 'Enquire Now'] },
-          ].map((col, idx) => (
-            <div key={idx}>
-              <h4 className="text-xs font-bold uppercase tracking-widest text-white mb-4">{col.title}</h4>
-              <div className="space-y-2">
-                {col.links.map((link, i) => (
-                  <a key={i} href="#" className="block text-sm text-white/55 hover:text-[#f0a500] transition-colors">
-                    {link}
-                  </a>
-                ))}
-              </div>
-            </div>
-          ))}
-          <div>
-            <h4 className="text-xs font-bold uppercase tracking-widest text-white mb-4">Contact</h4>
-            <p className="text-sm mb-2">📍 Bangalore, Karnataka, India</p>
-            <p className="text-sm mb-2">📧 <a href="mailto:hello@burgrental.com" className="hover:text-[#f0a500]">hello@burgrental.com</a></p>
-            <p className="text-sm">📞 <a href="tel:+918778579209" className="hover:text-[#f0a500]">+91 87785 79209</a></p>
-          </div>
-        </div>
-        <div className="border-t border-white/8 pt-6 text-center">
-          <p className="text-xs text-white/35 mb-2">© 2024–2025 BURG Rental Services LLP. All rights reserved. LLPIN: ACR-9256 | Registered in India.</p>
-          <p className="text-xs text-white/22">Commercial vehicle rental marketplace. All fleet partners independently verified. BURG is a facilitator, not a direct transport operator.</p>
-        </div>
-      </footer>
+      <Footer />
 
       <style>{`
         .fade-in {
