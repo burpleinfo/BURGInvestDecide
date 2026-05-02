@@ -1,7 +1,7 @@
 import ResetPasswordPage from './pages/ResetPasswordPage';
 import ForgotPasswordPage from './pages/ForgotPasswordPage';
 import Navbar from './widgets/Navbar/Navbar';
-import { Routes, Route, useLocation } from 'react-router-dom';
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { SearchProvider } from './contexts/SearchContext';
 import { ToastProvider, useToast } from './contexts/ToastContext';
 import CookieConsent from './components/CookieConsent';
@@ -19,15 +19,17 @@ import Services from './pages/Services';
 import Partners from './pages/Partners';
 import Drivers from './pages/Drivers';
 import Technology from './pages/Technology';
+import Founder from './pages/Founder';
 
 function AppContent() {
   const location = useLocation();
   const { toasts, removeToast } = useToast();
-  const showNavbar = location.pathname !== "/signin" && location.pathname !== "/signup" && location.pathname !== "/register" && location.pathname !== "/forgot-password" && location.pathname !== "/reset-password" && !location.pathname.startsWith("/ridesafe");
+  const showNavbar = location.pathname !== "/signin" && location.pathname !== "/signup" && location.pathname !== "/register" && location.pathname !== "/forgot-password" && location.pathname !== "/reset-password" && location.pathname !== "/team/akash" && !location.pathname.startsWith("/ridesafe");
+  const showCookieConsent = location.pathname !== "/team/akash";
   
   return (
     <>
-      <CookieConsent />
+      {showCookieConsent && <CookieConsent />}
       <ToastContainer toasts={toasts} onRemove={removeToast} />
       {showNavbar && <Navbar />}
       <Routes>
@@ -39,6 +41,8 @@ function AppContent() {
         <Route path="/technology" element={<Technology />} />
         <Route path="/contact" element={<ContactPage />} />
         <Route path="/about" element={<AboutUs />} />
+        <Route path="/team/akash" element={<Founder />} />
+        <Route path="/founder" element={<Navigate to="/team/akash" replace />} />
         <Route path="/signup" element={<SignupPage />} />
         <Route path="/register" element={<SignupPage />} />
         <Route path="/signin" element={<SigninPage />} />
