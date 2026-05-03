@@ -1,0 +1,66 @@
+{
+  "indexes": [
+    {
+      "collectionGroup": "trips",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "busId",  "order": "ASCENDING" },
+        { "fieldPath": "status", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "trips",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "driverId", "order": "ASCENDING" },
+        { "fieldPath": "status",   "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "passengers",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "busId", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "schedules",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "passengerUid", "order": "ASCENDING" },
+        { "fieldPath": "day",          "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "schedules",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "passengerUid", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "payments",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "passengerUid", "order": "ASCENDING" },
+        { "fieldPath": "createdAt",    "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "sosAlerts",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "status",    "order": "ASCENDING" },
+        { "fieldPath": "createdAt", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "users",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "role", "order": "ASCENDING" }
+      ]
+    }
+  ],
+  "fieldOverrides": []
+}

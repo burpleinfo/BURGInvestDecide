@@ -1,0 +1,165 @@
+// database/firestore/firestore.rules
+
+// ════════════════════════════════════════════════════
+// SYSTEM DESIGN #2 — Role Based Access Control
+// ════════════════════════════════════════════════════
+//
+// These rules are the SECOND layer of protection.
+// First layer  → authMiddleware.js (Node.js)
+// Second layer → these rules (Firestore database level)
+//
+// Even if someone bypasses the Node.js backend
+// and calls Firestore directly — these rules block them.
+//
+// HOW ROLES ARE READ:
+//   request.auth.token.role
+//   This is the custom claim set when admin creates a user:
+//   firebaseAuth.setCustomUserClaims(uid, { role: 'driver' })
+//   It is embedded in the JWT token automatically.
+//   No extra DB read needed to check role.
+//
+// RULE MATRIX:
+//
+//  Collection      Admin    Driver          Passenger
+//  ──────────────────────────────────────────────────
+//  users           R/W      own doc only    own doc only
+//  drivers         R/W      own doc only    ❌
+//  passengers      R/W      bus match read  own doc only
+//  buses           R/W      own bus read    own bus read
+//  routes          R/W      read only       read only
+//  trips           R/W      own bus R/W     own bus read
+//  schedules       R/W      bus match read  own docs R/W
+//  payments        R/W      ❌              own docs R/W
+//  sosAlerts       R/W      own alerts R/W  ❌
+//
+// HOW TO DEPLOY:
+//   firebase deploy --only firestore:rules
+// ════════════════════════════════════════════════════
+
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ── Helper Functions ──────────────────────────
+
+    function isLoggedIn() {
+      return request.auth != null;
+    }
+
+    function role() {
+      return request.auth.token.role;
+    }
+
+    function isAdmin() {
+      return isLoggedIn() && role() == 'admin';
+    }
+
+    function isDriver() {
+      return isLoggedIn() && role() == 'driver';
+    }
+
+    function isPassenger() {
+      return isLoggedIn() && role() == 'passenger';
+    }
+
+    function isOwner(uid) {
+      return isLoggedIn() && request.auth.uid == uid;
+    }
+
+
+    // ── /users ────────────────────────────────────
+    // Admin: full access
+    // Driver/Passenger: own document only
+    match /users/{uid} {
+      allow read, write: if isAdmin();
+      allow read, write: if isOwner(uid);
+    }
+
+
+    // ── /drivers ──────────────────────────────────
+    // Admin: full access
+    // Driver: own document only
+    // Passenger: no access
+    match /drivers/{uid} {
+      allow read, write: if isAdmin();
+      allow read:        if isOwner(uid);
+    }
+
+
+    // ── /passengers ───────────────────────────────
+    // Admin: full access
+    // Driver: read passengers on their bus
+    // Passenger: own document only
+    match /passengers/{uid} {
+      allow read, write: if isAdmin();
+      allow read:        if isOwner(uid);
+      allow read:        if isDriver();
+    }
+
+
+    // ── /buses ────────────────────────────────────
+    // Admin: full access
+    // Driver: read their assigned bus
+    // Passenger: read their assigned bus
+    match /buses/{busId} {
+      allow read, write: if isAdmin();
+      allow read:        if isDriver() || isPassenger();
+    }
+
+
+    // ── /routes ───────────────────────────────────
+    // Admin: full access
+    // Driver: read only
+    // Passenger: read only
+    match /routes/{routeId} {
+      allow read, write: if isAdmin();
+      allow read:        if isDriver() || isPassenger();
+    }
+
+
+    // ── /trips ────────────────────────────────────
+    // Admin: full access
+    // Driver: read and write their own bus trips
+    // Passenger: read only their bus trips
+    match /trips/{tripId} {
+      allow read, write: if isAdmin();
+      allow read, write: if isDriver();
+      allow read:        if isPassenger();
+    }
+
+
+    // ── /schedules ────────────────────────────────
+    // Admin: full access
+    // Driver: read schedules for their bus
+    // Passenger: read and write own schedules only
+    match /schedules/{scheduleId} {
+      allow read, write: if isAdmin();
+      allow read:        if isDriver();
+      allow read, write: if isPassenger()
+                         && request.auth.uid == resource.data.passengerUid;
+    }
+
+
+    // ── /payments ─────────────────────────────────
+    // Admin: full access
+    // Passenger: read and write own payments only
+    // Driver: no access
+    match /payments/{paymentId} {
+      allow read, write: if isAdmin();
+      allow read, write: if isPassenger()
+                         && request.auth.uid == resource.data.passengerUid;
+    }
+
+
+    // ── /sosAlerts ────────────────────────────────
+    // Admin: full access
+    // Driver: create and read own alerts
+    // Passenger: no access
+    match /sosAlerts/{alertId} {
+      allow read, write: if isAdmin();
+      allow create:      if isDriver();
+      allow read:        if isDriver()
+                         && request.auth.uid == resource.data.driverUid;
+    }
+  }
+}
