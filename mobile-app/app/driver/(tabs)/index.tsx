@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
+import MapView, { Marker, Polyline, PROVIDER_GOOGLE } from 'react-native-maps';
 import { Ionicons } from '@expo/vector-icons';
 
 import { AppButton } from '@/components/common/AppButton';
@@ -9,6 +10,23 @@ import { Screen } from '@/components/common/Screen';
 import { useToast } from '@/components/common/Toast';
 import { AppColors, Fonts } from '@/constants/theme';
 import { driverStops } from '@/data/appData';
+
+const DRIVER_REGION = {
+  latitude: 37.7749,
+  longitude: -122.4194,
+  latitudeDelta: 0.02,
+  longitudeDelta: 0.02,
+};
+
+const DRIVER_ROUTE = [
+  { latitude: 37.7820, longitude: -122.4325 },
+  { latitude: 37.7764, longitude: -122.4250 },
+  { latitude: 37.7710, longitude: -122.4172 },
+  { latitude: 37.7685, longitude: -122.4098 },
+];
+
+const DRIVER_BUS = DRIVER_ROUTE[2];
+const DRIVER_START = DRIVER_ROUTE[0];
 
 export default function DriverDashboardScreen() {
   const { showToast } = useToast();
@@ -31,9 +49,11 @@ export default function DriverDashboardScreen() {
         </View>
 
         <View style={styles.mapCard}>
-          <View style={styles.mapPath} />
-          <View style={styles.mapPulse} />
-          <View style={styles.mapBus} />
+          <MapView style={styles.map} provider={PROVIDER_GOOGLE} initialRegion={DRIVER_REGION}>
+            <Polyline coordinates={DRIVER_ROUTE} strokeColor={AppColors.teal} strokeWidth={4} />
+            <Marker coordinate={DRIVER_START} title="Route start" pinColor={AppColors.teal} />
+            <Marker coordinate={DRIVER_BUS} title="Bus" pinColor={AppColors.orange} />
+          </MapView>
           <View style={styles.speedBadge}>
             <Ionicons name="speedometer" size={14} color={AppColors.teal} />
             <Text style={styles.speedText}>28 mph</Text>
@@ -151,35 +171,9 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     backgroundColor: AppColors.surface,
     overflow: 'hidden',
-    justifyContent: 'center',
   },
-  mapPath: {
-    position: 'absolute',
-    left: 30,
-    right: 30,
-    top: 70,
-    height: 3,
-    backgroundColor: AppColors.teal,
-    borderRadius: 2,
-  },
-  mapPulse: {
-    position: 'absolute',
-    width: 18,
-    height: 18,
-    borderRadius: 9,
-    backgroundColor: AppColors.teal,
-    left: '48%',
-    top: 60,
-    opacity: 0.3,
-  },
-  mapBus: {
-    position: 'absolute',
-    width: 26,
-    height: 16,
-    borderRadius: 6,
-    backgroundColor: AppColors.orange,
-    right: 60,
-    top: 100,
+  map: {
+    ...StyleSheet.absoluteFillObject,
   },
   speedBadge: {
     position: 'absolute',

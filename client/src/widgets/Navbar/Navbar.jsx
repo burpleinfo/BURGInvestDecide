@@ -8,6 +8,9 @@ export default function Navbar() {
   const isPartnersPage = location.pathname.startsWith('/partners');
   const useSolidBackground = scrolled || isPartnersPage;
   const useLightHeader = scrolled && !isPartnersPage;
+  const adminButtonClass = useLightHeader
+    ? 'px-4 py-2 rounded-lg border border-blue-600 text-blue-700 hover:bg-blue-50'
+    : 'px-4 py-2 rounded-lg bg-[#f0a500] text-[#001f40] hover:bg-[#ffbf3f]';
 
   useEffect(() => {
     const handleScroll = () => {
@@ -38,6 +41,7 @@ export default function Navbar() {
             <Link to="/partners" className={`transition-colors ${location.pathname === '/partners' ? 'text-blue-600' : useLightHeader ? 'text-gray-600 hover:text-blue-600' : 'text-gray-200 hover:text-white'}`}>Partners</Link>
             <Link to="/drivers" className={`transition-colors ${location.pathname === '/drivers' ? 'text-blue-600' : useLightHeader ? 'text-gray-600 hover:text-blue-600' : 'text-gray-200 hover:text-white'}`}>Drivers</Link>
             <Link to="/technology" className={`transition-colors ${location.pathname === '/technology' ? 'text-blue-600' : useLightHeader ? 'text-gray-600 hover:text-blue-600' : 'text-gray-200 hover:text-white'}`}>Technology</Link>
+            <Link to="/admin" className={`font-semibold transition-all ${adminButtonClass}`}>Admin Dashboard</Link>
             <Link to="/contact" className={`px-6 py-2 rounded-lg transition-all ${useLightHeader ? 'bg-blue-600 text-white hover:bg-blue-700' : 'bg-white text-blue-900 hover:bg-gray-100'}`}>
               Contact Us
             </Link>
@@ -65,6 +69,7 @@ export default function Navbar() {
               <Link to="/partners" onClick={() => setMenuOpen(false)} className={`text-lg ${location.pathname === '/partners' ? 'text-blue-600' : 'text-gray-600'}`}>Partners</Link>
               <Link to="/drivers" onClick={() => setMenuOpen(false)} className={`text-lg ${location.pathname === '/drivers' ? 'text-blue-600' : 'text-gray-600'}`}>Drivers</Link>
               <Link to="/technology" onClick={() => setMenuOpen(false)} className={`text-lg ${location.pathname === '/technology' ? 'text-blue-600' : 'text-gray-600'}`}>Technology</Link>
+              <Link to="/admin" onClick={() => setMenuOpen(false)} className="inline-block mt-2 px-6 py-3 bg-[#f0a500] text-[#001f40] text-center rounded-lg font-semibold w-full">Admin Dashboard</Link>
               <Link to="/contact" onClick={() => setMenuOpen(false)} className="inline-block mt-4 px-6 py-3 bg-blue-600 text-white text-center rounded-lg font-semibold w-full">Contact Us</Link>
             </nav>
           </div>

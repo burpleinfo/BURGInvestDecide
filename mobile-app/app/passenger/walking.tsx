@@ -1,9 +1,22 @@
 import { StyleSheet, Text, View } from 'react-native';
+import MapView, { Marker, Polyline, PROVIDER_GOOGLE } from 'react-native-maps';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 
 import { AppButton } from '@/components/common/AppButton';
 import { AppColors, Fonts } from '@/constants/theme';
+
+const WALK_REGION = {
+  latitude: 37.7728,
+  longitude: -122.4185,
+  latitudeDelta: 0.01,
+  longitudeDelta: 0.01,
+};
+
+const WALK_ROUTE = [
+  { latitude: 37.7738, longitude: -122.4225 },
+  { latitude: 37.7710, longitude: -122.4142 },
+];
 
 export default function PassengerWalkingScreen() {
   const router = useRouter();
@@ -11,9 +24,11 @@ export default function PassengerWalkingScreen() {
   return (
     <View style={styles.container}>
       <View style={styles.mapMock}>
-        <View style={styles.routeLine} />
-        <View style={styles.startDot} />
-        <View style={styles.endDot} />
+        <MapView style={styles.map} provider={PROVIDER_GOOGLE} initialRegion={WALK_REGION}>
+          <Polyline coordinates={WALK_ROUTE} strokeColor={AppColors.teal} strokeWidth={4} />
+          <Marker coordinate={WALK_ROUTE[0]} title="Start" pinColor={AppColors.teal} />
+          <Marker coordinate={WALK_ROUTE[1]} title="Pickup" pinColor={AppColors.orange} />
+        </MapView>
       </View>
       <Text style={styles.title}>Walking directions</Text>
       <Text style={styles.subtitle}>
@@ -37,29 +52,9 @@ const styles = StyleSheet.create({
     borderRadius: 24,
     backgroundColor: AppColors.border,
     overflow: 'hidden',
-    justifyContent: 'center',
   },
-  routeLine: {
-    height: 4,
-    backgroundColor: AppColors.teal,
-    marginHorizontal: 30,
-    borderRadius: 4,
-  },
-  startDot: {
-    position: 'absolute',
-    left: 30,
-    width: 14,
-    height: 14,
-    borderRadius: 7,
-    backgroundColor: AppColors.teal,
-  },
-  endDot: {
-    position: 'absolute',
-    right: 30,
-    width: 14,
-    height: 14,
-    borderRadius: 7,
-    backgroundColor: AppColors.orange,
+  map: {
+    ...StyleSheet.absoluteFillObject,
   },
   title: {
     fontFamily: Fonts.rounded,

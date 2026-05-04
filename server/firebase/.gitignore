@@ -1,8 +1,20 @@
 # Firebase credentials — NEVER commit this
+serviceAccountkey.json
 serviceAccountKey.json
 
 # Environment variables
 .env
+.env.*
+!.env.example
+
+# Private keys and certs
+*.pem
+*.p12
+*.p8
+*.key
+*.jks
+*.keystore
+*.mobileprovision
 
 # Node modules
 node_modules/

@@ -3,8 +3,9 @@
 const admin          = require('firebase-admin')
 const serviceAccount = require('../serviceAccountKey.json')
 const dotenv         = require('dotenv')
+const path           = require('path')
 
-dotenv.config()
+dotenv.config({ path: path.join(__dirname, '..', '..', '.env') })
 
 // Initialize Firebase app (only once)
 if (!admin.apps.length) {

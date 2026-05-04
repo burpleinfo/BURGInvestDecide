@@ -1,4 +1,5 @@
 import { StyleSheet, Text, View } from 'react-native';
+import MapView, { Marker, Polyline, PROVIDER_GOOGLE } from 'react-native-maps';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 
@@ -7,6 +8,22 @@ import { AppCard } from '@/components/common/AppCard';
 import { AppHeader } from '@/components/common/AppHeader';
 import { Screen } from '@/components/common/Screen';
 import { AppColors, Fonts } from '@/constants/theme';
+
+const TRACKING_REGION = {
+  latitude: 37.7749,
+  longitude: -122.4194,
+  latitudeDelta: 0.012,
+  longitudeDelta: 0.012,
+};
+
+const BUS_ROUTE = [
+  { latitude: 37.7762, longitude: -122.4240 },
+  { latitude: 37.7742, longitude: -122.4194 },
+  { latitude: 37.7723, longitude: -122.4148 },
+];
+
+const BUS_POSITION = BUS_ROUTE[1];
+const PICKUP_POINT = BUS_ROUTE[0];
 
 export default function PassengerTrackingScreen() {
   const router = useRouter();
@@ -18,9 +35,11 @@ export default function PassengerTrackingScreen() {
       <AppCard>
         <Text style={styles.sectionTitle}>Real-time Map View</Text>
         <View style={styles.mapCard}>
-          <View style={styles.mapDot} />
-          <View style={styles.mapRoute} />
-          <View style={styles.mapBus} />
+          <MapView style={styles.map} provider={PROVIDER_GOOGLE} initialRegion={TRACKING_REGION}>
+            <Polyline coordinates={BUS_ROUTE} strokeColor={AppColors.teal} strokeWidth={4} />
+            <Marker coordinate={PICKUP_POINT} title="Pickup" pinColor={AppColors.teal} />
+            <Marker coordinate={BUS_POSITION} title="Bus" pinColor={AppColors.orange} />
+          </MapView>
         </View>
         <View style={styles.infoRow}>
           <Text style={styles.infoLabel}>Current Location</Text>
@@ -96,31 +115,8 @@ const styles = StyleSheet.create({
     marginBottom: 12,
     overflow: 'hidden',
   },
-  mapDot: {
-    position: 'absolute',
-    width: 12,
-    height: 12,
-    borderRadius: 6,
-    backgroundColor: AppColors.teal,
-    left: '40%',
-    top: '50%',
-  },
-  mapRoute: {
-    position: 'absolute',
-    width: 140,
-    height: 2,
-    backgroundColor: AppColors.teal,
-    left: '40%',
-    top: '50%',
-  },
-  mapBus: {
-    position: 'absolute',
-    width: 24,
-    height: 14,
-    borderRadius: 6,
-    backgroundColor: AppColors.orange,
-    left: '70%',
-    top: '40%',
+  map: {
+    ...StyleSheet.absoluteFillObject,
   },
   infoRow: {
     flexDirection: 'row',

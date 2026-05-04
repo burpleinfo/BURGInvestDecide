@@ -11,6 +11,19 @@ node_modules
 dist
 dist-ssr
 *.local
+.env.production
+
+# Security
+.env
+.env.*
+!.env.example
+*.pem
+*.p12
+*.p8
+*.key
+*.jks
+*.keystore
+*.mobileprovision
 
 # Editor directories and files
 .vscode/*

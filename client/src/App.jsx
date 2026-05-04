@@ -20,12 +20,14 @@ import Partners from './pages/Partners';
 import Drivers from './pages/Drivers';
 import Technology from './pages/Technology';
 import Founder from './pages/Founder';
+import AdminDashboard from './admin/AdminDashboard';
 
 function AppContent() {
   const location = useLocation();
   const { toasts, removeToast } = useToast();
-  const showNavbar = location.pathname !== "/signin" && location.pathname !== "/signup" && location.pathname !== "/register" && location.pathname !== "/forgot-password" && location.pathname !== "/reset-password" && location.pathname !== "/team/akash" && !location.pathname.startsWith("/ridesafe");
-  const showCookieConsent = location.pathname !== "/team/akash";
+  const isAdminPage = location.pathname.startsWith('/admin');
+  const showNavbar = location.pathname !== "/signin" && location.pathname !== "/signup" && location.pathname !== "/register" && location.pathname !== "/forgot-password" && location.pathname !== "/reset-password" && location.pathname !== "/team/akash" && !location.pathname.startsWith("/ridesafe") && !isAdminPage;
+  const showCookieConsent = location.pathname !== "/team/akash" && !isAdminPage;
   
   return (
     <>
@@ -50,6 +52,7 @@ function AppContent() {
         <Route path="/reset-password" element={<ResetPasswordPage />} />
         <Route path="/ridesafe" element={<BurgRideSafePage />} />
         <Route path="/ridesafe/cicf" element={<BurgRideSafeCICFProposal />} />
+        <Route path="/admin" element={<AdminDashboard />} />
       </Routes>
     </>
   );
