@@ -34,3 +34,9 @@ export const getRidesafeBaseUrl = () => {
 };
 
 export const getRidesafeApiUrl = (path) => new URL(path, getRidesafeBaseUrl()).toString();
+
+export const getRidesafeWsUrl = (path) => {
+  const baseUrl = getRidesafeBaseUrl();
+  const wsBase = baseUrl.replace(/^http:/, 'ws:').replace(/^https:/, 'wss:');
+  return new URL(path, wsBase).toString();
+};

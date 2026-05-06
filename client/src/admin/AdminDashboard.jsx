@@ -2,16 +2,16 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import AdminMetricCard from './AdminMetricCard';
 import AdminSectionHeader from './AdminSectionHeader';
 import { useToast } from '../contexts/ToastContext';
+import { useAdminAuth } from '../contexts/AdminAuthContext';
 import {
   broadcastAlert,
   createDriver,
   createPassenger,
+  createLiveLocationsSocket,
   fetchAdminSnapshot,
   fetchLiveLocations,
   getAdminProfile,
-  getStoredAdminToken,
-  notifyDelay,
-  setStoredAdminToken
+  notifyDelay
 } from '../services/ridesafeAdminApi';
 
 const fallbackInstitutions = [
@@ -297,9 +297,10 @@ const statusTone = (status) => {
 
 const AdminDashboard = () => {
   const { addToast } = useToast();
-  const [adminToken, setAdminToken] = useState(() => getStoredAdminToken());
-  const [tokenInput, setTokenInput] = useState(() => getStoredAdminToken());
+  const { adminUser, idToken, signOutAdmin } = useAdminAuth();
+  const adminToken = idToken || '';
   const [useLiveData, setUseLiveData] = useState(false);
+  const [liveSocketState, setLiveSocketState] = useState({ connected: false, error: '' });
   const [loadState, setLoadState] = useState({ loading: false, error: '' });
   const [adminProfile, setAdminProfile] = useState(null);
   const [dashboardData, setDashboardData] = useState({
@@ -343,6 +344,7 @@ const AdminDashboard = () => {
     delayMinutes: '',
     reason: ''
   });
+  const liveSocketRef = useRef(null);
   const mapContainerRef = useRef(null);
   const mapInstanceRef = useRef(null);
   const markersRef = useRef(new Map());
@@ -353,7 +355,7 @@ const AdminDashboard = () => {
     const token = tokenOverride || adminToken;
     if (!token) {
       setUseLiveData(false);
-      setLoadState({ loading: false, error: 'Admin token required to load live data.' });
+      setLoadState({ loading: false, error: 'Admin sign in required to load live data.' });
       return;
     }
 
@@ -393,7 +395,46 @@ const AdminDashboard = () => {
   }, [adminToken, refreshDashboard]);
 
   useEffect(() => {
-    if (!adminToken || !useLiveData) {
+    if (!useLiveData) {
+      if (liveSocketRef.current) {
+        liveSocketRef.current.close();
+        liveSocketRef.current = null;
+      }
+      setLiveSocketState({ connected: false, error: '' });
+      return;
+    }
+
+    const socket = createLiveLocationsSocket({
+      onOpen: () => setLiveSocketState({ connected: true, error: '' }),
+      onClose: () => setLiveSocketState({ connected: false, error: '' }),
+      onError: () => setLiveSocketState({ connected: false, error: 'Live socket disconnected.' }),
+      onMessage: (payload) => {
+        if (!payload || (payload.type !== 'snapshot' && payload.type !== 'update')) {
+          return;
+        }
+
+        setDashboardData((prev) => ({
+          ...prev,
+          liveLocations: payload.data || {}
+        }));
+        setLastUpdate(new Date());
+      }
+    });
+
+    if (!socket) {
+      return;
+    }
+
+    liveSocketRef.current = socket;
+
+    return () => {
+      socket.close();
+      liveSocketRef.current = null;
+    };
+  }, [useLiveData]);
+
+  useEffect(() => {
+    if (!adminToken || !useLiveData || liveSocketState.connected) {
       return;
     }
 
@@ -424,7 +465,7 @@ const AdminDashboard = () => {
       isMounted = false;
       clearInterval(intervalId);
     };
-  }, [adminToken, useLiveData]);
+  }, [adminToken, useLiveData, liveSocketState.connected]);
 
   const { buses, routes, drivers, passengers, liveLocations, sosAlerts, revenue } = dashboardData;
 
@@ -573,18 +614,6 @@ const AdminDashboard = () => {
   const openActionPanel = (panel) => {
     setActionStatus({ loading: false, error: '' });
     setActionPanel(panel);
-  };
-
-  const handleSaveToken = () => {
-    const trimmedToken = tokenInput.trim();
-    setStoredAdminToken(trimmedToken);
-    setAdminToken(trimmedToken);
-    addToast('Admin token saved.', 'success', 2500);
-    if (!trimmedToken) {
-      setUseLiveData(false);
-      setLoadState({ loading: false, error: 'Admin token required to load live data.' });
-      return;
-    }
   };
 
   const handleCreateDriver = async (event) => {
@@ -940,42 +969,31 @@ const AdminDashboard = () => {
                   {useLiveData ? 'Live data connected' : 'Sample data mode'}
                 </p>
                 <p className="text-sm admin-muted">
-                  Paste a Firebase admin ID token to load live data from the RideSafe backend.
+                  {adminUser?.email
+                    ? `Signed in as ${adminUser.email}.`
+                    : 'Sign in with an admin account to load live data from the RideSafe backend.'}
                 </p>
                 {loadState.error ? (
                   <p className="text-sm text-[#9B1C1C]">{loadState.error}</p>
                 ) : null}
               </div>
-              <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
-                <div className="flex flex-col">
-                  <label className="admin-label text-[0.62rem]" htmlFor="admin-token">Admin token</label>
-                  <input
-                    id="admin-token"
-                    type="password"
-                    value={tokenInput}
-                    onChange={(event) => setTokenInput(event.target.value)}
-                    placeholder="Paste Firebase ID token"
-                    className="admin-input rounded-xl px-3 py-2 text-sm"
-                  />
-                </div>
-                <div className="flex flex-wrap gap-2">
-                  <button
-                    type="button"
-                    className="admin-button rounded-xl px-4 py-2 text-sm"
-                    onClick={handleSaveToken}
-                    disabled={loadState.loading}
-                  >
-                    {loadState.loading ? 'Loading...' : 'Save token'}
-                  </button>
-                  <button
-                    type="button"
-                    className="admin-button-primary rounded-xl px-4 py-2 text-sm"
-                    onClick={() => refreshDashboard(tokenInput.trim())}
-                    disabled={loadState.loading || !tokenInput.trim()}
-                  >
-                    Refresh data
-                  </button>
-                </div>
+              <div className="flex flex-wrap gap-2">
+                <button
+                  type="button"
+                  className="admin-button-primary rounded-xl px-4 py-2 text-sm"
+                  onClick={() => refreshDashboard()}
+                  disabled={loadState.loading || !adminToken}
+                >
+                  {loadState.loading ? 'Loading...' : 'Refresh data'}
+                </button>
+                <button
+                  type="button"
+                  className="admin-button rounded-xl px-4 py-2 text-sm"
+                  onClick={signOutAdmin}
+                  disabled={!adminUser}
+                >
+                  Sign out
+                </button>
               </div>
             </div>
           </section>

@@ -1,4 +1,4 @@
-import { getRidesafeApiUrl } from "../utils/apiUrl";
+import { getRidesafeApiUrl, getRidesafeWsUrl } from "../utils/apiUrl";
 
 const STORAGE_KEY = "ridesafeAdminToken";
 
@@ -35,19 +35,19 @@ const resolveToken = (tokenOverride) => {
 const request = async (path, options = {}, tokenOverride) => {
   const token = resolveToken(tokenOverride);
 
-  if (!token) {
-    throw new Error("Admin token is missing. Paste a Firebase ID token to continue.");
-  }
-
   const { method = "GET", body } = options;
   const headers = {
-    "Content-Type": "application/json",
-    Authorization: `Bearer ${token}`
+    "Content-Type": "application/json"
   };
+
+  if (token) {
+    headers.Authorization = `Bearer ${token}`;
+  }
 
   const response = await fetch(getRidesafeApiUrl(path), {
     method,
     headers,
+    credentials: "include",
     body: body ? JSON.stringify(body) : undefined
   });
 
@@ -98,3 +98,42 @@ export const broadcastAlert = (payload, token) =>
 
 export const notifyDelay = (payload, token) =>
   request("/admin/notify-delay", { method: "POST", body: payload }, token);
+
+export const adminSignup = (payload) =>
+  request("/auth/admin-signup", { method: "POST", body: payload });
+
+export const startAdminSession = (token) =>
+  request("/auth/session-login", { method: "POST" }, token);
+
+export const endAdminSession = (token) =>
+  request("/auth/session-logout", { method: "POST" }, token);
+
+export const createLiveLocationsSocket = ({ onOpen, onClose, onError, onMessage } = {}) => {
+  if (typeof window === "undefined") {
+    return null;
+  }
+
+  const socket = new WebSocket(getRidesafeWsUrl("/ws/live-locations"));
+
+  if (onOpen) {
+    socket.addEventListener("open", onOpen);
+  }
+  if (onClose) {
+    socket.addEventListener("close", onClose);
+  }
+  if (onError) {
+    socket.addEventListener("error", onError);
+  }
+  if (onMessage) {
+    socket.addEventListener("message", (event) => {
+      try {
+        const payload = JSON.parse(event.data);
+        onMessage(payload);
+      } catch (error) {
+        console.warn("[LiveLocations] Invalid payload", error);
+      }
+    });
+  }
+
+  return socket;
+};
