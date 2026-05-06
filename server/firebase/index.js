@@ -13,13 +13,40 @@ const { startLiveLocationsSocket } = require('./websocket/liveLocationsSocket')
 dotenv.config({ path: path.join(__dirname, '..', '.env') })
 
 const app = express()
+const configuredOrigins = (process.env.CORS_ORIGIN || '')
+    .split(',')
+    .map((origin) => origin.trim())
+    .filter(Boolean)
+    .filter((origin) => origin !== '*')
+
+const defaultOrigins = [
+    'http://localhost:5173',
+    'http://localhost:3000',
+    'https://burgridesafe-eight.vercel.app'
+]
+
+const allowedOrigins = configuredOrigins.length ? configuredOrigins : defaultOrigins
+
+const corsOptions = {
+    credentials: true,
+    origin: (origin, callback) => {
+        // Allow non-browser clients with no Origin header.
+        if (!origin) {
+            return callback(null, true)
+        }
+
+        if (allowedOrigins.includes(origin)) {
+            return callback(null, true)
+        }
+
+        return callback(new Error(`CORS blocked for origin: ${origin}`))
+    }
+}
 
 // ── Middleware ─────────────────────────────────────
 app.use(helmet())
-app.use(cors({
-    origin: process.env.CORS_ORIGIN ? process.env.CORS_ORIGIN.split(',') : true,
-    credentials: true
-}))
+app.use(cors(corsOptions))
+app.options('*', cors(corsOptions))
 app.use(cookieParser())
 app.use(express.json())
 
