@@ -1,6 +1,40 @@
 // controllers/authController.js
 
 const { firebaseAuth, firestoreDb } = require('../config/firebase')
+const {
+    SESSION_COOKIE_NAME,
+    SESSION_EXPIRES_IN_MS,
+    buildSessionCookieOptions,
+    buildSessionCookieClearOptions
+} = require('../config/auth')
+
+
+const getIdTokenFromHeader = (req) => {
+    const authHeader = req.headers.authorization
+
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        return ''
+    }
+
+    return authHeader.split('Bearer ')[1]
+}
+
+
+const isValidAdminInvite = (req) => {
+    const required = process.env.ADMIN_SIGNUP_SECRET
+
+    if (!required) {
+        return { valid: true, warning: 'ADMIN_SIGNUP_SECRET not set' }
+    }
+
+    const provided = req.body?.inviteCode || req.body?.adminCode || ''
+
+    if (!provided || provided !== required) {
+        return { valid: false, error: 'Invalid admin invite code.' }
+    }
+
+    return { valid: true }
+}
 
 
 // ── Create User (called by Admin) ─────────────────
@@ -36,6 +70,57 @@ const createUser = async (req, res) => {
             uid: user.uid
         })
 
+    } catch (error) {
+        if (error.code === 'auth/email-already-exists') {
+            return res.status(400).json({ error: 'Email already in use' })
+        }
+        res.status(500).json({ error: error.message })
+    }
+}
+
+
+// ── Admin Signup (invite code required) ───────────
+const adminSignup = async (req, res) => {
+    try {
+        const { email, password, name, phone } = req.body
+        const inviteCheck = isValidAdminInvite(req)
+
+        if (!inviteCheck.valid) {
+            return res.status(403).json({ error: inviteCheck.error })
+        }
+
+        const user = await firebaseAuth.createUser({
+            email,
+            password,
+            displayName: name
+        })
+
+        await firebaseAuth.setCustomUserClaims(user.uid, { role: 'admin' })
+
+        await firestoreDb.collection('users').doc(user.uid).set({
+            uid: user.uid,
+            name,
+            email,
+            phone,
+            role: 'admin',
+            fcmToken: null,
+            createdAt: new Date().toISOString()
+        })
+
+        await firestoreDb.collection('admins').doc(user.uid).set({
+            uid: user.uid,
+            name,
+            email,
+            phone,
+            role: 'admin',
+            createdAt: new Date().toISOString()
+        })
+
+        res.status(201).json({
+            message: 'Admin account created successfully',
+            uid: user.uid,
+            warning: inviteCheck.warning || null
+        })
     } catch (error) {
         if (error.code === 'auth/email-already-exists') {
             return res.status(400).json({ error: 'Email already in use' })
@@ -157,11 +242,76 @@ const assignRole = async (req, res) => {
 }
 
 
+// ── Session Login (creates refresh cookie) ─────────
+const sessionLogin = async (req, res) => {
+    try {
+        const idToken = getIdTokenFromHeader(req)
+
+        if (!idToken) {
+            return res.status(401).json({ error: 'Missing Firebase ID token.' })
+        }
+
+        const decoded = await firebaseAuth.verifyIdToken(idToken)
+
+        if (decoded.role !== 'admin') {
+            return res.status(403).json({ error: 'Admin access required.' })
+        }
+        req.user = decoded
+        req.authType = 'idToken'
+        const sessionCookie = await firebaseAuth.createSessionCookie(idToken, {
+            expiresIn: SESSION_EXPIRES_IN_MS
+        })
+
+        res.cookie(SESSION_COOKIE_NAME, sessionCookie, buildSessionCookieOptions())
+        await firestoreDb.collection('adminSessions').add({
+            uid: decoded.uid,
+            email: decoded.email || null,
+            role: decoded.role || null,
+            sessionType: 'cookie',
+            createdAt: new Date().toISOString(),
+            expiresAt: new Date(Date.now() + SESSION_EXPIRES_IN_MS).toISOString(),
+            ip: req.ip || null,
+            userAgent: req.headers?.['user-agent'] || null
+        })
+        res.json({
+            message: 'Session cookie set',
+            uid: decoded.uid,
+            expiresIn: SESSION_EXPIRES_IN_MS
+        })
+    } catch (error) {
+        if (error.code === 'auth/id-token-expired') {
+            return res.status(401).json({ error: 'Token expired. Please login again.' })
+        }
+        res.status(500).json({ error: error.message })
+    }
+}
+
+
+// ── Session Logout (clears cookie) ────────────────
+const sessionLogout = async (req, res) => {
+    try {
+        const uid = req.user?.uid
+
+        if (uid) {
+            await firebaseAuth.revokeRefreshTokens(uid)
+        }
+
+        res.clearCookie(SESSION_COOKIE_NAME, buildSessionCookieClearOptions())
+        res.json({ message: 'Session cleared' })
+    } catch (error) {
+        res.status(500).json({ error: error.message })
+    }
+}
+
+
 module.exports = {
     createUser,
+    adminSignup,
     driverLogin,
     passengerLogin,
     saveFcmToken,
     getMe,
-    assignRole
+    assignRole,
+    sessionLogin,
+    sessionLogout
 }

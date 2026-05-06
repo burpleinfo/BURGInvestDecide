@@ -21,6 +21,10 @@ import Drivers from './pages/Drivers';
 import Technology from './pages/Technology';
 import Founder from './pages/Founder';
 import AdminDashboard from './admin/AdminDashboard';
+import AdminSigninPage from './pages/AdminSigninPage';
+import AdminSignupPage from './pages/AdminSignupPage';
+import RequireAdmin from './routes/RequireAdmin';
+import { AdminAuthProvider } from './contexts/AdminAuthContext';
 
 function AppContent() {
   const location = useLocation();
@@ -52,7 +56,13 @@ function AppContent() {
         <Route path="/reset-password" element={<ResetPasswordPage />} />
         <Route path="/ridesafe" element={<BurgRideSafePage />} />
         <Route path="/ridesafe/cicf" element={<BurgRideSafeCICFProposal />} />
-        <Route path="/admin" element={<AdminDashboard />} />
+        <Route path="/admin" element={
+          <RequireAdmin>
+            <AdminDashboard />
+          </RequireAdmin>
+        } />
+        <Route path="/admin/login" element={<AdminSigninPage />} />
+        <Route path="/admin/signup" element={<AdminSignupPage />} />
       </Routes>
     </>
   );
@@ -62,7 +72,9 @@ function App() {
   return (
     <SearchProvider>
       <ToastProvider>
-        <AppContent />
+        <AdminAuthProvider>
+          <AppContent />
+        </AdminAuthProvider>
       </ToastProvider>
     </SearchProvider>
   );

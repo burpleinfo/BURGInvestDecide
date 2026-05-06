@@ -349,13 +349,32 @@ const notifyDelay = async (req, res) => {
 // ── Get SOS Alerts ────────────────────────────────
 const getSOSAlerts = async (req, res) => {
     try {
-        const snap   = await firestoreDb
-            .collection('sosAlerts')
-            .where('status', '==', 'active')
-            .orderBy('createdAt', 'desc')
-            .get()
+        let alerts = []
 
-        const alerts = snap.docs.map(d => ({ id: d.id, ...d.data() }))
+        try {
+            const snap = await firestoreDb
+                .collection('sosAlerts')
+                .where('status', '==', 'active')
+                .orderBy('createdAt', 'desc')
+                .get()
+
+            alerts = snap.docs.map(d => ({ id: d.id, ...d.data() }))
+        } catch (error) {
+            if (error?.code !== 9 && error?.code !== 'failed-precondition') {
+                throw error
+            }
+
+            const fallbackSnap = await firestoreDb.collection('sosAlerts').get()
+            alerts = fallbackSnap.docs
+                .map(d => ({ id: d.id, ...d.data() }))
+                .filter((item) => item.status === 'active')
+                .sort((a, b) => {
+                    const aTime = new Date(a.createdAt || 0).getTime()
+                    const bTime = new Date(b.createdAt || 0).getTime()
+                    return bTime - aTime
+                })
+        }
+
         res.json({ alerts })
 
     } catch (error) {

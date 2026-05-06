@@ -1,8 +1,20 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import AdminMetricCard from './AdminMetricCard';
 import AdminSectionHeader from './AdminSectionHeader';
+import { useToast } from '../contexts/ToastContext';
+import { useAdminAuth } from '../contexts/AdminAuthContext';
+import {
+  broadcastAlert,
+  createDriver,
+  createPassenger,
+  createLiveLocationsSocket,
+  fetchAdminSnapshot,
+  fetchLiveLocations,
+  getAdminProfile,
+  notifyDelay
+} from '../services/ridesafeAdminApi';
 
-const institutions = [
+const fallbackInstitutions = [
   {
     id: 'lakeside-international',
     name: 'Lakeside International School',
@@ -233,14 +245,13 @@ const mapStyles = [
   { featureType: 'water', elementType: 'geometry', stylers: [{ color: '#BACCEC' }] },
   { featureType: 'water', elementType: 'labels.text.fill', stylers: [{ color: '#305CB5' }] },
 ];
+const STALE_MS = 30000;
 
-const getJitteredPosition = (position) => {
-  if (!position) return position;
-  const drift = 0.0008;
-  return {
-    lat: position.lat + (Math.random() - 0.5) * drift,
-    lng: position.lng + (Math.random() - 0.5) * drift,
-  };
+const formatTime = (value) => {
+  if (!value) return 'Unknown';
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return 'Unknown';
+  return date.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
 };
 
 let googleMapsLoader;
@@ -285,24 +296,422 @@ const statusTone = (status) => {
 };
 
 const AdminDashboard = () => {
-  const [institutionId, setInstitutionId] = useState(institutions[0].id);
-  const [liveVehicles, setLiveVehicles] = useState(institutions[0].vehicles);
+  const { addToast } = useToast();
+  const { adminUser, idToken, signOutAdmin } = useAdminAuth();
+  const adminToken = idToken || '';
+  const [useLiveData, setUseLiveData] = useState(false);
+  const [liveSocketState, setLiveSocketState] = useState({ connected: false, error: '' });
+  const [loadState, setLoadState] = useState({ loading: false, error: '' });
+  const [adminProfile, setAdminProfile] = useState(null);
+  const [dashboardData, setDashboardData] = useState({
+    buses: [],
+    routes: [],
+    drivers: [],
+    passengers: [],
+    liveLocations: {},
+    sosAlerts: [],
+    revenue: { totalRevenue: '0.00', totalPayments: 0 }
+  });
+  const [institutionId, setInstitutionId] = useState(fallbackInstitutions[0].id);
   const [lastUpdate, setLastUpdate] = useState(new Date());
   const [mapStatus, setMapStatus] = useState({ status: 'idle', error: '' });
+  const [actionPanel, setActionPanel] = useState('');
+  const [actionStatus, setActionStatus] = useState({ loading: false, error: '' });
+  const [driverForm, setDriverForm] = useState({
+    name: '',
+    email: '',
+    password: '',
+    phone: '',
+    licenseNo: '',
+    busId: ''
+  });
+  const [passengerForm, setPassengerForm] = useState({
+    name: '',
+    email: '',
+    password: '',
+    phone: '',
+    busId: '',
+    stopId: '',
+    parentPhone: ''
+  });
+  const [broadcastForm, setBroadcastForm] = useState({
+    title: '',
+    message: '',
+    targetRole: 'all'
+  });
+  const [delayForm, setDelayForm] = useState({
+    busId: '',
+    delayMinutes: '',
+    reason: ''
+  });
+  const liveSocketRef = useRef(null);
   const mapContainerRef = useRef(null);
   const mapInstanceRef = useRef(null);
   const markersRef = useRef(new Map());
   const didFitRef = useRef(false);
   const googleMapsApiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
 
-  const institution = useMemo(() => {
-    return institutions.find((item) => item.id === institutionId) || institutions[0];
-  }, [institutionId]);
+  const refreshDashboard = useCallback(async (tokenOverride) => {
+    const token = tokenOverride || adminToken;
+    if (!token) {
+      setUseLiveData(false);
+      setLoadState({ loading: false, error: 'Admin sign in required to load live data.' });
+      return;
+    }
+
+    setLoadState({ loading: true, error: '' });
+
+    try {
+      const [profileResult, snapshotResult] = await Promise.allSettled([
+        getAdminProfile(token),
+        fetchAdminSnapshot(token)
+      ]);
+
+      if (snapshotResult.status === 'rejected') {
+        throw snapshotResult.reason;
+      }
+
+      setDashboardData(snapshotResult.value);
+      if (profileResult.status === 'fulfilled') {
+        setAdminProfile(profileResult.value.user || null);
+      }
+      setLastUpdate(new Date());
+      setUseLiveData(true);
+    } catch (error) {
+      setUseLiveData(false);
+      setLoadState({ loading: false, error: error?.message || 'Failed to load admin data.' });
+      return;
+    }
+
+    setLoadState((prev) => ({ ...prev, loading: false }));
+  }, [adminToken]);
 
   useEffect(() => {
-    setLiveVehicles(institution.vehicles);
+    if (!adminToken) {
+      setUseLiveData(false);
+      return;
+    }
+    refreshDashboard();
+  }, [adminToken, refreshDashboard]);
+
+  useEffect(() => {
+    if (!useLiveData) {
+      if (liveSocketRef.current) {
+        liveSocketRef.current.close();
+        liveSocketRef.current = null;
+      }
+      setLiveSocketState({ connected: false, error: '' });
+      return;
+    }
+
+    const socket = createLiveLocationsSocket({
+      onOpen: () => setLiveSocketState({ connected: true, error: '' }),
+      onClose: () => setLiveSocketState({ connected: false, error: '' }),
+      onError: () => setLiveSocketState({ connected: false, error: 'Live socket disconnected.' }),
+      onMessage: (payload) => {
+        if (!payload || (payload.type !== 'snapshot' && payload.type !== 'update')) {
+          return;
+        }
+
+        setDashboardData((prev) => ({
+          ...prev,
+          liveLocations: payload.data || {}
+        }));
+        setLastUpdate(new Date());
+      }
+    });
+
+    if (!socket) {
+      return;
+    }
+
+    liveSocketRef.current = socket;
+
+    return () => {
+      socket.close();
+      liveSocketRef.current = null;
+    };
+  }, [useLiveData]);
+
+  useEffect(() => {
+    if (!adminToken || !useLiveData || liveSocketState.connected) {
+      return;
+    }
+
+    let isMounted = true;
+
+    const updateLocations = async () => {
+      try {
+        const data = await fetchLiveLocations(adminToken);
+        if (!isMounted) return;
+        setDashboardData((prev) => ({
+          ...prev,
+          liveLocations: data.locations || {}
+        }));
+        setLastUpdate(new Date());
+      } catch (error) {
+        if (!isMounted) return;
+        setLoadState((prev) => ({
+          ...prev,
+          error: prev.error || error?.message || 'Failed to refresh live locations.'
+        }));
+      }
+    };
+
+    updateLocations();
+    const intervalId = setInterval(updateLocations, 6000);
+
+    return () => {
+      isMounted = false;
+      clearInterval(intervalId);
+    };
+  }, [adminToken, useLiveData, liveSocketState.connected]);
+
+  const { buses, routes, drivers, passengers, liveLocations, sosAlerts, revenue } = dashboardData;
+
+  const derivedInstitution = useMemo(() => {
+    const now = Date.now();
+    const routesById = new Map(routes.map((route) => [route.id, route]));
+    const driversById = new Map(drivers.map((driver) => [driver.uid || driver.id, driver]));
+
+    const vehicles = buses.map((bus) => {
+      const route = routesById.get(bus.routeId);
+      const driver = driversById.get(bus.driverId);
+      const location = liveLocations?.[bus.id];
+      const timestamp = location?.timestamp || 0;
+      const isStale = !location || now - timestamp > STALE_MS;
+      const speedValue = Number.isFinite(location?.speed) ? Math.round(location.speed) : 0;
+
+      return {
+        id: bus.busNumber || bus.id,
+        busId: bus.id,
+        route: route?.name || 'Unassigned route',
+        driver: driver?.name || 'Unassigned',
+        status: !location ? 'Idle' : isStale ? 'Idle' : 'On Route',
+        speed: `${speedValue} km/h`,
+        occupancy: bus.capacity ? `0/${bus.capacity}` : '0/0',
+        phone: driver?.phone || '',
+        position: location ? { lat: location.lat, lng: location.lng } : null,
+      };
+    });
+
+    const routeCards = routes.map((route) => {
+      const assignedBuses = buses.filter((bus) => bus.routeId === route.id);
+      const online = assignedBuses.some((bus) => {
+        const location = liveLocations?.[bus.id];
+        if (!location) return false;
+        return now - (location.timestamp || 0) <= STALE_MS;
+      });
+
+      return {
+        name: route.name || 'Unnamed route',
+        vehicles: assignedBuses.length,
+        eta: online ? 'Live' : 'Offline',
+        status: online ? 'Running' : 'Standby',
+        updated: formatTime(route.updatedAt || route.createdAt || now)
+      };
+    });
+
+    const passengerCards = passengers.map((passenger) => {
+      const bus = buses.find((item) => item.id === passenger.busId);
+      const route = bus ? routesById.get(bus.routeId) : null;
+      const stop = route?.stops?.find?.((item) => item.id === passenger.stopId || item.name === passenger.stopId);
+
+      return {
+        name: passenger.name || 'Passenger',
+        grade: passenger.grade || 'Grade N/A',
+        stop: stop?.name || passenger.stopId || 'Stop not assigned',
+        feeStatus: passenger.feeStatus || 'Status not tracked',
+        guardian: passenger.parentName || 'Parent/Guardian',
+        phone: passenger.parentPhone || passenger.phone || 'N/A',
+        medical: passenger.medical || 'None'
+      };
+    });
+
+    const staffCards = drivers.map((driver) => ({
+      name: driver.name || 'Driver',
+      role: 'Driver',
+      phone: driver.phone || 'N/A',
+      license: driver.licenseNo ? `License ${driver.licenseNo}` : 'License on file',
+      shift: driver.shift || 'On duty'
+    }));
+
+    const alertCards = sosAlerts.map((alert) => ({
+      title: alert.message ? `SOS - ${alert.message}` : `SOS alert - Bus ${alert.busId || 'Unknown'}`,
+      status: alert.status === 'active' ? 'Open' : 'Resolved',
+      time: formatTime(alert.createdAt),
+      channel: 'FCM + SMS'
+    }));
+
+    const onlineCount = vehicles.filter((vehicle) => vehicle.status === 'On Route').length;
+
+    return {
+      id: 'burg-ridesafe',
+      name: 'BURG RideSafe',
+      city: 'Fleet Operations',
+      adminName: adminProfile?.name || 'Admin operator',
+      contactEmail: adminProfile?.email || 'admin@burg.io',
+      stats: {
+        vehicles: buses.length,
+        routes: routes.length,
+        drivers: drivers.length,
+        passengers: passengers.length,
+        alerts: sosAlerts.length,
+        onTime: `${onlineCount}/${buses.length || 0} buses live`
+      },
+      vehicles,
+      routes: routeCards,
+      passengers: passengerCards,
+      staff: staffCards,
+      alerts: alertCards,
+      finance: {
+        feesCollected: revenue?.totalRevenue ? `INR ${revenue.totalRevenue}` : 'INR 0.00',
+        feesOutstanding: 'Not configured',
+        busEmi: 'Not configured',
+        busRent: 'Not configured',
+        salaries: 'Not configured',
+        payoutsDue: 'Not configured'
+      },
+      medical: []
+    };
+  }, [adminProfile, buses, drivers, liveLocations, passengers, revenue, routes, sosAlerts]);
+
+  const institutions = useMemo(() => (
+    useLiveData ? [derivedInstitution] : fallbackInstitutions
+  ), [derivedInstitution, useLiveData]);
+
+  const institution = useMemo(() => {
+    return institutions.find((item) => item.id === institutionId) || institutions[0];
+  }, [institutionId, institutions]);
+
+  const liveVehicles = useMemo(() => institution?.vehicles || [], [institution]);
+  const onlineVehicleCount = useMemo(
+    () => liveVehicles.filter((vehicle) => vehicle.status === 'On Route').length,
+    [liveVehicles]
+  );
+  const onlineLabel = liveVehicles.length
+    ? `${onlineVehicleCount} of ${liveVehicles.length} vehicles online`
+    : 'No vehicles online';
+
+  const stopOptions = useMemo(() => {
+    if (!passengerForm.busId) return [];
+    const bus = buses.find((item) => item.id === passengerForm.busId);
+    const route = routes.find((item) => item.id === bus?.routeId);
+    return Array.isArray(route?.stops) ? route.stops : [];
+  }, [buses, passengerForm.busId, routes]);
+
+  useEffect(() => {
+    if (!institutions.length) return;
+    if (!institutions.find((item) => item.id === institutionId)) {
+      setInstitutionId(institutions[0].id);
+    }
+  }, [institutionId, institutions]);
+
+  useEffect(() => {
     didFitRef.current = false;
-  }, [institution]);
+  }, [institutionId, liveVehicles]);
+
+  const openActionPanel = (panel) => {
+    setActionStatus({ loading: false, error: '' });
+    setActionPanel(panel);
+  };
+
+  const handleCreateDriver = async (event) => {
+    event.preventDefault();
+    setActionStatus({ loading: true, error: '' });
+
+    try {
+      await createDriver({
+        name: driverForm.name,
+        email: driverForm.email,
+        password: driverForm.password,
+        phone: driverForm.phone,
+        licenseNo: driverForm.licenseNo,
+        busId: driverForm.busId
+      }, adminToken);
+
+      addToast('Driver created successfully.', 'success', 3000);
+      setDriverForm({ name: '', email: '', password: '', phone: '', licenseNo: '', busId: '' });
+      setActionPanel('');
+      refreshDashboard();
+    } catch (error) {
+      setActionStatus({ loading: false, error: error?.message || 'Failed to create driver.' });
+      return;
+    }
+
+    setActionStatus((prev) => ({ ...prev, loading: false }));
+  };
+
+  const handleCreatePassenger = async (event) => {
+    event.preventDefault();
+    setActionStatus({ loading: true, error: '' });
+
+    try {
+      await createPassenger({
+        name: passengerForm.name,
+        email: passengerForm.email,
+        password: passengerForm.password,
+        phone: passengerForm.phone,
+        busId: passengerForm.busId,
+        stopId: passengerForm.stopId,
+        parentPhone: passengerForm.parentPhone
+      }, adminToken);
+
+      addToast('Passenger created successfully.', 'success', 3000);
+      setPassengerForm({ name: '', email: '', password: '', phone: '', busId: '', stopId: '', parentPhone: '' });
+      setActionPanel('');
+      refreshDashboard();
+    } catch (error) {
+      setActionStatus({ loading: false, error: error?.message || 'Failed to create passenger.' });
+      return;
+    }
+
+    setActionStatus((prev) => ({ ...prev, loading: false }));
+  };
+
+  const handleBroadcastAlert = async (event) => {
+    event.preventDefault();
+    setActionStatus({ loading: true, error: '' });
+
+    try {
+      await broadcastAlert({
+        title: broadcastForm.title,
+        message: broadcastForm.message,
+        targetRole: broadcastForm.targetRole
+      }, adminToken);
+
+      addToast('Broadcast alert sent.', 'success', 3000);
+      setBroadcastForm({ title: '', message: '', targetRole: 'all' });
+      setActionPanel('');
+    } catch (error) {
+      setActionStatus({ loading: false, error: error?.message || 'Failed to send alert.' });
+      return;
+    }
+
+    setActionStatus((prev) => ({ ...prev, loading: false }));
+  };
+
+  const handleNotifyDelay = async (event) => {
+    event.preventDefault();
+    setActionStatus({ loading: true, error: '' });
+
+    try {
+      await notifyDelay({
+        busId: delayForm.busId,
+        delayMinutes: Number(delayForm.delayMinutes || 0),
+        reason: delayForm.reason
+      }, adminToken);
+
+      addToast('Delay notification sent.', 'success', 3000);
+      setDelayForm({ busId: '', delayMinutes: '', reason: '' });
+      setActionPanel('');
+    } catch (error) {
+      setActionStatus({ loading: false, error: error?.message || 'Failed to send delay alert.' });
+      return;
+    }
+
+    setActionStatus((prev) => ({ ...prev, loading: false }));
+  };
 
   useEffect(() => {
     if (!googleMapsApiKey) {
@@ -333,18 +742,6 @@ const AdminDashboard = () => {
       gestureHandling: 'greedy',
     });
   }, [mapStatus.status]);
-
-  useEffect(() => {
-    const intervalId = setInterval(() => {
-      setLiveVehicles((prev) => prev.map((vehicle) => ({
-        ...vehicle,
-        position: getJitteredPosition(vehicle.position),
-      })));
-      setLastUpdate(new Date());
-    }, 6000);
-
-    return () => clearInterval(intervalId);
-  }, [institutionId]);
 
   useEffect(() => {
     if (mapStatus.status !== 'ready' || !mapInstanceRef.current || !window.google?.maps) {
@@ -535,13 +932,382 @@ const AdminDashboard = () => {
                   </select>
                 </div>
                 <div className="flex flex-wrap gap-2">
-                  <button type="button" className="admin-button rounded-xl px-4 py-2 text-sm">Add passenger</button>
-                  <button type="button" className="admin-button rounded-xl px-4 py-2 text-sm">Add driver</button>
-                  <button type="button" className="admin-button-alert rounded-xl px-4 py-2 text-sm">Send alert</button>
+                  <button
+                    type="button"
+                    className="admin-button rounded-xl px-4 py-2 text-sm"
+                    onClick={() => openActionPanel('passenger')}
+                  >
+                    Add passenger
+                  </button>
+                  <button
+                    type="button"
+                    className="admin-button rounded-xl px-4 py-2 text-sm"
+                    onClick={() => openActionPanel('driver')}
+                  >
+                    Add driver
+                  </button>
+                  <button
+                    type="button"
+                    className="admin-button-alert rounded-xl px-4 py-2 text-sm"
+                    onClick={() => {
+                      setBroadcastForm({ title: 'Broadcast update', message: '', targetRole: 'all' });
+                      openActionPanel('broadcast');
+                    }}
+                  >
+                    Send alert
+                  </button>
                 </div>
               </div>
             </div>
           </header>
+
+          <section className="admin-card mt-6 rounded-3xl p-6">
+            <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+              <div className="space-y-2">
+                <p className="admin-label">Connection</p>
+                <p className="admin-title text-xl font-semibold">
+                  {useLiveData ? 'Live data connected' : 'Sample data mode'}
+                </p>
+                <p className="text-sm admin-muted">
+                  {adminUser?.email
+                    ? `Signed in as ${adminUser.email}.`
+                    : 'Sign in with an admin account to load live data from the RideSafe backend.'}
+                </p>
+                {loadState.error ? (
+                  <p className="text-sm text-[#9B1C1C]">{loadState.error}</p>
+                ) : null}
+              </div>
+              <div className="flex flex-wrap gap-2">
+                <button
+                  type="button"
+                  className="admin-button-primary rounded-xl px-4 py-2 text-sm"
+                  onClick={() => refreshDashboard()}
+                  disabled={loadState.loading || !adminToken}
+                >
+                  {loadState.loading ? 'Loading...' : 'Refresh data'}
+                </button>
+                <button
+                  type="button"
+                  className="admin-button rounded-xl px-4 py-2 text-sm"
+                  onClick={signOutAdmin}
+                  disabled={!adminUser}
+                >
+                  Sign out
+                </button>
+              </div>
+            </div>
+          </section>
+
+          {actionPanel ? (
+            <section className="admin-card mt-6 rounded-3xl p-6">
+              <AdminSectionHeader
+                title={
+                  actionPanel === 'driver'
+                    ? 'Create driver'
+                    : actionPanel === 'passenger'
+                      ? 'Create passenger'
+                      : actionPanel === 'delay'
+                        ? 'Notify delay'
+                        : 'Broadcast alert'
+                }
+                subtitle="Quick actions"
+                action={
+                  <button
+                    type="button"
+                    className="admin-button-secondary rounded-xl px-3 py-1.5 text-xs"
+                    onClick={() => setActionPanel('')}
+                  >
+                    Close
+                  </button>
+                }
+              />
+              {actionStatus.error ? (
+                <p className="mt-3 text-sm text-[#9B1C1C]">{actionStatus.error}</p>
+              ) : null}
+
+              {actionPanel === 'driver' ? (
+                <form onSubmit={handleCreateDriver} className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
+                  <div>
+                    <label className="admin-label">Driver name</label>
+                    <input
+                      value={driverForm.name}
+                      onChange={(event) => setDriverForm((prev) => ({ ...prev, name: event.target.value }))}
+                      className="admin-input mt-2 w-full rounded-xl px-3 py-2 text-sm"
+                      placeholder="Full name"
+                    />
+                  </div>
+                  <div>
+                    <label className="admin-label">Email</label>
+                    <input
+                      type="email"
+                      value={driverForm.email}
+                      onChange={(event) => setDriverForm((prev) => ({ ...prev, email: event.target.value }))}
+                      className="admin-input mt-2 w-full rounded-xl px-3 py-2 text-sm"
+                      placeholder="driver@school.com"
+                    />
+                  </div>
+                  <div>
+                    <label className="admin-label">Password</label>
+                    <input
+                      type="password"
+                      value={driverForm.password}
+                      onChange={(event) => setDriverForm((prev) => ({ ...prev, password: event.target.value }))}
+                      className="admin-input mt-2 w-full rounded-xl px-3 py-2 text-sm"
+                      placeholder="Temporary password"
+                    />
+                  </div>
+                  <div>
+                    <label className="admin-label">Phone</label>
+                    <input
+                      value={driverForm.phone}
+                      onChange={(event) => setDriverForm((prev) => ({ ...prev, phone: event.target.value }))}
+                      className="admin-input mt-2 w-full rounded-xl px-3 py-2 text-sm"
+                      placeholder="+91 99999 88888"
+                    />
+                  </div>
+                  <div>
+                    <label className="admin-label">License number</label>
+                    <input
+                      value={driverForm.licenseNo}
+                      onChange={(event) => setDriverForm((prev) => ({ ...prev, licenseNo: event.target.value }))}
+                      className="admin-input mt-2 w-full rounded-xl px-3 py-2 text-sm"
+                      placeholder="DL-12345"
+                    />
+                  </div>
+                  <div>
+                    <label className="admin-label">Assign bus</label>
+                    <select
+                      value={driverForm.busId}
+                      onChange={(event) => setDriverForm((prev) => ({ ...prev, busId: event.target.value }))}
+                      className="admin-input mt-2 w-full rounded-xl px-3 py-2 text-sm"
+                    >
+                      <option value="">Select bus</option>
+                      {buses.map((bus) => (
+                        <option key={bus.id} value={bus.id}>
+                          {bus.busNumber || bus.id}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="sm:col-span-2 flex flex-wrap gap-2">
+                    <button type="button" className="admin-button-secondary rounded-xl px-4 py-2 text-sm" onClick={() => setActionPanel('')}>
+                      Cancel
+                    </button>
+                    <button
+                      type="submit"
+                      className="admin-button-primary rounded-xl px-4 py-2 text-sm"
+                      disabled={actionStatus.loading || !driverForm.name || !driverForm.email || !driverForm.password || !driverForm.busId}
+                    >
+                      {actionStatus.loading ? 'Creating...' : 'Create driver'}
+                    </button>
+                  </div>
+                </form>
+              ) : null}
+
+              {actionPanel === 'passenger' ? (
+                <form onSubmit={handleCreatePassenger} className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
+                  <div>
+                    <label className="admin-label">Passenger name</label>
+                    <input
+                      value={passengerForm.name}
+                      onChange={(event) => setPassengerForm((prev) => ({ ...prev, name: event.target.value }))}
+                      className="admin-input mt-2 w-full rounded-xl px-3 py-2 text-sm"
+                      placeholder="Full name"
+                    />
+                  </div>
+                  <div>
+                    <label className="admin-label">Email</label>
+                    <input
+                      type="email"
+                      value={passengerForm.email}
+                      onChange={(event) => setPassengerForm((prev) => ({ ...prev, email: event.target.value }))}
+                      className="admin-input mt-2 w-full rounded-xl px-3 py-2 text-sm"
+                      placeholder="student@school.com"
+                    />
+                  </div>
+                  <div>
+                    <label className="admin-label">Password</label>
+                    <input
+                      type="password"
+                      value={passengerForm.password}
+                      onChange={(event) => setPassengerForm((prev) => ({ ...prev, password: event.target.value }))}
+                      className="admin-input mt-2 w-full rounded-xl px-3 py-2 text-sm"
+                      placeholder="Temporary password"
+                    />
+                  </div>
+                  <div>
+                    <label className="admin-label">Phone</label>
+                    <input
+                      value={passengerForm.phone}
+                      onChange={(event) => setPassengerForm((prev) => ({ ...prev, phone: event.target.value }))}
+                      className="admin-input mt-2 w-full rounded-xl px-3 py-2 text-sm"
+                      placeholder="+91 98888 77777"
+                    />
+                  </div>
+                  <div>
+                    <label className="admin-label">Bus assignment</label>
+                    <select
+                      value={passengerForm.busId}
+                      onChange={(event) => setPassengerForm((prev) => ({ ...prev, busId: event.target.value }))}
+                      className="admin-input mt-2 w-full rounded-xl px-3 py-2 text-sm"
+                    >
+                      <option value="">Select bus</option>
+                      {buses.map((bus) => (
+                        <option key={bus.id} value={bus.id}>
+                          {bus.busNumber || bus.id}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="admin-label">Stop</label>
+                    {stopOptions.length ? (
+                      <select
+                        value={passengerForm.stopId}
+                        onChange={(event) => setPassengerForm((prev) => ({ ...prev, stopId: event.target.value }))}
+                        className="admin-input mt-2 w-full rounded-xl px-3 py-2 text-sm"
+                      >
+                        <option value="">Select stop</option>
+                        {stopOptions.map((stop) => (
+                          <option key={stop.id || stop.name} value={stop.id || stop.name}>
+                            {stop.name || stop.id}
+                          </option>
+                        ))}
+                      </select>
+                    ) : (
+                      <input
+                        value={passengerForm.stopId}
+                        onChange={(event) => setPassengerForm((prev) => ({ ...prev, stopId: event.target.value }))}
+                        className="admin-input mt-2 w-full rounded-xl px-3 py-2 text-sm"
+                        placeholder="Stop ID"
+                      />
+                    )}
+                  </div>
+                  <div>
+                    <label className="admin-label">Parent phone</label>
+                    <input
+                      value={passengerForm.parentPhone}
+                      onChange={(event) => setPassengerForm((prev) => ({ ...prev, parentPhone: event.target.value }))}
+                      className="admin-input mt-2 w-full rounded-xl px-3 py-2 text-sm"
+                      placeholder="+91 97777 66666"
+                    />
+                  </div>
+                  <div className="sm:col-span-2 flex flex-wrap gap-2">
+                    <button type="button" className="admin-button-secondary rounded-xl px-4 py-2 text-sm" onClick={() => setActionPanel('')}>
+                      Cancel
+                    </button>
+                    <button
+                      type="submit"
+                      className="admin-button-primary rounded-xl px-4 py-2 text-sm"
+                      disabled={actionStatus.loading || !passengerForm.name || !passengerForm.email || !passengerForm.password || !passengerForm.busId}
+                    >
+                      {actionStatus.loading ? 'Creating...' : 'Create passenger'}
+                    </button>
+                  </div>
+                </form>
+              ) : null}
+
+              {actionPanel === 'broadcast' ? (
+                <form onSubmit={handleBroadcastAlert} className="mt-6 grid grid-cols-1 gap-4">
+                  <div>
+                    <label className="admin-label">Title</label>
+                    <input
+                      value={broadcastForm.title}
+                      onChange={(event) => setBroadcastForm((prev) => ({ ...prev, title: event.target.value }))}
+                      className="admin-input mt-2 w-full rounded-xl px-3 py-2 text-sm"
+                      placeholder="Alert title"
+                    />
+                  </div>
+                  <div>
+                    <label className="admin-label">Message</label>
+                    <textarea
+                      value={broadcastForm.message}
+                      onChange={(event) => setBroadcastForm((prev) => ({ ...prev, message: event.target.value }))}
+                      className="admin-input mt-2 w-full rounded-xl px-3 py-2 text-sm"
+                      rows={3}
+                      placeholder="Share the update for drivers or parents"
+                    />
+                  </div>
+                  <div>
+                    <label className="admin-label">Target audience</label>
+                    <select
+                      value={broadcastForm.targetRole}
+                      onChange={(event) => setBroadcastForm((prev) => ({ ...prev, targetRole: event.target.value }))}
+                      className="admin-input mt-2 w-full rounded-xl px-3 py-2 text-sm"
+                    >
+                      <option value="all">All users</option>
+                      <option value="driver">Drivers</option>
+                      <option value="passenger">Passengers</option>
+                    </select>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    <button type="button" className="admin-button-secondary rounded-xl px-4 py-2 text-sm" onClick={() => setActionPanel('')}>
+                      Cancel
+                    </button>
+                    <button
+                      type="submit"
+                      className="admin-button-alert rounded-xl px-4 py-2 text-sm"
+                      disabled={actionStatus.loading || !broadcastForm.title || !broadcastForm.message}
+                    >
+                      {actionStatus.loading ? 'Sending...' : 'Send broadcast'}
+                    </button>
+                  </div>
+                </form>
+              ) : null}
+
+              {actionPanel === 'delay' ? (
+                <form onSubmit={handleNotifyDelay} className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
+                  <div>
+                    <label className="admin-label">Bus</label>
+                    <select
+                      value={delayForm.busId}
+                      onChange={(event) => setDelayForm((prev) => ({ ...prev, busId: event.target.value }))}
+                      className="admin-input mt-2 w-full rounded-xl px-3 py-2 text-sm"
+                    >
+                      <option value="">Select bus</option>
+                      {buses.map((bus) => (
+                        <option key={bus.id} value={bus.id}>
+                          {bus.busNumber || bus.id}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="admin-label">Delay minutes</label>
+                    <input
+                      type="number"
+                      value={delayForm.delayMinutes}
+                      onChange={(event) => setDelayForm((prev) => ({ ...prev, delayMinutes: event.target.value }))}
+                      className="admin-input mt-2 w-full rounded-xl px-3 py-2 text-sm"
+                      placeholder="10"
+                      min="0"
+                    />
+                  </div>
+                  <div className="sm:col-span-2">
+                    <label className="admin-label">Reason</label>
+                    <input
+                      value={delayForm.reason}
+                      onChange={(event) => setDelayForm((prev) => ({ ...prev, reason: event.target.value }))}
+                      className="admin-input mt-2 w-full rounded-xl px-3 py-2 text-sm"
+                      placeholder="Traffic near main gate"
+                    />
+                  </div>
+                  <div className="sm:col-span-2 flex flex-wrap gap-2">
+                    <button type="button" className="admin-button-secondary rounded-xl px-4 py-2 text-sm" onClick={() => setActionPanel('')}>
+                      Cancel
+                    </button>
+                    <button
+                      type="submit"
+                      className="admin-button-alert rounded-xl px-4 py-2 text-sm"
+                      disabled={actionStatus.loading || !delayForm.busId || !delayForm.delayMinutes}
+                    >
+                      {actionStatus.loading ? 'Sending...' : 'Notify delay'}
+                    </button>
+                  </div>
+                </form>
+              ) : null}
+            </section>
+          ) : null}
 
           <section className="admin-stagger mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-5">
             <AdminMetricCard label="Active vehicles" value={institution.stats.vehicles} helper="GPS online" tone="teal" />
@@ -559,7 +1325,16 @@ const AdminDashboard = () => {
                 action={
                   <div className="flex flex-wrap gap-2">
                     <button type="button" className="admin-button-secondary rounded-xl px-3 py-1.5 text-xs">Share link</button>
-                    <button type="button" className="admin-button-primary rounded-xl px-3 py-1.5 text-xs">Broadcast to dashboards</button>
+                    <button
+                      type="button"
+                      className="admin-button-primary rounded-xl px-3 py-1.5 text-xs"
+                      onClick={() => {
+                        setBroadcastForm({ title: 'Broadcast update', message: '', targetRole: 'all' });
+                        openActionPanel('broadcast');
+                      }}
+                    >
+                      Broadcast to dashboards
+                    </button>
                   </div>
                 }
               />
@@ -574,12 +1349,12 @@ const AdminDashboard = () => {
                 )}
                 {mapStatus.status === 'error' && (
                   <div className="absolute inset-0 flex items-center justify-center bg-[#EBF0F6]/95 px-6 text-center text-sm text-[#2A3D53]">
-                    {mapStatus.error} Add VITE_GOOGLE_MAPS_API_KEY in .env.local.
+                    {mapStatus.error} Add VITE_GOOGLE_MAPS_API_KEY in your environment (.env.local or .env.production).
                   </div>
                 )}
 
                 <div className="pointer-events-none absolute left-4 top-4 rounded-full border border-[#B8C3D7] bg-[#EBF0F6] px-3 py-1 text-xs text-[#5F84AF]">
-                  All vehicles online
+                  {onlineLabel}
                 </div>
                 <div className="pointer-events-none absolute right-4 top-4 rounded-full border border-[#B8C3D7] bg-[#EBF0F6] px-3 py-1 text-xs text-[#5F84AF]">
                   Updated {lastUpdate.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })}
@@ -593,22 +1368,30 @@ const AdminDashboard = () => {
             <div className="admin-card rounded-3xl p-6">
               <AdminSectionHeader title="Fleet status" subtitle="Vehicle list" />
               <div className="mt-5 space-y-4">
-                {institution.vehicles.map((vehicle) => (
-                  <div key={vehicle.id} className="admin-card-compact rounded-2xl p-4">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="admin-title text-lg font-semibold">{vehicle.id}</p>
-                        <p className="text-sm admin-muted">{vehicle.route} - {vehicle.driver}</p>
+                {institution.vehicles.length ? (
+                  institution.vehicles.map((vehicle) => (
+                    <div key={vehicle.id} className="admin-card-compact rounded-2xl p-4">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="admin-title text-lg font-semibold">{vehicle.id}</p>
+                          <p className="text-sm admin-muted">{vehicle.route} - {vehicle.driver}</p>
+                        </div>
+                        <span className={`rounded-full border px-3 py-1 text-xs ${statusTone(vehicle.status)}`}>{vehicle.status}</span>
                       </div>
-                      <span className={`rounded-full border px-3 py-1 text-xs ${statusTone(vehicle.status)}`}>{vehicle.status}</span>
+                      <div className="mt-3 flex flex-wrap items-center justify-between gap-3 text-xs admin-muted">
+                        <span>Speed: {vehicle.speed}</span>
+                        <span>Occupancy: {vehicle.occupancy}</span>
+                        {vehicle.phone ? (
+                          <a href={`tel:${vehicle.phone}`} className="admin-button-secondary rounded-full px-3 py-1 text-xs">Call driver</a>
+                        ) : (
+                          <span className="text-xs admin-muted">Phone unavailable</span>
+                        )}
+                      </div>
                     </div>
-                    <div className="mt-3 flex flex-wrap items-center justify-between gap-3 text-xs admin-muted">
-                      <span>Speed: {vehicle.speed}</span>
-                      <span>Occupancy: {vehicle.occupancy}</span>
-                      <a href={`tel:${vehicle.phone}`} className="admin-button-secondary rounded-full px-3 py-1 text-xs">Call driver</a>
-                    </div>
-                  </div>
-                ))}
+                  ))
+                ) : (
+                  <p className="text-sm admin-muted">No vehicles available.</p>
+                )}
               </div>
             </div>
           </section>
@@ -620,29 +1403,41 @@ const AdminDashboard = () => {
                 subtitle="Add or remove passengers"
                 action={
                   <div className="flex flex-wrap gap-2">
-                    <button type="button" className="admin-button rounded-xl px-3 py-1.5 text-xs">Add passenger</button>
-                    <button type="button" className="admin-button rounded-xl px-3 py-1.5 text-xs">Remove selected</button>
+                    <button
+                      type="button"
+                      className="admin-button rounded-xl px-3 py-1.5 text-xs"
+                      onClick={() => openActionPanel('passenger')}
+                    >
+                      Add passenger
+                    </button>
+                    <button type="button" className="admin-button rounded-xl px-3 py-1.5 text-xs" disabled>
+                      Remove selected
+                    </button>
                   </div>
                 }
               />
 
               <div className="mt-5 space-y-3">
-                {institution.passengers.map((passenger) => (
-                  <div key={passenger.name} className="admin-card-compact rounded-2xl p-4">
-                    <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                      <div>
-                        <p className="admin-title text-lg font-semibold">{passenger.name}</p>
-                        <p className="text-sm admin-muted">{passenger.grade} - {passenger.stop}</p>
+                {institution.passengers.length ? (
+                  institution.passengers.map((passenger) => (
+                    <div key={passenger.name} className="admin-card-compact rounded-2xl p-4">
+                      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                        <div>
+                          <p className="admin-title text-lg font-semibold">{passenger.name}</p>
+                          <p className="text-sm admin-muted">{passenger.grade} - {passenger.stop}</p>
+                        </div>
+                        <span className="admin-chip rounded-full px-3 py-1 text-xs">{passenger.feeStatus}</span>
                       </div>
-                      <span className="admin-chip rounded-full px-3 py-1 text-xs">{passenger.feeStatus}</span>
+                      <div className="mt-3 flex flex-wrap gap-3 text-xs admin-muted">
+                        <span>Guardian: {passenger.guardian}</span>
+                        <span>Phone: {passenger.phone}</span>
+                        <span>Medical: {passenger.medical}</span>
+                      </div>
                     </div>
-                    <div className="mt-3 flex flex-wrap gap-3 text-xs admin-muted">
-                      <span>Guardian: {passenger.guardian}</span>
-                      <span>Phone: {passenger.phone}</span>
-                      <span>Medical: {passenger.medical}</span>
-                    </div>
-                  </div>
-                ))}
+                  ))
+                ) : (
+                  <p className="text-sm admin-muted">No passengers registered yet.</p>
+                )}
               </div>
             </div>
 
@@ -652,25 +1447,41 @@ const AdminDashboard = () => {
                 subtitle="Add or remove staff"
                 action={
                   <div className="flex flex-wrap gap-2">
-                    <button type="button" className="admin-button rounded-xl px-3 py-1.5 text-xs">Add staff</button>
-                    <button type="button" className="admin-button rounded-xl px-3 py-1.5 text-xs">Remove staff</button>
+                    <button
+                      type="button"
+                      className="admin-button rounded-xl px-3 py-1.5 text-xs"
+                      onClick={() => openActionPanel('driver')}
+                    >
+                      Add staff
+                    </button>
+                    <button type="button" className="admin-button rounded-xl px-3 py-1.5 text-xs" disabled>
+                      Remove staff
+                    </button>
                   </div>
                 }
               />
 
               <div className="mt-5 space-y-3">
-                {institution.staff.map((member) => (
-                  <div key={`${member.name}-${member.role}`} className="admin-card-compact rounded-2xl p-4">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="admin-title text-lg font-semibold">{member.name}</p>
-                        <p className="text-sm admin-muted">{member.role} - {member.shift}</p>
+                {institution.staff.length ? (
+                  institution.staff.map((member) => (
+                    <div key={`${member.name}-${member.role}`} className="admin-card-compact rounded-2xl p-4">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="admin-title text-lg font-semibold">{member.name}</p>
+                          <p className="text-sm admin-muted">{member.role} - {member.shift}</p>
+                        </div>
+                        {member.phone ? (
+                          <a href={`tel:${member.phone}`} className="admin-button-secondary rounded-full px-3 py-1 text-xs">Call</a>
+                        ) : (
+                          <span className="text-xs admin-muted">Phone unavailable</span>
+                        )}
                       </div>
-                      <a href={`tel:${member.phone}`} className="admin-button-secondary rounded-full px-3 py-1 text-xs">Call</a>
+                      <div className="mt-3 text-xs admin-muted">{member.license}</div>
                     </div>
-                    <div className="mt-3 text-xs admin-muted">{member.license}</div>
-                  </div>
-                ))}
+                  ))
+                ) : (
+                  <p className="text-sm admin-muted">No staff records found.</p>
+                )}
               </div>
             </div>
           </section>
@@ -681,27 +1492,37 @@ const AdminDashboard = () => {
                 title="Route assignments"
                 subtitle="Dynamic updates to all dashboards"
                 action={
-                  <button type="button" className="admin-button-primary rounded-xl px-3 py-1.5 text-xs">Push updates now</button>
+                  <button
+                    type="button"
+                    className="admin-button-primary rounded-xl px-3 py-1.5 text-xs"
+                    onClick={() => refreshDashboard()}
+                  >
+                    Push updates now
+                  </button>
                 }
               />
 
               <div className="mt-5 space-y-3">
-                {institution.routes.map((route) => (
-                  <div key={route.name} className="admin-card-compact rounded-2xl p-4">
-                    <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                      <div>
-                        <p className="admin-title text-lg font-semibold">{route.name}</p>
-                        <p className="text-xs admin-muted">Vehicles assigned: {route.vehicles} - ETA {route.eta}</p>
+                {institution.routes.length ? (
+                  institution.routes.map((route) => (
+                    <div key={route.name} className="admin-card-compact rounded-2xl p-4">
+                      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                        <div>
+                          <p className="admin-title text-lg font-semibold">{route.name}</p>
+                          <p className="text-xs admin-muted">Vehicles assigned: {route.vehicles} - ETA {route.eta}</p>
+                        </div>
+                        <span className={`rounded-full border px-3 py-1 text-xs ${statusTone(route.status)}`}>{route.status}</span>
                       </div>
-                      <span className={`rounded-full border px-3 py-1 text-xs ${statusTone(route.status)}`}>{route.status}</span>
+                      <div className="mt-3 flex flex-wrap items-center gap-3 text-xs admin-muted">
+                        <span>Last update: {route.updated}</span>
+                        <button type="button" className="admin-button-secondary rounded-full px-3 py-1 text-xs" disabled>Assign vehicle</button>
+                        <button type="button" className="admin-button-secondary rounded-full px-3 py-1 text-xs" disabled>Edit stops</button>
+                      </div>
                     </div>
-                    <div className="mt-3 flex flex-wrap items-center gap-3 text-xs admin-muted">
-                      <span>Last update: {route.updated}</span>
-                      <button type="button" className="admin-button-secondary rounded-full px-3 py-1 text-xs">Assign vehicle</button>
-                      <button type="button" className="admin-button-secondary rounded-full px-3 py-1 text-xs">Edit stops</button>
-                    </div>
-                  </div>
-                ))}
+                  ))
+                ) : (
+                  <p className="text-sm admin-muted">No routes configured yet.</p>
+                )}
               </div>
             </div>
 
@@ -713,23 +1534,55 @@ const AdminDashboard = () => {
                   Draft a broadcast message to parents, drivers, or all dashboards. Notifications sync to the driver app and passenger display instantly.
                 </div>
                 <div className="space-y-3">
-                  {institution.alerts.map((alert) => (
-                    <div key={alert.title} className="admin-card-compact rounded-2xl p-4">
-                      <div className="flex items-center justify-between">
-                        <p className="admin-title text-base font-semibold">{alert.title}</p>
-                        <span className={`rounded-full border px-3 py-1 text-xs ${statusTone(alert.status)}`}>{alert.status}</span>
+                  {institution.alerts.length ? (
+                    institution.alerts.map((alert) => (
+                      <div key={alert.title} className="admin-card-compact rounded-2xl p-4">
+                        <div className="flex items-center justify-between">
+                          <p className="admin-title text-base font-semibold">{alert.title}</p>
+                          <span className={`rounded-full border px-3 py-1 text-xs ${statusTone(alert.status)}`}>{alert.status}</span>
+                        </div>
+                        <div className="mt-2 flex flex-wrap gap-3 text-xs admin-muted">
+                          <span>{alert.time}</span>
+                          <span>{alert.channel}</span>
+                          <button
+                            type="button"
+                            className="admin-button-secondary rounded-full px-3 py-1 text-xs"
+                            onClick={() => {
+                              setBroadcastForm({
+                                title: `Escalation: ${alert.title}`,
+                                message: 'Please review the alert and respond immediately.',
+                                targetRole: 'all'
+                              });
+                              openActionPanel('broadcast');
+                            }}
+                          >
+                            Escalate
+                          </button>
+                        </div>
                       </div>
-                      <div className="mt-2 flex flex-wrap gap-3 text-xs admin-muted">
-                        <span>{alert.time}</span>
-                        <span>{alert.channel}</span>
-                        <button type="button" className="admin-button-secondary rounded-full px-3 py-1 text-xs">Escalate</button>
-                      </div>
-                    </div>
-                  ))}
+                    ))
+                  ) : (
+                    <p className="text-sm admin-muted">No active alerts right now.</p>
+                  )}
                 </div>
                 <div className="flex flex-wrap gap-2">
-                  <button type="button" className="admin-button-alert rounded-xl px-4 py-2 text-sm">Send emergency alert</button>
-                  <button type="button" className="admin-button-secondary rounded-xl px-4 py-2 text-sm">Send ETA update</button>
+                  <button
+                    type="button"
+                    className="admin-button-alert rounded-xl px-4 py-2 text-sm"
+                    onClick={() => {
+                      setBroadcastForm({ title: 'Emergency alert', message: '', targetRole: 'all' });
+                      openActionPanel('broadcast');
+                    }}
+                  >
+                    Send emergency alert
+                  </button>
+                  <button
+                    type="button"
+                    className="admin-button-secondary rounded-xl px-4 py-2 text-sm"
+                    onClick={() => openActionPanel('delay')}
+                  >
+                    Send ETA update
+                  </button>
                 </div>
               </div>
             </div>
@@ -754,15 +1607,19 @@ const AdminDashboard = () => {
             <div className="admin-card rounded-3xl p-6">
               <AdminSectionHeader title="Emergency and medical needs" subtitle="Safety" />
               <div className="mt-5 space-y-3">
-                {institution.medical.map((item) => (
-                  <div key={item.name} className="rounded-2xl border border-[#B3BBD9] bg-[#E5E9F0] p-4">
-                    <div className="flex items-center justify-between">
-                      <p className="admin-title text-lg font-semibold">{item.name}</p>
-                      <a href={`tel:${item.contact}`} className="admin-button-secondary rounded-full px-3 py-1 text-xs">Call guardian</a>
+                {institution.medical.length ? (
+                  institution.medical.map((item) => (
+                    <div key={item.name} className="rounded-2xl border border-[#B3BBD9] bg-[#E5E9F0] p-4">
+                      <div className="flex items-center justify-between">
+                        <p className="admin-title text-lg font-semibold">{item.name}</p>
+                        <a href={`tel:${item.contact}`} className="admin-button-secondary rounded-full px-3 py-1 text-xs">Call guardian</a>
+                      </div>
+                      <p className="mt-2 text-xs admin-muted">{item.note}</p>
                     </div>
-                    <p className="mt-2 text-xs admin-muted">{item.note}</p>
-                  </div>
-                ))}
+                  ))
+                ) : (
+                  <p className="text-sm admin-muted">No medical notes available.</p>
+                )}
               </div>
               <div className="mt-4 rounded-2xl border border-[#B8C3D7] bg-[#E5E9F0] p-4 text-xs text-[#2A3D53]">
                 Medical notes are visible to drivers, conductors, and dispatch operators only.

@@ -42,29 +42,58 @@
 // ════════════════════════════════════════════════════
 
 const { firebaseAuth } = require('../config/firebase')
+const { SESSION_COOKIE_NAME } = require('../config/auth')
+
+
+const getBearerToken = (req) => {
+    const authHeader = req.headers.authorization
+
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        return ''
+    }
+
+    return authHeader.split('Bearer ')[1]
+}
+
+
+const getSessionCookie = (req) => {
+    return req.cookies?.[SESSION_COOKIE_NAME] || ''
+}
 
 
 const verifyToken = async (req, res, next) => {
+    const bearerToken = getBearerToken(req)
+    const sessionCookie = getSessionCookie(req)
+
+    if (!bearerToken && !sessionCookie) {
+        return res.status(401).json({
+            error: 'Missing authorization token.'
+        })
+    }
+
+    if (bearerToken) {
+        try {
+            const decoded = await firebaseAuth.verifyIdToken(bearerToken)
+            req.user = decoded
+            req.authType = 'idToken'
+            return next()
+        } catch (error) {
+            if (!sessionCookie) {
+                if (error.code === 'auth/id-token-expired') {
+                    return res.status(401).json({ error: 'Token expired. Please login again.' })
+                }
+                return res.status(401).json({ error: 'Invalid token.' })
+            }
+        }
+    }
+
     try {
-        const authHeader = req.headers.authorization
-
-        if (!authHeader || !authHeader.startsWith('Bearer ')) {
-            return res.status(401).json({
-                error: 'Invalid authorization format. Use: Bearer <token>'
-            })
-        }
-
-        const token   = authHeader.split('Bearer ')[1]
-        const decoded = await firebaseAuth.verifyIdToken(token)
-
+        const decoded = await firebaseAuth.verifySessionCookie(sessionCookie, true)
         req.user = decoded
-        next()
-
+        req.authType = 'sessionCookie'
+        return next()
     } catch (error) {
-        if (error.code === 'auth/id-token-expired') {
-            return res.status(401).json({ error: 'Token expired. Please login again.' })
-        }
-        return res.status(401).json({ error: 'Invalid token.' })
+        return res.status(401).json({ error: 'Invalid session.' })
     }
 }
 
