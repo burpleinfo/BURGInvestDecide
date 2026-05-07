@@ -13,11 +13,13 @@ const { startLiveLocationsSocket } = require('./websocket/liveLocationsSocket')
 dotenv.config({ path: path.join(__dirname, '..', '.env') })
 
 const app = express()
+
+// Never allow wildcard when credentials: true
 const configuredOrigins = (process.env.CORS_ORIGIN || '')
     .split(',')
     .map((origin) => origin.trim())
     .filter(Boolean)
-    .filter((origin) => origin !== '*')
+    .filter((origin) => origin !== '*') // Explicitly reject wildcard
 
 const defaultOrigins = [
     'http://localhost:5173',
@@ -25,22 +27,29 @@ const defaultOrigins = [
     'https://burgridesafe-eight.vercel.app'
 ]
 
-const allowedOrigins = configuredOrigins.length ? configuredOrigins : defaultOrigins
+const allowedOrigins = configuredOrigins.length > 0 ? configuredOrigins : defaultOrigins
 
 const corsOptions = {
     credentials: true,
     origin: (origin, callback) => {
-        // Allow non-browser clients with no Origin header.
+        // Allow non-browser clients with no Origin header
         if (!origin) {
             return callback(null, true)
         }
 
+        // Check if origin is allowed
         if (allowedOrigins.includes(origin)) {
-            return callback(null, true)
+            // Explicitly return the origin, never return null for wildcard
+            return callback(null, origin)
         }
 
+        // Log blocked origin for debugging
+        console.warn(`CORS blocked for origin: ${origin}. Allowed: ${allowedOrigins.join(', ')}`)
         return callback(new Error(`CORS blocked for origin: ${origin}`))
-    }
+    },
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    exposedHeaders: ['Set-Cookie']
 }
 
 // ── Middleware ─────────────────────────────────────
@@ -74,6 +83,12 @@ app.use((req, res) => {
 // ── Global Error Handler ───────────────────────────
 app.use((err, req, res, next) => {
     console.error('[ERROR]', err.message)
+    // Ensure CORS headers are sent even on error
+    const origin = req.get('origin')
+    if (allowedOrigins.includes(origin)) {
+        res.set('Access-Control-Allow-Origin', origin)
+        res.set('Access-Control-Allow-Credentials', 'true')
+    }
     res.status(500).json({ error: err.message || 'Internal server error' })
 })
 
