@@ -54,6 +54,14 @@ service cloud.firestore {
       return isLoggedIn() && role() == 'admin';
     }
 
+    function isDirector() {
+      return isLoggedIn() && role() == 'director';
+    }
+
+    function isAdminOrDirector() {
+      return isAdmin() || isDirector();
+    }
+
     function isDriver() {
       return isLoggedIn() && role() == 'driver';
     }
@@ -71,7 +79,7 @@ service cloud.firestore {
     // Admin: full access
     // Driver/Passenger: own document only
     match /users/{uid} {
-      allow read, write: if isAdmin();
+      allow read, write: if isAdminOrDirector();
       allow read, write: if isOwner(uid);
     }
 
@@ -81,7 +89,7 @@ service cloud.firestore {
     // Driver: own document only
     // Passenger: no access
     match /drivers/{uid} {
-      allow read, write: if isAdmin();
+      allow read, write: if isAdminOrDirector();
       allow read:        if isOwner(uid);
     }
 
@@ -91,7 +99,7 @@ service cloud.firestore {
     // Driver: read passengers on their bus
     // Passenger: own document only
     match /passengers/{uid} {
-      allow read, write: if isAdmin();
+      allow read, write: if isAdminOrDirector();
       allow read:        if isOwner(uid);
       allow read:        if isDriver();
     }
@@ -102,7 +110,7 @@ service cloud.firestore {
     // Driver: read their assigned bus
     // Passenger: read their assigned bus
     match /buses/{busId} {
-      allow read, write: if isAdmin();
+      allow read, write: if isAdminOrDirector();
       allow read:        if isDriver() || isPassenger();
     }
 
@@ -112,7 +120,7 @@ service cloud.firestore {
     // Driver: read only
     // Passenger: read only
     match /routes/{routeId} {
-      allow read, write: if isAdmin();
+      allow read, write: if isAdminOrDirector();
       allow read:        if isDriver() || isPassenger();
     }
 
@@ -122,7 +130,7 @@ service cloud.firestore {
     // Driver: read and write their own bus trips
     // Passenger: read only their bus trips
     match /trips/{tripId} {
-      allow read, write: if isAdmin();
+      allow read, write: if isAdminOrDirector();
       allow read, write: if isDriver();
       allow read:        if isPassenger();
     }
@@ -133,7 +141,7 @@ service cloud.firestore {
     // Driver: read schedules for their bus
     // Passenger: read and write own schedules only
     match /schedules/{scheduleId} {
-      allow read, write: if isAdmin();
+      allow read, write: if isAdminOrDirector();
       allow read:        if isDriver();
       allow read, write: if isPassenger()
                          && request.auth.uid == resource.data.passengerUid;
@@ -145,7 +153,7 @@ service cloud.firestore {
     // Passenger: read and write own payments only
     // Driver: no access
     match /payments/{paymentId} {
-      allow read, write: if isAdmin();
+      allow read, write: if isAdminOrDirector();
       allow read, write: if isPassenger()
                          && request.auth.uid == resource.data.passengerUid;
     }
@@ -156,10 +164,22 @@ service cloud.firestore {
     // Driver: create and read own alerts
     // Passenger: no access
     match /sosAlerts/{alertId} {
-      allow read, write: if isAdmin();
+      allow read, write: if isAdminOrDirector();
       allow create:      if isDriver();
       allow read:        if isDriver()
                          && request.auth.uid == resource.data.driverUid;
+    }
+
+    // ── /adminRequests ───────────────────────────
+    // Director: full access
+    match /adminRequests/{requestId} {
+      allow read, write: if isDirector();
+    }
+
+    // ── /institutions ───────────────────────────
+    // Admin/Director: full access
+    match /institutions/{institutionId} {
+      allow read, write: if isAdminOrDirector();
     }
   }
 }

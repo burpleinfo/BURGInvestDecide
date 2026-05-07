@@ -15,12 +15,20 @@ const getMyProfile = async (req, res) => {
             return res.status(404).json({ error: 'Passenger not found' })
         }
 
+        const userData = userDoc.data() || {}
+
         const passengerDoc = await firestoreDb
             .collection('passengers').doc(uid).get()
 
+        const passengerData = passengerDoc.exists ? passengerDoc.data() : null
+
+        if (passengerData?.institutionId && userData.institutionId && passengerData.institutionId !== userData.institutionId) {
+            return res.status(403).json({ error: 'Passenger record does not belong to this institution.' })
+        }
+
         res.json({
-            user:      userDoc.data(),
-            passenger: passengerDoc.exists ? passengerDoc.data() : null
+            user:      userData,
+            passenger: passengerData
         })
 
     } catch (error) {
@@ -36,11 +44,13 @@ const getBurgId = async (req, res) => {
         const passengerDoc = await firestoreDb
             .collection('passengers').doc(uid).get()
 
+        const passengerData = passengerDoc.data() || {}
+
         if (!passengerDoc.exists) {
             return res.status(404).json({ error: 'Passenger not found' })
         }
 
-        res.json({ burgId: passengerDoc.data().burgId })
+        res.json({ burgId: passengerData.burgId })
 
     } catch (error) {
         res.status(500).json({ error: error.message })
@@ -59,7 +69,12 @@ const generateQR = async (req, res) => {
             return res.status(404).json({ error: 'Passenger not found' })
         }
 
-        const burgId = passengerDoc.data().burgId
+        const passengerData = passengerDoc.data() || {}
+        if (passengerData.institutionId && req.user?.institutionId && passengerData.institutionId !== req.user.institutionId) {
+            return res.status(403).json({ error: 'Passenger record does not belong to this institution.' })
+        }
+
+        const burgId = passengerData.burgId
 
         // Generate QR code as base64 image
         const qrDataURL = await QRCode.toDataURL(
@@ -89,8 +104,20 @@ const scanQR = async (req, res) => {
             return res.status(404).json({ error: 'Passenger not found' })
         }
 
-        if (passengerDoc.data().busId !== busId) {
+        const passengerData = passengerDoc.data() || {}
+
+        if (passengerData.busId !== busId) {
             return res.status(400).json({ error: 'Passenger not assigned to this bus' })
+        }
+
+        const busDoc = await firestoreDb.collection('buses').doc(busId).get()
+        if (!busDoc.exists) {
+            return res.status(404).json({ error: 'Bus not found' })
+        }
+
+        const busData = busDoc.data() || {}
+        if (passengerData.institutionId && busData.institutionId && passengerData.institutionId !== busData.institutionId) {
+            return res.status(403).json({ error: 'Bus does not belong to this institution.' })
         }
 
         // Mark as boarded in trip
@@ -106,67 +133,6 @@ const scanQR = async (req, res) => {
     }
 }
 
-
-// ── Get Schedule ──────────────────────────────────
-const getSchedule = async (req, res) => {
-    try {
-        const uid = req.user.uid
-
-        const scheduleSnap = await firestoreDb
-            .collection('schedules')
-            .where('passengerUid', '==', uid)
-            .get()
-
-        if (scheduleSnap.empty) {
-            return res.json({ schedule: [] })
-        }
-
-        const schedule = scheduleSnap.docs.map(d => ({ id: d.id, ...d.data() }))
-        res.json({ schedule })
-
-    } catch (error) {
-        res.status(500).json({ error: error.message })
-    }
-}
-
-
-// ── Save Schedule ─────────────────────────────────
-const saveSchedule = async (req, res) => {
-    try {
-        const uid                                  = req.user.uid
-        const { day, pickupFromHome, pickupFromCollege } = req.body
-
-        // Check if schedule already exists for this day
-        const existing = await firestoreDb
-            .collection('schedules')
-            .where('passengerUid', '==', uid)
-            .where('day',          '==', day)
-            .get()
-
-        if (!existing.empty) {
-            // Update existing
-            await existing.docs[0].ref.update({
-                pickupFromHome,
-                pickupFromCollege,
-                updatedAt: new Date().toISOString()
-            })
-        } else {
-            // Create new
-            await firestoreDb.collection('schedules').add({
-                passengerUid:     uid,
-                day,
-                pickupFromHome,
-                pickupFromCollege,
-                createdAt:        new Date().toISOString()
-            })
-        }
-
-        res.json({ message: `Schedule saved for ${day}` })
-
-    } catch (error) {
-        res.status(500).json({ error: error.message })
-    }
-}
 
 
 // ── Get Live Bus Location (System Design #1) ──────
@@ -251,7 +217,8 @@ const getTripStatus = async (req, res) => {
 
         const passengerDoc = await firestoreDb
             .collection('passengers').doc(uid).get()
-        const busId        = passengerDoc.data().busId
+        const passengerData = passengerDoc.data() || {}
+        const busId        = passengerData.busId
 
         const tripsSnap = await firestoreDb
             .collection('trips')
@@ -336,14 +303,11 @@ const getDriverInfo = async (req, res) => {
     }
 }
 
-
 module.exports = {
     getMyProfile,
     getBurgId,
     generateQR,
     scanQR,
-    getSchedule,
-    saveSchedule,
     getLiveLocation,
     getETA,
     getTripStatus,

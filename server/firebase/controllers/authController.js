@@ -82,7 +82,7 @@ const createUser = async (req, res) => {
 // ── Admin Signup (invite code required) ───────────
 const adminSignup = async (req, res) => {
     try {
-        const { email, password, name, phone } = req.body
+        const { email, password, name, phone, institutionId, institutionName } = req.body
         const inviteCheck = isValidAdminInvite(req)
 
         if (!inviteCheck.valid) {
@@ -95,29 +95,60 @@ const adminSignup = async (req, res) => {
             displayName: name
         })
 
-        await firebaseAuth.setCustomUserClaims(user.uid, { role: 'admin' })
+        await firebaseAuth.setCustomUserClaims(user.uid, { role: 'pendingAdmin' })
+
+        // Save basic user profile and attach provided institution info (if any)
+        const resolvedInstitutionId = institutionId || null
+        const resolvedInstitutionName = institutionName || null
 
         await firestoreDb.collection('users').doc(user.uid).set({
             uid: user.uid,
             name,
             email,
             phone,
-            role: 'admin',
+            role: 'pendingAdmin',
             fcmToken: null,
+            institutionId: resolvedInstitutionId,
+            institutionName: resolvedInstitutionName,
             createdAt: new Date().toISOString()
         })
 
-        await firestoreDb.collection('admins').doc(user.uid).set({
+        // Create an admin request record for director approval
+        await firestoreDb.collection('adminRequests').doc(user.uid).set({
             uid: user.uid,
             name,
             email,
             phone,
-            role: 'admin',
+            institutionId: resolvedInstitutionId,
+            institutionName: resolvedInstitutionName,
+            status: 'pending',
             createdAt: new Date().toISOString()
         })
 
-        res.status(201).json({
-            message: 'Admin account created successfully',
+        // If institution details were provided, ensure an institutions document exists
+        if (resolvedInstitutionName) {
+            // Use provided institutionId if available; otherwise derive a slug from name
+            const instId = resolvedInstitutionId || String(resolvedInstitutionName).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')
+            const instRef = firestoreDb.collection('institutions').doc(instId)
+            const instDoc = await instRef.get()
+            if (!instDoc.exists) {
+                await instRef.set({
+                    id: instId,
+                    name: resolvedInstitutionName,
+                    createdBy: user.uid,
+                    createdAt: new Date().toISOString()
+                })
+            } else {
+                // If exists but missing a name, merge name
+                const data = instDoc.data() || {}
+                if (!data.name && resolvedInstitutionName) {
+                    await instRef.set({ name: resolvedInstitutionName }, { merge: true })
+                }
+            }
+        }
+
+        res.status(202).json({
+            message: 'Admin request submitted. Awaiting director approval.',
             uid: user.uid,
             warning: inviteCheck.warning || null
         })
@@ -263,16 +294,6 @@ const sessionLogin = async (req, res) => {
         })
 
         res.cookie(SESSION_COOKIE_NAME, sessionCookie, buildSessionCookieOptions())
-        await firestoreDb.collection('adminSessions').add({
-            uid: decoded.uid,
-            email: decoded.email || null,
-            role: decoded.role || null,
-            sessionType: 'cookie',
-            createdAt: new Date().toISOString(),
-            expiresAt: new Date(Date.now() + SESSION_EXPIRES_IN_MS).toISOString(),
-            ip: req.ip || null,
-            userAgent: req.headers?.['user-agent'] || null
-        })
         res.json({
             message: 'Session cookie set',
             uid: decoded.uid,

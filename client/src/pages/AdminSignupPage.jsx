@@ -12,12 +12,15 @@ const AdminSignupPage = () => {
     name: "",
     email: "",
     phone: "",
+    institutionName: "",
+    institutionId: "",
     password: "",
     confirmPassword: "",
     inviteCode: ""
   });
   const [loading, setLoading] = useState(false);
   const [apiError, setApiError] = useState("");
+  const [submitted, setSubmitted] = useState(false);
 
   const handleChange = (event) => {
     const { name, value } = event.target;
@@ -41,11 +44,13 @@ const AdminSignupPage = () => {
         email: form.email,
         password: form.password,
         phone: form.phone,
-        inviteCode: form.inviteCode
+        inviteCode: form.inviteCode,
+        institutionName: form.institutionName,
+        institutionId: form.institutionId
       });
 
-      addToast("Admin account created.", "success", 2500);
-      navigate("/admin", { replace: true });
+      addToast("Admin request submitted for approval.", "success", 3000);
+      setSubmitted(true);
     } catch (error) {
       setApiError(error?.message || "Admin signup failed. Please try again.");
     } finally {
@@ -89,104 +94,144 @@ const AdminSignupPage = () => {
               </div>
 
               <h2 className="text-3xl md:text-4xl font-bold text-gray-800 text-center mb-8">
-                Create Admin Account
+                Request Admin Access
               </h2>
 
-              <form onSubmit={handleSubmit} className="space-y-5">
-                {apiError && (
-                  <div className="text-red-600 text-center font-medium mb-2">{apiError}</div>
-                )}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Full name</label>
-                  <input
-                    type="text"
-                    name="name"
-                    value={form.name}
-                    onChange={handleChange}
-                    required
-                    placeholder="Admin name"
-                    className="w-full px-4 py-3 rounded-lg text-gray-800 placeholder-gray-400 border-2 border-gray-300 bg-gray-50"
-                  />
+              {submitted ? (
+                <div className="text-center space-y-4">
+                  <p className="text-gray-700">
+                    Your request is now pending director approval. You will be able to sign in once it is approved.
+                  </p>
+                  <button
+                    onClick={() => navigate("/admin/login")}
+                    className="w-full py-3 rounded-lg font-semibold transition-all duration-300 bg-yellow-500 hover:bg-yellow-600 text-white"
+                  >
+                    Go to sign in
+                  </button>
                 </div>
+              ) : (
+                <form onSubmit={handleSubmit} className="space-y-5">
+                  {apiError && (
+                    <div className="text-red-600 text-center font-medium mb-2">{apiError}</div>
+                  )}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Full name</label>
+                    <input
+                      type="text"
+                      name="name"
+                      value={form.name}
+                      onChange={handleChange}
+                      required
+                      placeholder="Admin name"
+                      className="w-full px-4 py-3 rounded-lg text-gray-800 placeholder-gray-400 border-2 border-gray-300 bg-gray-50"
+                    />
+                  </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
-                  <input
-                    type="email"
-                    name="email"
-                    value={form.email}
-                    onChange={handleChange}
-                    required
-                    placeholder="admin@burg.io"
-                    className="w-full px-4 py-3 rounded-lg text-gray-800 placeholder-gray-400 border-2 border-gray-300 bg-gray-50"
-                  />
-                </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                    <input
+                      type="email"
+                      name="email"
+                      value={form.email}
+                      onChange={handleChange}
+                      required
+                      placeholder="admin@burg.io"
+                      className="w-full px-4 py-3 rounded-lg text-gray-800 placeholder-gray-400 border-2 border-gray-300 bg-gray-50"
+                    />
+                  </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Phone</label>
-                  <input
-                    type="tel"
-                    name="phone"
-                    value={form.phone}
-                    onChange={handleChange}
-                    placeholder="+91 99999 88888"
-                    className="w-full px-4 py-3 rounded-lg text-gray-800 placeholder-gray-400 border-2 border-gray-300 bg-gray-50"
-                  />
-                </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Phone</label>
+                    <input
+                      type="tel"
+                      name="phone"
+                      value={form.phone}
+                      onChange={handleChange}
+                      placeholder="+91 99999 88888"
+                      className="w-full px-4 py-3 rounded-lg text-gray-800 placeholder-gray-400 border-2 border-gray-300 bg-gray-50"
+                    />
+                  </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
-                  <input
-                    type="password"
-                    name="password"
-                    value={form.password}
-                    onChange={handleChange}
-                    required
-                    placeholder="Create password"
-                    className="w-full px-4 py-3 rounded-lg text-gray-800 placeholder-gray-400 border-2 border-gray-300 bg-gray-50"
-                  />
-                </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Institution name</label>
+                    <input
+                      type="text"
+                      name="institutionName"
+                      value={form.institutionName}
+                      onChange={handleChange}
+                      placeholder="Institution or company"
+                      className="w-full px-4 py-3 rounded-lg text-gray-800 placeholder-gray-400 border-2 border-gray-300 bg-gray-50"
+                    />
+                  </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Confirm password</label>
-                  <input
-                    type="password"
-                    name="confirmPassword"
-                    value={form.confirmPassword}
-                    onChange={handleChange}
-                    required
-                    placeholder="Re-enter password"
-                    className="w-full px-4 py-3 rounded-lg text-gray-800 placeholder-gray-400 border-2 border-gray-300 bg-gray-50"
-                  />
-                </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Institution ID</label>
+                    <input
+                      type="text"
+                      name="institutionId"
+                      value={form.institutionId}
+                      onChange={handleChange}
+                      placeholder="Optional reference ID"
+                      className="w-full px-4 py-3 rounded-lg text-gray-800 placeholder-gray-400 border-2 border-gray-300 bg-gray-50"
+                    />
+                  </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Admin invite code</label>
-                  <input
-                    type="text"
-                    name="inviteCode"
-                    value={form.inviteCode}
-                    onChange={handleChange}
-                    placeholder="Provided by BURG"
-                    className="w-full px-4 py-3 rounded-lg text-gray-800 placeholder-gray-400 border-2 border-gray-300 bg-gray-50"
-                  />
-                </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
+                    <input
+                      type="password"
+                      name="password"
+                      value={form.password}
+                      onChange={handleChange}
+                      required
+                      placeholder="Create password"
+                      className="w-full px-4 py-3 rounded-lg text-gray-800 placeholder-gray-400 border-2 border-gray-300 bg-gray-50"
+                    />
+                  </div>
 
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className="w-full py-3 rounded-lg font-semibold transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed bg-yellow-500 hover:bg-yellow-600 text-white"
-                >
-                  {loading ? "Creating admin..." : "Create admin"}
-                </button>
-              </form>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Confirm password</label>
+                    <input
+                      type="password"
+                      name="confirmPassword"
+                      value={form.confirmPassword}
+                      onChange={handleChange}
+                      required
+                      placeholder="Re-enter password"
+                      className="w-full px-4 py-3 rounded-lg text-gray-800 placeholder-gray-400 border-2 border-gray-300 bg-gray-50"
+                    />
+                  </div>
 
-              <p className="mt-6 text-sm text-center text-gray-600">
-                Already have access?{" "}
-                <Link to="/admin/login" className="text-blue-600 hover:text-blue-800 font-semibold">
-                  Sign in
-                </Link>
-              </p>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Admin invite code</label>
+                    <input
+                      type="text"
+                      name="inviteCode"
+                      value={form.inviteCode}
+                      onChange={handleChange}
+                      placeholder="Provided by BURG"
+                      className="w-full px-4 py-3 rounded-lg text-gray-800 placeholder-gray-400 border-2 border-gray-300 bg-gray-50"
+                    />
+                  </div>
+
+                  <button
+                    type="submit"
+                    disabled={loading}
+                    className="w-full py-3 rounded-lg font-semibold transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed bg-yellow-500 hover:bg-yellow-600 text-white"
+                  >
+                    {loading ? "Submitting request..." : "Submit request"}
+                  </button>
+                </form>
+              )}
+
+              {!submitted && (
+                <p className="mt-6 text-sm text-center text-gray-600">
+                  Already have access?{" "}
+                  <Link to="/admin/login" className="text-blue-600 hover:text-blue-800 font-semibold">
+                    Sign in
+                  </Link>
+                </p>
+              )}
             </div>
           </div>
         </main>

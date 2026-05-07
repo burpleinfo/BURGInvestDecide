@@ -58,6 +58,8 @@ app.use('/payment',   require('./routes/paymentRoutes'))
 app.use('/admin',     auditLogger('admin.request', {
     shouldLog: (req) => !(req.method === 'GET' && req.originalUrl.includes('/admin/all-locations'))
 }), require('./routes/adminRoutes'))
+app.use('/director',  auditLogger('director.request'), require('./routes/directorRoutes'))
+app.use('/institution', auditLogger('institution.request'), require('./routes/institutionRoutes'))
 
 // ── Health Check ───────────────────────────────────
 app.get('/', (req, res) => {

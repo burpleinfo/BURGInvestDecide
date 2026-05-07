@@ -27,17 +27,9 @@
 //      boardedPassengers[], droppedPassengers[],
 //      completedStops[]
 //
-//  /schedules/{scheduleId}
-//      passengerUid, day, pickupFromHome,
-//      pickupFromCollege, createdAt
-//
 //  /payments/{paymentId}
 //      passengerUid, busId, amount, method,
 //      details, status, createdAt
-//
-//  /sosAlerts/{alertId}
-//      busId, driverUid, message, lat, lng,
-//      status, createdAt
 // ════════════════════════════════════════════════════
 
 const { firestoreDb } = require('../../firebase/config/firebase')
@@ -274,43 +266,6 @@ const endTrip = async (tripId) => {
 
 
 // ══════════════════════════════════════════════════
-//  SCHEDULES
-// ══════════════════════════════════════════════════
-
-const getScheduleByPassenger = async (passengerUid) => {
-    const snap = await firestoreDb
-        .collection('schedules')
-        .where('passengerUid', '==', passengerUid)
-        .get()
-    return snap.docs.map(d => ({ id: d.id, ...d.data() }))
-}
-
-const saveSchedule = async (passengerUid, day, pickupFromHome, pickupFromCollege) => {
-    const existing = await firestoreDb
-        .collection('schedules')
-        .where('passengerUid', '==', passengerUid)
-        .where('day',          '==', day)
-        .get()
-
-    if (!existing.empty) {
-        await existing.docs[0].ref.update({
-            pickupFromHome,
-            pickupFromCollege,
-            updatedAt: new Date().toISOString()
-        })
-        return { message: `Schedule updated for ${day}` }
-    }
-
-    await firestoreDb.collection('schedules').add({
-        passengerUid, day,
-        pickupFromHome, pickupFromCollege,
-        createdAt: new Date().toISOString()
-    })
-    return { message: `Schedule saved for ${day}` }
-}
-
-
-// ══════════════════════════════════════════════════
 //  PAYMENTS
 // ══════════════════════════════════════════════════
 
@@ -348,38 +303,6 @@ const getPayment = async (paymentId) => {
 }
 
 
-// ══════════════════════════════════════════════════
-//  SOS ALERTS
-// ══════════════════════════════════════════════════
-
-const createSOSAlert = async (busId, driverUid, message, lat, lng) => {
-    const ref = await firestoreDb.collection('sosAlerts').add({
-        busId, driverUid, message,
-        lat, lng,
-        status:    'active',
-        createdAt: new Date().toISOString()
-    })
-    return { message: 'SOS alert created', alertId: ref.id }
-}
-
-const getActiveSOSAlerts = async () => {
-    const snap = await firestoreDb
-        .collection('sosAlerts')
-        .where('status', '==', 'active')
-        .orderBy('createdAt', 'desc')
-        .get()
-    return snap.docs.map(d => ({ id: d.id, ...d.data() }))
-}
-
-const resolveSOSAlert = async (alertId) => {
-    await firestoreDb.collection('sosAlerts').doc(alertId).update({
-        status:     'resolved',
-        resolvedAt: new Date().toISOString()
-    })
-    return { message: 'SOS alert resolved' }
-}
-
-
 module.exports = {
     // Users
     getUser, updateUser, getAllByRole,
@@ -403,13 +326,7 @@ module.exports = {
     getTrip, boardPassenger, dropPassenger,
     completeStop, endTrip,
 
-    // Schedules
-    getScheduleByPassenger, saveSchedule,
-
     // Payments
     createPayment, getPaymentsByPassenger,
-    getAllPayments, getPayment,
-
-    // SOS
-    createSOSAlert, getActiveSOSAlerts, resolveSOSAlert
+    getAllPayments, getPayment
 }
