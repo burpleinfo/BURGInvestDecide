@@ -39,8 +39,10 @@ const corsOptions = {
 
         // Check if origin is allowed
         if (allowedOrigins.includes(origin)) {
-            // Explicitly return the origin, never return null for wildcard
-            return callback(null, origin)
+            // Allow this origin. Passing `true` tells the cors middleware
+            // to reflect the request's Origin header back in
+            // `Access-Control-Allow-Origin` (safer than using `*`).
+            return callback(null, true)
         }
 
         // Log blocked origin for debugging
@@ -48,16 +50,27 @@ const corsOptions = {
         return callback(new Error(`CORS blocked for origin: ${origin}`))
     },
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
-    exposedHeaders: ['Set-Cookie']
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'X-CSRF-Token'],
+    exposedHeaders: ['Set-Cookie', 'Access-Control-Allow-Origin']
 }
 
 // ── Middleware ─────────────────────────────────────
-app.use(helmet())
+// Configure Helmet to NOT set CORS headers - let cors() middleware handle it
+app.use(helmet({
+    crossOriginResourcePolicy: false,  // Disable helmet's CORS override
+    crossOriginOpenerPolicy: false     // Don't interfere with COOP
+}))
+// CORS MUST come before routes
 app.use(cors(corsOptions))
 app.options('*', cors(corsOptions))
 app.use(cookieParser())
 app.use(express.json())
+
+// Ensure the `Vary` header reflects that responses vary by Origin
+app.use((req, res, next) => {
+    res.vary('Origin')
+    next()
+})
 
 // ── Routes ─────────────────────────────────────────
 app.use('/auth',      require('./routes/authRoutes'))
