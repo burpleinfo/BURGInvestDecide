@@ -41,10 +41,6 @@ router.get('/burg-id',              ...passengerOnly, controller.getBurgId)
 router.get('/qr-code',              ...passengerOnly, controller.generateQR)
 router.post('/scan-qr',             ...passengerOnly, controller.scanQR)
 
-// ── Schedule Manager ──────────────────────────────
-router.get('/schedule',             ...passengerOnly, controller.getSchedule)
-router.post('/schedule',            ...passengerOnly, controller.saveSchedule)
-
 // ── Live Tracking (reads from Realtime DB) ────────
 router.get('/live-location/:busId', ...passengerOnly, controller.getLiveLocation)
 router.get('/eta/:busId',           ...passengerOnly, controller.getETA)
