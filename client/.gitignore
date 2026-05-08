@@ -12,6 +12,7 @@ dist
 dist-ssr
 *.local
 .env.production
+.env.local
 
 # Security
 .env

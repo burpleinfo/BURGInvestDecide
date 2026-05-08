@@ -25,13 +25,18 @@ import AdminSigninPage from './pages/AdminSigninPage';
 import AdminSignupPage from './pages/AdminSignupPage';
 import RequireAdmin from './routes/RequireAdmin';
 import { AdminAuthProvider } from './contexts/AdminAuthContext';
+import { DirectorAuthProvider } from './contexts/DirectorAuthContext';
+import DirectorDashboard from './director/DirectorDashboard';
+import DirectorSigninPage from './pages/DirectorSigninPage';
+import RequireDirector from './routes/RequireDirector';
 
 function AppContent() {
   const location = useLocation();
   const { toasts, removeToast } = useToast();
   const isAdminPage = location.pathname.startsWith('/admin');
-  const showNavbar = location.pathname !== "/signin" && location.pathname !== "/signup" && location.pathname !== "/register" && location.pathname !== "/forgot-password" && location.pathname !== "/reset-password" && location.pathname !== "/team/akash" && !location.pathname.startsWith("/ridesafe") && !isAdminPage;
-  const showCookieConsent = location.pathname !== "/team/akash" && !isAdminPage;
+  const isDirectorPage = location.pathname.startsWith('/director');
+  const showNavbar = location.pathname !== "/signin" && location.pathname !== "/signup" && location.pathname !== "/register" && location.pathname !== "/forgot-password" && location.pathname !== "/reset-password" && location.pathname !== "/team/akash" && !location.pathname.startsWith("/ridesafe") && !isAdminPage && !isDirectorPage;
+  const showCookieConsent = location.pathname !== "/team/akash" && !isAdminPage && !isDirectorPage;
   
   return (
     <>
@@ -63,6 +68,12 @@ function AppContent() {
         } />
         <Route path="/admin/login" element={<AdminSigninPage />} />
         <Route path="/admin/signup" element={<AdminSignupPage />} />
+        <Route path="/director" element={
+          <RequireDirector>
+            <DirectorDashboard />
+          </RequireDirector>
+        } />
+        <Route path="/director/login" element={<DirectorSigninPage />} />
       </Routes>
     </>
   );
@@ -73,7 +84,9 @@ function App() {
     <SearchProvider>
       <ToastProvider>
         <AdminAuthProvider>
-          <AppContent />
+          <DirectorAuthProvider>
+            <AppContent />
+          </DirectorAuthProvider>
         </AdminAuthProvider>
       </ToastProvider>
     </SearchProvider>

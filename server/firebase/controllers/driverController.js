@@ -244,39 +244,6 @@ const endTrip = async (req, res) => {
 }
 
 
-// ── SOS Alert (System Design #3) ──────────────────
-const triggerSOS = async (req, res) => {
-    try {
-        const { busId, message, lat, lng } = req.body
-        const driverUid = req.user.uid
-
-        // Save SOS alert to Firestore
-        await firestoreDb.collection('sosAlerts').add({
-            busId,
-            driverUid,
-            message:   message || 'SOS Alert triggered',
-            lat,
-            lng,
-            status:    'active',
-            createdAt: new Date().toISOString()
-        })
-
-        // Notify all admins immediately
-        const adminsSnap = await firestoreDb
-            .collection('users')
-            .where('role', '==', 'admin')
-            .get()
-
-        const adminUids = adminsSnap.docs.map(d => d.id)
-        await fcmService.notifySOS(adminUids, busId, message)
-
-        res.json({ message: 'SOS alert sent to admin' })
-
-    } catch (error) {
-        res.status(500).json({ error: error.message })
-    }
-}
-
 
 // ── Share ETA ─────────────────────────────────────
 const shareETA = async (req, res) => {
@@ -332,7 +299,6 @@ module.exports = {
     markAllBoarded,
     completeStop,
     endTrip,
-    triggerSOS,
     shareETA,
     getPassengers
 }

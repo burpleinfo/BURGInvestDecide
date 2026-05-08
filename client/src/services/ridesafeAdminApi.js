@@ -99,6 +99,33 @@ export const broadcastAlert = (payload, token) =>
 export const notifyDelay = (payload, token) =>
   request("/admin/notify-delay", { method: "POST", body: payload }, token);
 
+// ── Bus Operations ────────────────────────────────
+export const addBus = (payload, token) =>
+  request("/admin/add-bus", { method: "POST", body: payload }, token);
+
+export const updateBus = (busId, payload, token) =>
+  request(`/admin/update-bus/${busId}`, { method: "PUT", body: payload }, token);
+
+export const deleteBus = (busId, token) =>
+  request(`/admin/delete-bus/${busId}`, { method: "DELETE" }, token);
+
+// ── Route Operations ──────────────────────────────
+export const addRoute = (payload, token) =>
+  request("/admin/add-route", { method: "POST", body: payload }, token);
+
+export const updateRoute = (routeId, payload, token) =>
+  request(`/admin/update-route/${routeId}`, { method: "PUT", body: payload }, token);
+
+export const deleteRoute = (routeId, token) =>
+  request(`/admin/delete-route/${routeId}`, { method: "DELETE" }, token);
+
+// ── Trip Operations ───────────────────────────────
+export const startTrip = (payload, token) =>
+  request("/admin/start-trip", { method: "POST", body: payload }, token);
+
+export const getTripReport = (tripId, token) =>
+  request(`/admin/trip-report/${tripId}`, {}, token);
+
 export const adminSignup = (payload) =>
   request("/auth/admin-signup", { method: "POST", body: payload });
 

@@ -2,5 +2,9 @@
 .env.*
 !**/.env.example
 
+# Firebase service account secrets
+server/firebase/serviceAccountkey.json
+server/firebase/serviceAccountKey.json
+
 node_modules
 dist

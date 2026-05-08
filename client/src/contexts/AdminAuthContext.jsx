@@ -5,6 +5,7 @@ import {
   signOut as firebaseSignOut
 } from "firebase/auth";
 import { firebaseAuth } from "../services/firebaseClient";
+import { getAdminProfile } from "../services/ridesafeAdminApi";
 import {
   adminSignup,
   endAdminSession,
@@ -21,6 +22,25 @@ export const AdminAuthProvider = ({ children }) => {
   const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [adminProfile, setAdminProfile] = useState(null);
+
+  const loadAdminProfile = async (token) => {
+    if (!token) {
+      setAdminProfile(null);
+      return null;
+    }
+
+    try {
+      const profileResult = await getAdminProfile(token);
+      const profile = profileResult?.user || null;
+      setAdminProfile(profile);
+      return profile;
+    } catch (profileError) {
+      console.warn("[AdminAuth] Failed to load admin profile", profileError);
+      setAdminProfile(null);
+      return null;
+    }
+  };
 
   useEffect(() => {
     const unsubscribe = onIdTokenChanged(firebaseAuth, async (nextUser) => {
@@ -29,6 +49,7 @@ export const AdminAuthProvider = ({ children }) => {
         setIsAdmin(false);
         setIdToken("");
         setStoredAdminToken("");
+        setAdminProfile(null);
         setLoading(false);
         return;
       }
@@ -39,8 +60,16 @@ export const AdminAuthProvider = ({ children }) => {
 
         setUser(nextUser);
         setIsAdmin(role === "admin");
-        setIdToken(tokenResult.token || "");
-        setStoredAdminToken(tokenResult.token || "");
+
+        if (role === "admin") {
+          setIdToken(tokenResult.token || "");
+          setStoredAdminToken(tokenResult.token || "");
+          await loadAdminProfile(tokenResult.token || "");
+        } else {
+          setIdToken("");
+          setStoredAdminToken("");
+          setAdminProfile(null);
+        }
       } catch (authError) {
         setError(authError?.message || "Failed to refresh admin session.");
       } finally {
@@ -62,6 +91,11 @@ export const AdminAuthProvider = ({ children }) => {
     const tokenResult = await signedInUser.getIdTokenResult(true);
     const role = tokenResult.claims?.role || null;
 
+    if (role === "pendingAdmin") {
+      await firebaseSignOut(firebaseAuth);
+      throw new Error("Your admin request is pending director approval.");
+    }
+
     if (role !== "admin") {
       await firebaseSignOut(firebaseAuth);
       throw new Error("Access denied. Admin role required.");
@@ -71,6 +105,7 @@ export const AdminAuthProvider = ({ children }) => {
     setIdToken(tokenResult.token || "");
     setIsAdmin(true);
     setUser(signedInUser);
+    await loadAdminProfile(tokenResult.token || "");
 
     if (tokenResult.token) {
       await startAdminSession(tokenResult.token);
@@ -79,10 +114,10 @@ export const AdminAuthProvider = ({ children }) => {
     return signedInUser;
   };
 
-  const signUpAdmin = async ({ name, email, password, phone, inviteCode }) => {
+  const signUpAdmin = async ({ name, email, password, phone, inviteCode, institutionId, institutionName }) => {
     setError("");
-    await adminSignup({ name, email, password, phone, inviteCode });
-    return signInAdmin({ email, password });
+    await adminSignup({ name, email, password, phone, inviteCode, institutionId, institutionName });
+    return { email };
   };
 
   const signOutAdmin = async () => {
@@ -103,7 +138,11 @@ export const AdminAuthProvider = ({ children }) => {
   const value = useMemo(
     () => ({
       adminUser: user,
+      adminProfile,
       idToken,
+      // Backward-compatible keys used by components
+      adminToken: idToken,
+      adminUid: user?.uid || null,
       isAdmin,
       loading,
       error,
@@ -111,7 +150,7 @@ export const AdminAuthProvider = ({ children }) => {
       signUpAdmin,
       signOutAdmin
     }),
-    [user, idToken, isAdmin, loading, error]
+    [user, adminProfile, idToken, isAdmin, loading, error]
   );
 
   return (

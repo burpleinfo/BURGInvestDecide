@@ -43,10 +43,6 @@ router.post('/mark-all-boarded',        ...driverOnly, controller.markAllBoarded
 // ── Stops ─────────────────────────────────────────
 router.post('/complete-stop/:stopId',   ...driverOnly, controller.completeStop)
 
-// ── SOS (System Design #3 — Notification) ─────────
-// Triggers FCM to Admin + Office immediately
-router.post('/sos',                     ...driverOnly, controller.triggerSOS)
-
 // ── ETA Share ─────────────────────────────────────
 router.post('/share-eta',               ...driverOnly, controller.shareETA)
 

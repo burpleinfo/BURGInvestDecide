@@ -7,6 +7,9 @@ import {
   broadcastAlert,
   createDriver,
   createPassenger,
+  addBus,
+  addRoute,
+  startTrip,
   createLiveLocationsSocket,
   fetchAdminSnapshot,
   fetchLiveLocations,
@@ -344,6 +347,19 @@ const AdminDashboard = () => {
     delayMinutes: '',
     reason: ''
   });
+  const [busForm, setBusForm] = useState({
+    busNumber: '',
+    capacity: '',
+    routeId: ''
+  });
+  const [routeForm, setRouteForm] = useState({
+    name: '',
+    stops: ''
+  });
+  const [tripForm, setTripForm] = useState({
+    busId: '',
+    driverId: ''
+  });
   const liveSocketRef = useRef(null);
   const mapContainerRef = useRef(null);
   const mapInstanceRef = useRef(null);
@@ -546,9 +562,9 @@ const AdminDashboard = () => {
     const onlineCount = vehicles.filter((vehicle) => vehicle.status === 'On Route').length;
 
     return {
-      id: 'burg-ridesafe',
-      name: 'BURG RideSafe',
-      city: 'Fleet Operations',
+      id: adminProfile?.institutionId || 'burg-ridesafe',
+      name: adminProfile?.institutionName || 'BURG RideSafe',
+      city: adminProfile?.institutionCity || 'Fleet Operations',
       adminName: adminProfile?.name || 'Admin operator',
       contactEmail: adminProfile?.email || 'admin@burg.io',
       stats: {
@@ -614,11 +630,40 @@ const AdminDashboard = () => {
   const openActionPanel = (panel) => {
     setActionStatus({ loading: false, error: '' });
     setActionPanel(panel);
+
+    if ((panel === 'driver' || panel === 'passenger') && buses.length > 0) {
+      const firstBusId = buses[0].id || '';
+      if (panel === 'driver') {
+        setDriverForm((prev) => ({ ...prev, busId: prev.busId || firstBusId }));
+      }
+      if (panel === 'passenger') {
+        setPassengerForm((prev) => ({ ...prev, busId: prev.busId || firstBusId }));
+      }
+    }
   };
+
+  useEffect(() => {
+    if (!actionPanel || buses.length === 0) {
+      return;
+    }
+
+    const firstBusId = buses[0].id || '';
+
+    if (actionPanel === 'driver' && !driverForm.busId) {
+      setDriverForm((prev) => ({ ...prev, busId: firstBusId }));
+    }
+
+    if (actionPanel === 'passenger' && !passengerForm.busId) {
+      setPassengerForm((prev) => ({ ...prev, busId: firstBusId }));
+    }
+  }, [actionPanel, buses, driverForm.busId, passengerForm.busId]);
 
   const handleCreateDriver = async (event) => {
     event.preventDefault();
     setActionStatus({ loading: true, error: '' });
+
+    const selectedBus = buses.find((item) => item.id === driverForm.busId);
+    const selectedRoute = routes.find((item) => item.id === selectedBus?.routeId);
 
     try {
       await createDriver({
@@ -627,7 +672,13 @@ const AdminDashboard = () => {
         password: driverForm.password,
         phone: driverForm.phone,
         licenseNo: driverForm.licenseNo,
-        busId: driverForm.busId
+        busId: driverForm.busId,
+        institutionId: institution.id,
+        institutionName: institution.name,
+        routeId: selectedRoute?.id || selectedBus?.routeId || null,
+        routeName: selectedRoute?.name || null,
+        locationId: selectedRoute?.id || selectedBus?.routeId || null,
+        locationName: selectedRoute?.name || null
       }, adminToken);
 
       addToast('Driver created successfully.', 'success', 3000);
@@ -646,6 +697,12 @@ const AdminDashboard = () => {
     event.preventDefault();
     setActionStatus({ loading: true, error: '' });
 
+    const selectedBus = buses.find((item) => item.id === passengerForm.busId);
+    const selectedRoute = routes.find((item) => item.id === selectedBus?.routeId);
+    const selectedStop = selectedRoute?.stops?.find?.(
+      (item) => item.id === passengerForm.stopId || item.name === passengerForm.stopId
+    );
+
     try {
       await createPassenger({
         name: passengerForm.name,
@@ -654,7 +711,13 @@ const AdminDashboard = () => {
         phone: passengerForm.phone,
         busId: passengerForm.busId,
         stopId: passengerForm.stopId,
-        parentPhone: passengerForm.parentPhone
+        parentPhone: passengerForm.parentPhone,
+        institutionId: institution.id,
+        institutionName: institution.name,
+        routeId: selectedRoute?.id || selectedBus?.routeId || null,
+        routeName: selectedRoute?.name || null,
+        locationId: selectedStop?.id || passengerForm.stopId || null,
+        locationName: selectedStop?.name || passengerForm.stopId || null
       }, adminToken);
 
       addToast('Passenger created successfully.', 'success', 3000);
@@ -707,6 +770,84 @@ const AdminDashboard = () => {
       setActionPanel('');
     } catch (error) {
       setActionStatus({ loading: false, error: error?.message || 'Failed to send delay alert.' });
+      return;
+    }
+
+    setActionStatus((prev) => ({ ...prev, loading: false }));
+  };
+
+  const handleAddBus = async (event) => {
+    event.preventDefault();
+    setActionStatus({ loading: true, error: '' });
+
+    try {
+      await addBus({
+        busNumber: busForm.busNumber,
+        capacity: Number(busForm.capacity || 40),
+        routeId: busForm.routeId,
+        institutionId: institution.id,
+        institutionName: institution.name
+      }, adminToken);
+
+      addToast('Bus added successfully.', 'success', 3000);
+      setBusForm({ busNumber: '', capacity: '', routeId: '' });
+      setActionPanel('');
+      refreshDashboard();
+    } catch (error) {
+      setActionStatus({ loading: false, error: error?.message || 'Failed to add bus.' });
+      return;
+    }
+
+    setActionStatus((prev) => ({ ...prev, loading: false }));
+  };
+
+  const handleAddRoute = async (event) => {
+    event.preventDefault();
+    setActionStatus({ loading: true, error: '' });
+
+    try {
+      const stopsList = routeForm.stops
+        .split('\n')
+        .filter(s => s.trim())
+        .map((name, idx) => ({ id: `stop-${idx}`, name: name.trim() }));
+
+      await addRoute({
+        name: routeForm.name,
+        stops: stopsList,
+        institutionId: institution.id,
+        institutionName: institution.name
+      }, adminToken);
+
+      addToast('Route added successfully.', 'success', 3000);
+      setRouteForm({ name: '', stops: '' });
+      setActionPanel('');
+      refreshDashboard();
+    } catch (error) {
+      setActionStatus({ loading: false, error: error?.message || 'Failed to add route.' });
+      return;
+    }
+
+    setActionStatus((prev) => ({ ...prev, loading: false }));
+  };
+
+  const handleStartTrip = async (event) => {
+    event.preventDefault();
+    setActionStatus({ loading: true, error: '' });
+
+    try {
+      await startTrip({
+        busId: tripForm.busId,
+        driverId: tripForm.driverId,
+        institutionId: institution.id,
+        institutionName: institution.name
+      }, adminToken);
+
+      addToast('Trip started successfully.', 'success', 3000);
+      setTripForm({ busId: '', driverId: '' });
+      setActionPanel('');
+      refreshDashboard();
+    } catch (error) {
+      setActionStatus({ loading: false, error: error?.message || 'Failed to start trip.' });
       return;
     }
 
@@ -901,7 +1042,7 @@ const AdminDashboard = () => {
         }
       `}</style>
 
-      <div className="mx-auto max-w-[1400px] px-6 pb-16 pt-10">
+      <div className="mx-auto max-w-350 px-6 pb-16 pt-10">
           <header className="admin-fade-up admin-card rounded-3xl p-6">
             <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
               <div className="space-y-3">
@@ -945,6 +1086,27 @@ const AdminDashboard = () => {
                     onClick={() => openActionPanel('driver')}
                   >
                     Add driver
+                  </button>
+                  <button
+                    type="button"
+                    className="admin-button rounded-xl px-4 py-2 text-sm"
+                    onClick={() => openActionPanel('bus')}
+                  >
+                    Add bus
+                  </button>
+                  <button
+                    type="button"
+                    className="admin-button rounded-xl px-4 py-2 text-sm"
+                    onClick={() => openActionPanel('route')}
+                  >
+                    Add route
+                  </button>
+                  <button
+                    type="button"
+                    className="admin-button rounded-xl px-4 py-2 text-sm"
+                    onClick={() => openActionPanel('trip')}
+                  >
+                    Start trip
                   </button>
                   <button
                     type="button"
@@ -1006,9 +1168,15 @@ const AdminDashboard = () => {
                     ? 'Create driver'
                     : actionPanel === 'passenger'
                       ? 'Create passenger'
-                      : actionPanel === 'delay'
-                        ? 'Notify delay'
-                        : 'Broadcast alert'
+                      : actionPanel === 'bus'
+                        ? 'Add bus'
+                        : actionPanel === 'route'
+                          ? 'Add route'
+                          : actionPanel === 'trip'
+                            ? 'Start trip'
+                            : actionPanel === 'delay'
+                              ? 'Notify delay'
+                              : 'Broadcast alert'
                 }
                 subtitle="Quick actions"
                 action={
@@ -1088,6 +1256,11 @@ const AdminDashboard = () => {
                         </option>
                       ))}
                     </select>
+                    <p className="mt-2 text-xs admin-muted">
+                      {driverForm.busId
+                        ? `Driver will inherit the bus route as location for ${institution.name}.`
+                        : 'Pick a bus to scope the driver to the correct route and institution.'}
+                    </p>
                   </div>
                   <div className="sm:col-span-2 flex flex-wrap gap-2">
                     <button type="button" className="admin-button-secondary rounded-xl px-4 py-2 text-sm" onClick={() => setActionPanel('')}>
@@ -1182,6 +1355,11 @@ const AdminDashboard = () => {
                         placeholder="Stop ID"
                       />
                     )}
+                    <p className="mt-2 text-xs admin-muted">
+                      {passengerForm.stopId
+                        ? `Passenger will be stored under ${institution.name} at the selected stop location.`
+                        : 'Choose a bus first, then assign the passenger to a stop location.'}
+                    </p>
                   </div>
                   <div>
                     <label className="admin-label">Parent phone</label>
@@ -1306,6 +1484,149 @@ const AdminDashboard = () => {
                   </div>
                 </form>
               ) : null}
+
+              {actionPanel === 'bus' ? (
+                <form onSubmit={handleAddBus} className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
+                  <div>
+                    <label className="admin-label">Bus number</label>
+                    <input
+                      value={busForm.busNumber}
+                      onChange={(event) => setBusForm((prev) => ({ ...prev, busNumber: event.target.value }))}
+                      className="admin-input mt-2 w-full rounded-xl px-3 py-2 text-sm"
+                      placeholder="e.g., KA01AB1023"
+                    />
+                  </div>
+                  <div>
+                    <label className="admin-label">Capacity</label>
+                    <input
+                      type="number"
+                      value={busForm.capacity}
+                      onChange={(event) => setBusForm((prev) => ({ ...prev, capacity: event.target.value }))}
+                      className="admin-input mt-2 w-full rounded-xl px-3 py-2 text-sm"
+                      placeholder="40"
+                      min="1"
+                    />
+                  </div>
+                  <div className="sm:col-span-2">
+                    <label className="admin-label">Assign route</label>
+                    <select
+                      value={busForm.routeId}
+                      onChange={(event) => setBusForm((prev) => ({ ...prev, routeId: event.target.value }))}
+                      className="admin-input mt-2 w-full rounded-xl px-3 py-2 text-sm"
+                    >
+                      <option value="">Select route</option>
+                      {routes.map((route) => (
+                        <option key={route.id} value={route.id}>
+                          {route.name || route.id}
+                        </option>
+                      ))}
+                    </select>
+                    <p className="mt-2 text-xs admin-muted">
+                      {busForm.routeId
+                        ? `Bus will be assigned to the selected route in ${institution.name}.`
+                        : 'Choose a route to assign this bus to a specific location.'}
+                    </p>
+                  </div>
+                  <div className="sm:col-span-2 flex flex-wrap gap-2">
+                    <button type="button" className="admin-button-secondary rounded-xl px-4 py-2 text-sm" onClick={() => setActionPanel('')}>
+                      Cancel
+                    </button>
+                    <button
+                      type="submit"
+                      className="admin-button-primary rounded-xl px-4 py-2 text-sm"
+                      disabled={actionStatus.loading || !busForm.busNumber || !busForm.capacity}
+                    >
+                      {actionStatus.loading ? 'Adding...' : 'Add bus'}
+                    </button>
+                  </div>
+                </form>
+              ) : null}
+
+              {actionPanel === 'route' ? (
+                <form onSubmit={handleAddRoute} className="mt-6 grid grid-cols-1 gap-4">
+                  <div>
+                    <label className="admin-label">Route name</label>
+                    <input
+                      value={routeForm.name}
+                      onChange={(event) => setRouteForm((prev) => ({ ...prev, name: event.target.value }))}
+                      className="admin-input mt-2 w-full rounded-xl px-3 py-2 text-sm"
+                      placeholder="e.g., North Loop"
+                    />
+                  </div>
+                  <div>
+                    <label className="admin-label">Stops (one per line)</label>
+                    <textarea
+                      value={routeForm.stops}
+                      onChange={(event) => setRouteForm((prev) => ({ ...prev, stops: event.target.value }))}
+                      className="admin-input mt-2 w-full rounded-xl px-3 py-2 text-sm"
+                      placeholder="Indiranagar Gate 2&#10;RMZ Junction&#10;Old Airport Road"
+                      rows={5}
+                    />
+                    <p className="mt-2 text-xs admin-muted">
+                      Enter one stop name per line. These stops will be available when assigning passengers.
+                    </p>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    <button type="button" className="admin-button-secondary rounded-xl px-4 py-2 text-sm" onClick={() => setActionPanel('')}>
+                      Cancel
+                    </button>
+                    <button
+                      type="submit"
+                      className="admin-button-primary rounded-xl px-4 py-2 text-sm"
+                      disabled={actionStatus.loading || !routeForm.name || !routeForm.stops}
+                    >
+                      {actionStatus.loading ? 'Adding...' : 'Add route'}
+                    </button>
+                  </div>
+                </form>
+              ) : null}
+
+              {actionPanel === 'trip' ? (
+                <form onSubmit={handleStartTrip} className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
+                  <div>
+                    <label className="admin-label">Bus</label>
+                    <select
+                      value={tripForm.busId}
+                      onChange={(event) => setTripForm((prev) => ({ ...prev, busId: event.target.value }))}
+                      className="admin-input mt-2 w-full rounded-xl px-3 py-2 text-sm"
+                    >
+                      <option value="">Select bus</option>
+                      {buses.map((bus) => (
+                        <option key={bus.id} value={bus.id}>
+                          {bus.busNumber || bus.id}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="admin-label">Driver (optional)</label>
+                    <select
+                      value={tripForm.driverId}
+                      onChange={(event) => setTripForm((prev) => ({ ...prev, driverId: event.target.value }))}
+                      className="admin-input mt-2 w-full rounded-xl px-3 py-2 text-sm"
+                    >
+                      <option value="">Select driver</option>
+                      {drivers.map((driver) => (
+                        <option key={driver.id} value={driver.id}>
+                          {driver.name || driver.id}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="sm:col-span-2 flex flex-wrap gap-2">
+                    <button type="button" className="admin-button-secondary rounded-xl px-4 py-2 text-sm" onClick={() => setActionPanel('')}>
+                      Cancel
+                    </button>
+                    <button
+                      type="submit"
+                      className="admin-button-primary rounded-xl px-4 py-2 text-sm"
+                      disabled={actionStatus.loading || !tripForm.busId}
+                    >
+                      {actionStatus.loading ? 'Starting...' : 'Start trip'}
+                    </button>
+                  </div>
+                </form>
+              ) : null}
             </section>
           ) : null}
 
@@ -1339,7 +1660,7 @@ const AdminDashboard = () => {
                 }
               />
 
-              <div className="admin-grid relative mt-6 h-[360px] overflow-hidden rounded-2xl border border-[#B8C3D7]">
+              <div className="admin-grid relative mt-6 h-90 overflow-hidden rounded-2xl border border-[#B8C3D7]">
                 <div ref={mapContainerRef} className="h-full w-full" />
 
                 {mapStatus.status === 'loading' && (
@@ -1632,3 +1953,5 @@ const AdminDashboard = () => {
 };
 
 export default AdminDashboard;
+
+
