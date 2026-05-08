@@ -7,7 +7,6 @@ const dotenv     = require('dotenv')
 const path       = require('path')
 const http       = require('http')
 const cookieParser = require('cookie-parser')
-const auditLogger = require('./middleware/auditLogger')
 const { startLiveLocationsSocket } = require('./websocket/liveLocationsSocket')
 
 dotenv.config({ path: path.join(__dirname, '..', '.env') })
@@ -77,11 +76,9 @@ app.use('/auth',      require('./routes/authRoutes'))
 app.use('/driver',    require('./routes/driverRoutes'))
 app.use('/passenger', require('./routes/passengerRoutes'))
 app.use('/payment',   require('./routes/paymentRoutes'))
-app.use('/admin',     auditLogger('admin.request', {
-    shouldLog: (req) => !(req.method === 'GET' && req.originalUrl.includes('/admin/all-locations'))
-}), require('./routes/adminRoutes'))
-app.use('/director',  auditLogger('director.request'), require('./routes/directorRoutes'))
-app.use('/institution', auditLogger('institution.request'), require('./routes/institutionRoutes'))
+app.use('/admin',     require('./routes/adminRoutes'))
+app.use('/director',  require('./routes/directorRoutes'))
+app.use('/institution', require('./routes/institutionRoutes'))
 
 // ── Health Check ───────────────────────────────────
 app.get('/', (req, res) => {

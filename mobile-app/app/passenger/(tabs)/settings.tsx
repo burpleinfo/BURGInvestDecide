@@ -8,10 +8,12 @@ import { AppCard } from '@/components/common/AppCard';
 import { AppHeader } from '@/components/common/AppHeader';
 import { Screen } from '@/components/common/Screen';
 import { AppColors, Fonts } from '@/constants/theme';
+import { usePassenger } from '@/contexts/PassengerContext';
 import { faqs } from '@/data/appData';
 
 export default function PassengerSettingsScreen() {
   const router = useRouter();
+  const { passenger } = usePassenger();
   const [pushNotifications, setPushNotifications] = useState(true);
   const [shareLocation, setShareLocation] = useState(true);
   const [expanded, setExpanded] = useState<number | null>(null);
@@ -19,6 +21,23 @@ export default function PassengerSettingsScreen() {
   return (
     <Screen scroll contentStyle={styles.content}>
       <AppHeader title="Settings & Support" subtitle="Manage preferences and get help" />
+
+      <AppCard>
+        <Text style={styles.sectionTitle}>Profile</Text>
+        <View style={styles.profileRow}>
+          <Text style={styles.profileLabel}>Name</Text>
+          <Text style={styles.profileValue}>{passenger?.name || 'Not specified'}</Text>
+        </View>
+        <View style={styles.profileRow}>
+          <Text style={styles.profileLabel}>BURG ID</Text>
+          <Text style={styles.profileValue}>{passenger?.burgId || 'Not assigned'}</Text>
+        </View>
+        <View style={styles.profileRow}>
+          <Text style={styles.profileLabel}>Pickup stop</Text>
+          <Text style={styles.profileValue}>{passenger?.pickupStop || 'Not assigned'}</Text>
+        </View>
+        <AppButton title="Edit profile" variant="outline" onPress={() => router.push('/passenger/edit-profile')} />
+      </AppCard>
 
       <AppCard>
         <Text style={styles.sectionTitle}>Settings</Text>
@@ -106,6 +125,21 @@ const styles = StyleSheet.create({
     color: AppColors.text,
     flex: 1,
     paddingRight: 12,
+  },
+  profileRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 10,
+  },
+  profileLabel: {
+    fontSize: 12,
+    color: AppColors.muted,
+  },
+  profileValue: {
+    fontSize: 13,
+    color: AppColors.text,
+    fontWeight: '600',
   },
   supportRow: {
     backgroundColor: AppColors.teal,

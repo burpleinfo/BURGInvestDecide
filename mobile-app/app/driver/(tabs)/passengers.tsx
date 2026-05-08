@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
@@ -7,88 +7,99 @@ import { AppCard } from '@/components/common/AppCard';
 import { AppHeader } from '@/components/common/AppHeader';
 import { Screen } from '@/components/common/Screen';
 import { AppColors, Fonts } from '@/constants/theme';
-import { driverPassengers } from '@/data/appData';
+import { useDriver } from '@/contexts/DriverContext';
 
 export default function DriverPassengersScreen() {
+  const { passengers } = useDriver();
   const [checked, setChecked] = useState<Record<string, boolean>>(
-    driverPassengers.reduce((acc, passenger) => {
-      acc[passenger.name] = false;
+    passengers.reduce((acc, passenger) => {
+      acc[passenger.uid] = false;
       return acc;
     }, {} as Record<string, boolean>)
   );
 
-  const togglePassenger = (name: string) => {
-    setChecked((prev) => ({ ...prev, [name]: !prev[name] }));
+  useEffect(() => {
+    setChecked((prev) => {
+      const next: Record<string, boolean> = {};
+      passengers.forEach((passenger) => {
+        next[passenger.uid] = prev[passenger.uid] || false;
+      });
+      return next;
+    });
+  }, [passengers]);
+
+  const togglePassenger = (uid: string) => {
+    setChecked((prev) => ({ ...prev, [uid]: !prev[uid] }));
   };
 
   const markAll = () => {
     const next: Record<string, boolean> = {};
-    driverPassengers.forEach((passenger) => {
-      next[passenger.name] = true;
+    passengers.forEach((passenger) => {
+      next[passenger.uid] = true;
     });
     setChecked(next);
   };
 
-  const boardedCount = driverPassengers.filter((passenger) => checked[passenger.name]).length;
+  const boardedCount = passengers.filter((passenger) => checked[passenger.uid]).length;
 
   return (
     <Screen scroll contentStyle={styles.content}>
       <AppHeader
         title="Passengers on board"
-        subtitle={`${boardedCount} boarded · ${driverPassengers.length} total`}
+        subtitle={`${boardedCount} boarded · ${passengers.length} total`}
       />
 
-      {driverPassengers.map((passenger) => (
-        <AppCard key={passenger.name}>
+      {passengers.map((passenger) => (
+        <AppCard key={passenger.uid}>
           <View style={styles.passengerHeader}>
             <View>
               <Text style={styles.passengerName}>{passenger.name}</Text>
               <Text style={styles.passengerMeta}>
-                Age {passenger.age} · {passenger.grade}
+                BURG ID {passenger.burgId || 'N/A'}
               </Text>
             </View>
             <View style={styles.statusGroup}>
               <View
                 style={[
                   styles.statusBadge,
-                  checked[passenger.name] ? styles.statusBoarded : styles.statusAbsent,
+                  checked[passenger.uid] ? styles.statusBoarded : styles.statusAbsent,
                 ]}>
                 <Text
                   style={[
                     styles.statusText,
-                    checked[passenger.name] ? styles.statusTextBoarded : styles.statusTextAbsent,
+                    checked[passenger.uid] ? styles.statusTextBoarded : styles.statusTextAbsent,
                   ]}>
-                  {checked[passenger.name] ? 'Boarded' : 'Absent'}
+                  {checked[passenger.uid] ? 'Boarded' : 'Absent'}
                 </Text>
               </View>
-              <Pressable onPress={() => togglePassenger(passenger.name)}>
+              <Pressable onPress={() => togglePassenger(passenger.uid)}>
                 <Ionicons
-                  name={checked[passenger.name] ? 'checkbox' : 'square-outline'}
+                  name={checked[passenger.uid] ? 'checkbox' : 'square-outline'}
                   size={26}
-                  color={checked[passenger.name] ? AppColors.teal : AppColors.muted}
+                  color={checked[passenger.uid] ? AppColors.teal : AppColors.muted}
                 />
               </Pressable>
             </View>
           </View>
 
-          {passenger.medical ? (
+          {passenger.pickupStop ? (
             <View style={styles.medicalBadge}>
-              <Ionicons name="alert" size={14} color={AppColors.red} />
-              <Text style={styles.medicalText}>{passenger.medical}</Text>
+              <Ionicons name="location" size={14} color={AppColors.red} />
+              <Text style={styles.medicalText}>Pickup: {passenger.pickupStop}</Text>
             </View>
           ) : null}
 
           <View style={styles.infoRow}>
-            <Text style={styles.infoLabel}>Pickup:</Text>
-            <Text style={styles.infoValue}>{passenger.pickup}</Text>
+            <Text style={styles.infoLabel}>Dropoff:</Text>
+            <Text style={styles.infoValue}>{passenger.dropoffStop || 'Not assigned'}</Text>
           </View>
           <View style={styles.infoRow}>
             <Text style={styles.infoLabel}>Parent:</Text>
-            <Text style={styles.infoValue}>{passenger.parent}</Text>
+            <Text style={styles.infoValue}>{passenger.parentPhone || 'Not assigned'}</Text>
           </View>
           <View style={styles.infoRow}>
-            <Text style={styles.infoLabel}>Emergency:</Text>
-            <Text style={styles.infoValue}>{passenger.emergency}</Text>
+            <Text style={styles.infoLabel}>Contact:</Text>
+            <Text style={styles.infoValue}>{passenger.phone || 'Not specified'}</Text>
           </View>
         </AppCard>
       ))}
