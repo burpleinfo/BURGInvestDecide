@@ -8,6 +8,7 @@ import { AppCard } from '@/components/common/AppCard';
 import { AppHeader } from '@/components/common/AppHeader';
 import { Screen } from '@/components/common/Screen';
 import { AppColors, Fonts } from '@/constants/theme';
+import { usePassenger } from '@/contexts/PassengerContext';
 
 const TRACKING_REGION = {
   latitude: 37.7749,
@@ -27,23 +28,30 @@ const PICKUP_POINT = BUS_ROUTE[0];
 
 export default function PassengerTrackingScreen() {
   const router = useRouter();
+  const { passenger, route } = usePassenger();
+  const routeCoordinates = (route?.stops || [])
+    .filter((stop) => typeof stop.lat === 'number' && typeof stop.lng === 'number')
+    .map((stop) => ({ latitude: stop.lat as number, longitude: stop.lng as number }));
+  const mapPath = routeCoordinates.length >= 2 ? routeCoordinates : BUS_ROUTE;
+  const busPosition = mapPath[Math.min(1, mapPath.length - 1)] || BUS_POSITION;
+  const pickupPoint = mapPath[0] || PICKUP_POINT;
 
   return (
     <Screen scroll contentStyle={styles.content}>
-      <AppHeader title="Live Tracking" subtitle="Real-time bus location" />
+      <AppHeader title="Live Tracking" subtitle={route?.name || passenger?.route || 'Real-time bus location'} />
 
       <AppCard>
-        <Text style={styles.sectionTitle}>Real-time Map View</Text>
+        <Text style={styles.sectionTitle}>{route?.name || passenger?.route || 'Real-time Map View'}</Text>
         <View style={styles.mapCard}>
           <MapView style={styles.map} provider={PROVIDER_GOOGLE} initialRegion={TRACKING_REGION}>
-            <Polyline coordinates={BUS_ROUTE} strokeColor={AppColors.teal} strokeWidth={4} />
-            <Marker coordinate={PICKUP_POINT} title="Pickup" pinColor={AppColors.teal} />
-            <Marker coordinate={BUS_POSITION} title="Bus" pinColor={AppColors.orange} />
+            <Polyline coordinates={mapPath} strokeColor={AppColors.teal} strokeWidth={4} />
+            <Marker coordinate={pickupPoint} title="Pickup" pinColor={AppColors.teal} />
+            <Marker coordinate={busPosition} title="Bus" pinColor={AppColors.orange} />
           </MapView>
         </View>
         <View style={styles.infoRow}>
           <Text style={styles.infoLabel}>Current Location</Text>
-          <Text style={styles.infoValue}>Main Street & 3rd Avenue</Text>
+          <Text style={styles.infoValue}>{route?.stops?.[1]?.name || passenger?.pickupStop || 'Main Street & 3rd Avenue'}</Text>
         </View>
         <View style={styles.infoRow}>
           <Text style={styles.infoLabel}>ETA</Text>
@@ -56,8 +64,8 @@ export default function PassengerTrackingScreen() {
       <AppCard>
         <View style={styles.driverRow}>
           <View>
-            <Text style={styles.driverName}>Mike Anderson</Text>
-            <Text style={styles.driverMeta}>BUS-342</Text>
+            <Text style={styles.driverName}>{passenger?.name || 'Passenger'}</Text>
+            <Text style={styles.driverMeta}>{passenger?.busNumber || 'BUS-342'}</Text>
           </View>
           <View style={styles.callButton}>
             <Ionicons name="call" size={18} color={AppColors.card} />
@@ -81,15 +89,15 @@ export default function PassengerTrackingScreen() {
         <Text style={styles.sectionTitle}>Trip Info</Text>
         <View style={styles.infoRow}>
           <Text style={styles.infoLabel}>Next stop</Text>
-          <Text style={styles.infoValue}>Oak Street</Text>
+          <Text style={styles.infoValue}>{route?.stops?.[0]?.name || passenger?.pickupStop || 'Oak Street'}</Text>
         </View>
         <View style={styles.infoRow}>
           <Text style={styles.infoLabel}>Passengers waiting</Text>
-          <Text style={styles.infoValue}>2</Text>
+          <Text style={styles.infoValue}>{route?.stops?.[0]?.passengers ?? 2}</Text>
         </View>
         <View style={styles.infoRow}>
           <Text style={styles.infoLabel}>Stops completed</Text>
-          <Text style={styles.infoValue}>2 of 4</Text>
+          <Text style={styles.infoValue}>{Math.max(mapPath.length - 1, 0)} of {mapPath.length}</Text>
         </View>
       </AppCard>
     </Screen>

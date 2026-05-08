@@ -8,9 +8,11 @@ import { AppCard } from '@/components/common/AppCard';
 import { AppHeader } from '@/components/common/AppHeader';
 import { Screen } from '@/components/common/Screen';
 import { AppColors, Fonts } from '@/constants/theme';
+import { useDriver } from '@/contexts/DriverContext';
 
 export default function DriverSettingsScreen() {
   const router = useRouter();
+  const { driver } = useDriver();
   const [shareLocation, setShareLocation] = useState(true);
   const [notifications, setNotifications] = useState({
     routes: true,
@@ -69,12 +71,78 @@ export default function DriverSettingsScreen() {
         <Text style={styles.sectionTitle}>Profile</Text>
         <View style={styles.field}>
           <Text style={styles.label}>Driver Name</Text>
-          <TextInput value="Mike Anderson" editable={false} style={styles.input} />
+          <TextInput 
+            value={driver?.name || 'Not specified'} 
+            editable={false} 
+            style={styles.input} 
+          />
+        </View>
+        <View style={styles.field}>
+          <Text style={styles.label}>Email</Text>
+          <TextInput 
+            value={driver?.email || 'Not specified'} 
+            editable={false} 
+            style={styles.input} 
+          />
+        </View>
+        <View style={styles.field}>
+          <Text style={styles.label}>Institution</Text>
+          <TextInput
+            value={driver?.institutionName || driver?.institutionId || 'Not assigned'}
+            editable={false}
+            style={styles.input}
+          />
         </View>
         <View style={styles.field}>
           <Text style={styles.label}>Contact Number</Text>
-          <TextInput value="+1-555-0199" editable={false} style={styles.input} />
+          <TextInput 
+            value={driver?.phone || 'Not specified'} 
+            editable={false} 
+            style={styles.input} 
+          />
         </View>
+        <View style={styles.field}>
+          <Text style={styles.label}>Bus Number</Text>
+          <TextInput 
+            value={driver?.busNumber || 'Not specified'} 
+            editable={false} 
+            style={styles.input} 
+          />
+        </View>
+        <View style={styles.field}>
+          <Text style={styles.label}>License Number</Text>
+          <TextInput 
+            value={driver?.licenseNumber || 'Not specified'} 
+            editable={false} 
+            style={styles.input} 
+          />
+        </View>
+        <View style={styles.field}>
+          <Text style={styles.label}>License Expiry</Text>
+          <TextInput 
+            value={driver?.licenseExpiry || 'Not specified'} 
+            editable={false} 
+            style={styles.input} 
+          />
+        </View>
+        <View style={styles.field}>
+          <Text style={styles.label}>Assigned Route</Text>
+          <TextInput
+            value={driver?.assignedRoute || driver?.route || 'Not specified'}
+            editable={false}
+            style={styles.input}
+          />
+        </View>
+        <View style={styles.field}>
+          <Text style={styles.label}>Driver Token</Text>
+          <TextInput
+            value={driver?.driverToken || 'Not available'}
+            editable={false}
+            style={styles.input}
+            numberOfLines={2}
+          />
+        </View>
+        <AppButton title="Edit profile" variant="outline" onPress={() => router.push('/driver/edit-profile')} />
         <AppButton title="Change PIN" variant="outline" />
       </AppCard>
 

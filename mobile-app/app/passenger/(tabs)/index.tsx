@@ -1,6 +1,5 @@
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useState } from 'react';
 import { useRouter } from 'expo-router';
 
 import { AppButton } from '@/components/common/AppButton';
@@ -9,35 +8,39 @@ import { AppHeader } from '@/components/common/AppHeader';
 import { Screen } from '@/components/common/Screen';
 import { useToast } from '@/components/common/Toast';
 import { AppColors, Fonts } from '@/constants/theme';
-import {
-  passengerAfternoonTimes,
-  passengerDays,
-  passengerMorningTimes,
-} from '@/data/appData';
+import { usePassenger } from '@/contexts/PassengerContext';
 
 export default function PassengerHomeScreen() {
   const router = useRouter();
   const { showToast } = useToast();
-  const [selectedDay, setSelectedDay] = useState(passengerDays[0]);
-  const [morning, setMorning] = useState(passengerMorningTimes[0]);
-  const [afternoon, setAfternoon] = useState(passengerAfternoonTimes[0]);
+  const { passenger, route } = usePassenger();
+
+  const initials = (passenger?.name || 'Passenger')
+    .split(' ')
+    .map((part) => part[0])
+    .join('')
+    .toUpperCase()
+    .slice(0, 2) || 'P';
 
   return (
     <Screen scroll contentStyle={styles.content}>
       <AppHeader
-        title="Hello, Emma"
-        subtitle="Your route updates are live"
-        rightSlot={<View style={styles.avatar}><Text style={styles.avatarText}>EJ</Text></View>}
+        title={`Hello, ${passenger?.name || 'Passenger'}`}
+        subtitle={passenger?.route || route?.name || 'Your route updates are live'}
+        rightSlot={<View style={styles.avatar}><Text style={styles.avatarText}>{initials}</Text></View>}
       />
 
       <AppCard style={styles.burgCard}>
         <Text style={styles.burgLabel}>Your BURG ID</Text>
         <View style={styles.burgRow}>
-          <Text style={styles.burgId}>BURG-8823</Text>
+          <Text style={styles.burgId}>{passenger?.burgId || 'Not assigned'}</Text>
           <Pressable onPress={() => showToast('BURG ID copied', 'success')}>
             <Ionicons name="copy" size={18} color={AppColors.card} />
           </Pressable>
         </View>
+        <Text style={styles.burgMeta}>
+          {passenger?.institutionName || passenger?.institutionId || 'Institution not assigned'}
+        </Text>
       </AppCard>
 
       <AppButton
@@ -47,52 +50,37 @@ export default function PassengerHomeScreen() {
       />
 
       <AppCard>
-        <Text style={styles.sectionTitle}>Schedule Manager</Text>
+        <Text style={styles.sectionTitle}>Trip Summary</Text>
+        <View style={styles.infoRow}>
+          <Text style={styles.infoLabel}>Pickup stop</Text>
+          <Text style={styles.infoValue}>{passenger?.pickupStop || 'Not assigned'}</Text>
+        </View>
+        <View style={styles.infoRow}>
+          <Text style={styles.infoLabel}>Dropoff stop</Text>
+          <Text style={styles.infoValue}>{passenger?.dropoffStop || 'Not assigned'}</Text>
+        </View>
+        <View style={styles.infoRow}>
+          <Text style={styles.infoLabel}>Bus number</Text>
+          <Text style={styles.infoValue}>{passenger?.busNumber || 'BUS-000'}</Text>
+        </View>
+      </AppCard>
+
+      <AppCard>
+        <Text style={styles.sectionTitle}>Upcoming Route Stops</Text>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.dayScroll}>
-          {passengerDays.map((day) => (
-            <Pressable
-              key={day}
-              onPress={() => setSelectedDay(day)}
-              style={[styles.dayChip, selectedDay === day && styles.dayChipActive]}>
-              <Text style={[styles.dayText, selectedDay === day && styles.dayTextActive]}>{day}</Text>
-            </Pressable>
-          ))}
+          {(route?.stops || []).length > 0 ? route!.stops.map((stop) => (
+            <View key={stop.id || stop.name} style={styles.stopChip}>
+              <Text style={styles.stopName}>{stop.name}</Text>
+              <Text style={styles.stopMeta}>{stop.time || stop.distance || 'Scheduled stop'}</Text>
+            </View>
+          )) : (
+            <View style={styles.stopChip}>
+              <Text style={styles.stopName}>No route assigned</Text>
+              <Text style={styles.stopMeta}>Ask admin to assign your route</Text>
+            </View>
+          )}
         </ScrollView>
-
-        <View style={styles.field}>
-          <Text style={styles.label}>Pickup from home</Text>
-          <View style={styles.selectWrap}>
-            {passengerMorningTimes.map((time) => (
-              <Pressable
-                key={time}
-                style={[styles.selectOption, morning === time && styles.selectActive]}
-                onPress={() => setMorning(time)}>
-                <Text style={[styles.selectText, morning === time && styles.selectTextActive]}>
-                  {time}
-                </Text>
-              </Pressable>
-            ))}
-          </View>
-        </View>
-
-        <View style={styles.field}>
-          <Text style={styles.label}>Pickup from college</Text>
-          <View style={styles.selectWrap}>
-            {passengerAfternoonTimes.map((time) => (
-              <Pressable
-                key={time}
-                style={[styles.selectOption, afternoon === time && styles.selectActive]}
-                onPress={() => setAfternoon(time)}>
-                <Text style={[styles.selectText, afternoon === time && styles.selectTextActive]}>
-                  {time}
-                </Text>
-              </Pressable>
-            ))}
-          </View>
-          <Text style={styles.note}>Pickup point is fixed by route.</Text>
-        </View>
-
-        <AppButton title="Save schedule" onPress={() => showToast('Schedule saved', 'success')} />
+        <AppButton title="Save route alert" onPress={() => showToast('Route alert saved', 'success')} />
       </AppCard>
     </Screen>
   );
@@ -135,6 +123,12 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.rounded,
     fontWeight: '700',
   },
+  burgMeta: {
+    marginTop: 8,
+    color: AppColors.card,
+    opacity: 0.9,
+    fontSize: 12,
+  },
   sectionTitle: {
     fontFamily: Fonts.rounded,
     fontSize: 15,
@@ -145,60 +139,36 @@ const styles = StyleSheet.create({
   dayScroll: {
     marginBottom: 12,
   },
-  dayChip: {
+  stopChip: {
     paddingHorizontal: 14,
-    paddingVertical: 8,
+    paddingVertical: 10,
     borderRadius: 12,
     backgroundColor: AppColors.surface,
     marginRight: 8,
+    minWidth: 140,
   },
-  dayChipActive: {
-    backgroundColor: AppColors.teal,
-  },
-  dayText: {
-    color: AppColors.muted,
+  stopName: {
+    color: AppColors.text,
     fontSize: 12,
-    fontWeight: '600',
+    fontWeight: '700',
   },
-  dayTextActive: {
-    color: AppColors.card,
-  },
-  field: {
-    marginBottom: 16,
-  },
-  label: {
-    fontSize: 12,
+  stopMeta: {
+    marginTop: 4,
     color: AppColors.muted,
-    marginBottom: 8,
+    fontSize: 11,
   },
-  selectWrap: {
+  infoRow: {
     flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 8,
+    justifyContent: 'space-between',
+    marginTop: 8,
   },
-  selectOption: {
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: AppColors.border,
-    backgroundColor: AppColors.card,
+  infoLabel: {
+    fontSize: 12,
+    color: AppColors.muted,
   },
-  selectActive: {
-    borderColor: AppColors.teal,
-    backgroundColor: AppColors.tealSoft,
-  },
-  selectText: {
+  infoValue: {
     fontSize: 12,
     color: AppColors.text,
-  },
-  selectTextActive: {
-    color: AppColors.teal,
     fontWeight: '600',
-  },
-  note: {
-    fontSize: 11,
-    color: AppColors.muted,
-    marginTop: 6,
   },
 });

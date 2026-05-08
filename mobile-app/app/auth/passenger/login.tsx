@@ -6,21 +6,35 @@ import { useRouter } from 'expo-router';
 import { AppButton } from '@/components/common/AppButton';
 import { useToast } from '@/components/common/Toast';
 import { AppColors, Fonts } from '@/constants/theme';
+import { useAuth } from '@/contexts/AuthContext';
 
 export default function PassengerLoginScreen() {
   const router = useRouter();
   const { showToast } = useToast();
+  const { login, isLoading } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!email || !password) {
       showToast('Please enter your email and password.', 'error');
       return;
     }
-    showToast('Welcome back, passenger!', 'success');
-    router.replace('/passenger');
+
+    try {
+      const authUser = await login(email, password);
+      if (authUser.role !== 'passenger') {
+        showToast('This account is not registered as a passenger.', 'error');
+        return;
+      }
+
+      showToast('Welcome back, passenger!', 'success');
+      router.replace('/passenger');
+    } catch (error: any) {
+      const errorMessage = error.response?.data?.error || error.response?.data?.message || 'Login failed. Please try again.';
+      showToast(errorMessage, 'error');
+    }
   };
 
   return (
@@ -67,7 +81,7 @@ export default function PassengerLoginScreen() {
           </View>
         </View>
 
-        <AppButton title="Sign In" onPress={handleSubmit} />
+        <AppButton title={isLoading ? 'Signing in...' : 'Sign In'} onPress={handleSubmit} disabled={isLoading} />
 
         <Text style={styles.switchText}>
           Need an account?{' '}

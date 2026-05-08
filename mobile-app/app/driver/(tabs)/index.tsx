@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Modal, Pressable, StyleSheet, Text, View, ActivityIndicator } from 'react-native';
 import MapView, { Marker, Polyline, PROVIDER_GOOGLE } from 'react-native-maps';
 import { Ionicons } from '@expo/vector-icons';
 
@@ -9,7 +9,7 @@ import { AppHeader } from '@/components/common/AppHeader';
 import { Screen } from '@/components/common/Screen';
 import { useToast } from '@/components/common/Toast';
 import { AppColors, Fonts } from '@/constants/theme';
-import { driverStops } from '@/data/appData';
+import { useDriver } from '@/contexts/DriverContext';
 
 const DRIVER_REGION = {
   latitude: 37.7749,
@@ -26,33 +26,81 @@ const DRIVER_ROUTE = [
 ];
 
 const DRIVER_BUS = DRIVER_ROUTE[2];
-const DRIVER_START = DRIVER_ROUTE[0];
 
 export default function DriverDashboardScreen() {
   const { showToast } = useToast();
+  const { driver, route, passengers, isLoading } = useDriver();
   const [showModal, setShowModal] = useState(false);
+
+  // Get driver initials for avatar
+  const getInitials = (name: string) => {
+    return name
+      ?.split(' ')
+      .map((n) => n[0])
+      .join('')
+      .toUpperCase() || 'DR';
+  };
+
+  if (isLoading) {
+    return (
+      <Screen contentStyle={styles.loadingContainer}>
+        <ActivityIndicator size="large" color={AppColors.teal} />
+        <Text style={styles.loadingText}>Loading driver details...</Text>
+      </Screen>
+    );
+  }
+
+  const driverName = driver?.name || 'Driver';
+  const busInfo = `${driver?.busNumber || 'BUS-000'} · ${driver?.busType || 'School Bus'}`;
+  const initials = getInitials(driverName);
+  const routeStops = route?.stops || [];
+  const mapCoordinates = routeStops
+    .filter((stop) => typeof stop.lat === 'number' && typeof stop.lng === 'number')
+    .map((stop) => ({ latitude: stop.lat as number, longitude: stop.lng as number }));
+  const mapPath = mapCoordinates.length >= 2 ? mapCoordinates : DRIVER_ROUTE;
+  const busCoordinate = mapPath[Math.min(1, mapPath.length - 1)] || DRIVER_BUS;
 
   return (
     <Screen scroll contentStyle={styles.content}>
       <AppHeader
-        title="Good morning, Mike"
-        subtitle="BUS-342 · School Bus"
-        rightSlot={<View style={styles.avatar}><Text style={styles.avatarText}>MA</Text></View>}
+        title={`Good morning, ${driverName}`}
+        subtitle={`${busInfo}${driver?.institutionName ? ` · ${driver.institutionName}` : ''}`}
+        rightSlot={<View style={styles.avatar}><Text style={styles.avatarText}>{initials}</Text></View>}
       />
 
       <AppCard>
+        <Text style={styles.sectionTitle}>Driver Profile</Text>
+        <View style={styles.profileRow}>
+          <Text style={styles.profileLabel}>Email</Text>
+          <Text style={styles.profileValue}>{driver?.email || 'Not specified'}</Text>
+        </View>
+        <View style={styles.profileRow}>
+          <Text style={styles.profileLabel}>Phone</Text>
+          <Text style={styles.profileValue}>{driver?.phone || 'Not specified'}</Text>
+        </View>
+        <View style={styles.profileRow}>
+          <Text style={styles.profileLabel}>Institution</Text>
+          <Text style={styles.profileValue}>{driver?.institutionName || driver?.institutionId || 'Not assigned'}</Text>
+        </View>
+        <View style={styles.profileRow}>
+          <Text style={styles.profileLabel}>License</Text>
+          <Text style={styles.profileValue}>{driver?.licenseNumber || 'N/A'} · {driver?.licenseExpiry || 'N/A'}</Text>
+        </View>
+      </AppCard>
+
+      <AppCard>
         <View style={styles.routeHeader}>
-          <Text style={styles.routeTitle}>Route A – North District</Text>
+          <Text style={styles.routeTitle}>{route?.name || driver?.route || 'Assigned Route'}</Text>
           <View style={styles.liveBadge}>
-            <Text style={styles.liveText}>Live</Text>
+            <Text style={styles.liveText}>{driver?.status === 'active' ? 'Live' : 'Offline'}</Text>
           </View>
         </View>
 
         <View style={styles.mapCard}>
           <MapView style={styles.map} provider={PROVIDER_GOOGLE} initialRegion={DRIVER_REGION}>
-            <Polyline coordinates={DRIVER_ROUTE} strokeColor={AppColors.teal} strokeWidth={4} />
-            <Marker coordinate={DRIVER_START} title="Route start" pinColor={AppColors.teal} />
-            <Marker coordinate={DRIVER_BUS} title="Bus" pinColor={AppColors.orange} />
+            <Polyline coordinates={mapPath} strokeColor={AppColors.teal} strokeWidth={4} />
+            <Marker coordinate={mapPath[0]} title="Route start" pinColor={AppColors.teal} />
+            <Marker coordinate={busCoordinate} title="Bus" pinColor={AppColors.orange} />
           </MapView>
           <View style={styles.speedBadge}>
             <Ionicons name="speedometer" size={14} color={AppColors.teal} />
@@ -68,23 +116,24 @@ export default function DriverDashboardScreen() {
 
       <AppCard>
         <Text style={styles.sectionTitle}>Next Stops</Text>
-        {driverStops.map((stop) => (
+        {(routeStops.length > 0 ? routeStops : []).map((stop, index) => (
           <View key={stop.name} style={styles.stopCard}>
             <View style={styles.stopInfo}>
               <Text style={styles.stopTitle}>{stop.name}</Text>
               <Text style={styles.stopMeta}>
-                {stop.time} · pickup · {stop.passengers} passengers
+                {stop.time || `Stop ${index + 1}`} · {typeof stop.passengers === 'number' ? `${stop.passengers} passengers` : `${passengers.length} passengers`}
               </Text>
             </View>
-            <Text style={styles.stopDistance}>{stop.distance} away</Text>
+            <Text style={styles.stopDistance}>{stop.distance || 'In route'}</Text>
           </View>
         ))}
+        {routeStops.length === 0 ? <Text style={styles.emptyText}>No Firestore route assigned yet.</Text> : null}
       </AppCard>
 
       <AppCard>
         <View style={styles.progressRow}>
-          <Text style={styles.progressText}>Completed 2 of 4 stops</Text>
-          <Text style={styles.progressMeta}>Total distance 12.5 mi</Text>
+          <Text style={styles.progressText}>Passengers: {passengers.length}</Text>
+          <Text style={styles.progressMeta}>{routeStops.length} stops on route</Text>
         </View>
         <View style={styles.progressBar}>
           <View style={styles.progressFill} />
@@ -130,6 +179,17 @@ const styles = StyleSheet.create({
   content: {
     paddingBottom: 90,
     gap: 16,
+  },
+  loadingContainer: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingBottom: 90,
+  },
+  loadingText: {
+    marginTop: 12,
+    fontSize: 14,
+    color: AppColors.muted,
+    fontFamily: Fonts.rounded,
   },
   avatar: {
     width: 44,
@@ -213,6 +273,25 @@ const styles = StyleSheet.create({
     color: AppColors.text,
     marginBottom: 8,
   },
+  profileRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 8,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: AppColors.border,
+  },
+  profileLabel: {
+    fontSize: 12,
+    color: AppColors.muted,
+  },
+  profileValue: {
+    flex: 1,
+    textAlign: 'right',
+    fontSize: 13,
+    color: AppColors.text,
+    fontWeight: '600',
+  },
   stopCard: {
     backgroundColor: AppColors.surface,
     borderRadius: 14,
@@ -239,6 +318,11 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: AppColors.teal,
     fontWeight: '600',
+  },
+  emptyText: {
+    fontSize: 12,
+    color: AppColors.muted,
+    marginTop: 8,
   },
   progressRow: {
     flexDirection: 'row',
