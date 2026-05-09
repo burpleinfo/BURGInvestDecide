@@ -16,7 +16,12 @@ importScripts('https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js'
 importScripts('https://www.gstatic.com/firebasejs/9.22.2/firebase-messaging-compat.js');
 
 const firebaseConfig = {
-  messagingSenderId: '993466980047'
+  apiKey: 'AIzaSyDPD_GMR_F-zXqjUGrmfkFw3eMgC6D2DyI',
+  authDomain: 'ridesafe-d106f.firebaseapp.com',
+  projectId: 'ridesafe-d106f',
+  storageBucket: 'ridesafe-d106f.firebasestorage.app',
+  messagingSenderId: '993466980047',
+  appId: '1:993466980047:web:10e78e2ce341bdd58fc9ba'
 };
 
 try {

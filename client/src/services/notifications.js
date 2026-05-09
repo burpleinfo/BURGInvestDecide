@@ -28,7 +28,10 @@ export const requestWebPushPermissionAndSave = async () => {
     let swRegistration = null
     if ('serviceWorker' in navigator) {
       try {
-        swRegistration = await navigator.serviceWorker.register('/firebase-messaging-sw.js')
+        // register the service worker and wait until it's active
+        await navigator.serviceWorker.register('/firebase-messaging-sw.js')
+        swRegistration = await navigator.serviceWorker.ready
+        console.log('[Notifications] Service worker ready:', !!(swRegistration && swRegistration.active))
       } catch (swErr) {
         console.error('[Notifications] Service worker registration failed', swErr)
         return { ok: false, reason: swErr.message }
