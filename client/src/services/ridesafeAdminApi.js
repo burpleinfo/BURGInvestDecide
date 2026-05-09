@@ -61,28 +61,64 @@ const request = async (path, options = {}, tokenOverride) => {
   return data;
 };
 
-export const getAdminProfile = (token) => request("/auth/me", {}, token);
+// Simple in-memory cache to avoid redundant network requests during rapid UI navigation.
+const cache = new Map();
+
+const makeCacheKey = (key, token) => `${key}::${token || ""}`;
+
+export const getAdminProfile = async (token) => {
+  const key = makeCacheKey("adminProfile", token);
+  const TTL = 10000; // 10s
+  const now = Date.now();
+  const entry = cache.get(key);
+  if (entry && now - entry.ts < TTL) {
+    return entry.value;
+  }
+
+  const data = await request("/auth/me", {}, token);
+  cache.set(key, { ts: now, value: data });
+  return data;
+};
 
 export const fetchAdminSnapshot = async (token) => {
-  const [buses, routes, drivers, passengers, locations, alerts, revenue] = await Promise.all([
-    request("/admin/all-buses", {}, token),
-    request("/admin/all-routes", {}, token),
-    request("/admin/all-drivers", {}, token),
-    request("/admin/all-passengers", {}, token),
-    request("/admin/all-locations", {}, token),
-    request("/admin/sos-alerts", {}, token),
-    request("/admin/revenue", {}, token)
-  ]);
+  const key = makeCacheKey("adminSnapshot", token);
+  const TTL = 5000; // 5s
+  const now = Date.now();
+  const entry = cache.get(key);
+  if (entry && now - entry.ts < TTL) {
+    return entry.value;
+  }
 
-  return {
-    buses: buses.buses || [],
-    routes: routes.routes || [],
-    drivers: drivers.drivers || [],
-    passengers: passengers.passengers || [],
-    liveLocations: locations.locations || {},
-    sosAlerts: alerts.alerts || [],
-    revenue: revenue || { totalRevenue: "0.00", totalPayments: 0 }
+  const requests = {
+    buses: request("/admin/all-buses", {}, token),
+    routes: request("/admin/all-routes", {}, token),
+    drivers: request("/admin/all-drivers", {}, token),
+    passengers: request("/admin/all-passengers", {}, token),
+    locations: request("/admin/all-locations", {}, token),
+    alerts: request("/admin/sos-alerts", {}, token),
+    revenue: request("/admin/revenue", {}, token)
   };
+
+  const results = await Promise.allSettled(Object.values(requests));
+  const keys = Object.keys(requests);
+
+  const mapResult = {};
+  results.forEach((res, idx) => {
+    mapResult[keys[idx]] = res.status === "fulfilled" ? res.value : null;
+  });
+
+  const snapshot = {
+    buses: (mapResult.buses && mapResult.buses.buses) || [],
+    routes: (mapResult.routes && mapResult.routes.routes) || [],
+    drivers: (mapResult.drivers && mapResult.drivers.drivers) || [],
+    passengers: (mapResult.passengers && mapResult.passengers.passengers) || [],
+    liveLocations: (mapResult.locations && mapResult.locations.locations) || {},
+    sosAlerts: (mapResult.alerts && mapResult.alerts.alerts) || [],
+    revenue: mapResult.revenue || { totalRevenue: "0.00", totalPayments: 0 }
+  };
+
+  cache.set(key, { ts: now, value: snapshot });
+  return snapshot;
 };
 
 export const fetchLiveLocations = (token) => request("/admin/all-locations", {}, token);

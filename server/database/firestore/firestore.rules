@@ -74,6 +74,15 @@ service cloud.firestore {
       return isLoggedIn() && request.auth.uid == uid;
     }
 
+    function userInstitutionId() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.institutionId;
+    }
+
+    function hasInstitutionAccess(institutionId) {
+      return isLoggedIn()
+        && userInstitutionId() == institutionId;
+    }
+
 
     // ── /users ────────────────────────────────────
     // Admin: full access
@@ -180,6 +189,24 @@ service cloud.firestore {
     // Admin/Director: full access
     match /institutions/{institutionId} {
       allow read, write: if isAdminOrDirector();
+    }
+
+    // ── /institutions/{institutionId}/passengers ───
+    // Admin/Director: full access
+    // Driver: read passengers only for their own institution
+    // Passenger: read own passenger document only
+    match /institutions/{institutionId}/passengers/{uid} {
+      allow read, write: if isAdminOrDirector();
+      allow read:        if isDriver() && hasInstitutionAccess(institutionId);
+      allow read:        if isPassenger() && isOwner(uid);
+    }
+
+    // ── /institutions/{institutionId}/drivers ─────
+    // Admin/Director: full access
+    // Driver: read own driver document only inside their institution
+    match /institutions/{institutionId}/drivers/{uid} {
+      allow read, write: if isAdminOrDirector();
+      allow read:        if isDriver() && hasInstitutionAccess(institutionId) && isOwner(uid);
     }
   }
 }

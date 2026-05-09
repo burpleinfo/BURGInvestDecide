@@ -6,19 +6,28 @@ import { useRouter } from 'expo-router';
 import { AppButton } from '@/components/common/AppButton';
 import { AppCard } from '@/components/common/AppCard';
 import { AppHeader } from '@/components/common/AppHeader';
+import { SkeletonScreen } from '@/components/common/Skeleton';
 import { Screen } from '@/components/common/Screen';
 import { AppColors, Fonts } from '@/constants/theme';
 import { useDriver } from '@/contexts/DriverContext';
 
 export default function DriverSettingsScreen() {
   const router = useRouter();
-  const { driver } = useDriver();
+  const { driver, isLoading } = useDriver();
   const [shareLocation, setShareLocation] = useState(true);
   const [notifications, setNotifications] = useState({
     routes: true,
     passenger: true,
     schedule: false,
   });
+
+  if (isLoading) {
+    return (
+      <Screen scroll contentStyle={styles.content}>
+        <SkeletonScreen cards={4} />
+      </Screen>
+    );
+  }
 
   return (
     <Screen scroll contentStyle={styles.content}>

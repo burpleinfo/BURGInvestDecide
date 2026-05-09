@@ -5,6 +5,7 @@ import { useRouter } from 'expo-router';
 import { AppButton } from '@/components/common/AppButton';
 import { AppCard } from '@/components/common/AppCard';
 import { AppHeader } from '@/components/common/AppHeader';
+import { SkeletonScreen } from '@/components/common/Skeleton';
 import { Screen } from '@/components/common/Screen';
 import { useToast } from '@/components/common/Toast';
 import { AppColors, Fonts } from '@/constants/theme';
@@ -13,7 +14,15 @@ import { usePassenger } from '@/contexts/PassengerContext';
 export default function PassengerHomeScreen() {
   const router = useRouter();
   const { showToast } = useToast();
-  const { passenger, route } = usePassenger();
+  const { passenger, route, isLoading } = usePassenger();
+
+  if (isLoading) {
+    return (
+      <Screen scroll contentStyle={styles.content}>
+        <SkeletonScreen cards={4} />
+      </Screen>
+    );
+  }
 
   const initials = (passenger?.name || 'Passenger')
     .split(' ')

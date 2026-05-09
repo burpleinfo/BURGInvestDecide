@@ -30,7 +30,7 @@ const SigninPage = () => {
 
   const handleGoogleAuth = () => {
     try {
-      window.location.assign(getApiUrl("/api/auth/google?mode=signin"));
+      window.location.assign(getApiUrl("/auth/google?mode=signin"));
     } catch {
       setApiError("Google authentication is currently unavailable. Please try again.");
     }
@@ -110,7 +110,7 @@ const SigninPage = () => {
     if (!emailError && !passwordError) {
       setLoading(true);
       try {
-        const res = await fetch(getApiUrl("/api/auth/signin"), {
+        const res = await fetch(getApiUrl("/auth/signin"), {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({

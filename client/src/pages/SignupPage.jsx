@@ -30,7 +30,7 @@ const SignupPage = () => {
 
   const handleGoogleAuth = (mode) => {
     try {
-      const endpoint = getApiUrl(`/api/auth/google?mode=${mode}`);
+      const endpoint = getApiUrl(`/auth/google?mode=${mode}`);
       window.location.assign(endpoint);
     } catch {
       setApiError("Google authentication is currently unavailable. Please try again.");
@@ -116,7 +116,7 @@ const SignupPage = () => {
     if (!fullNameError && !emailError && !passwordError && !confirmPasswordError) {
       setLoading(true);
       try {
-        const res = await fetch(getApiUrl("/api/auth/signup"), {
+        const res = await fetch(getApiUrl("/auth/signup"), {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({

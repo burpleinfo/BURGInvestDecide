@@ -5,12 +5,13 @@ import { Ionicons } from '@expo/vector-icons';
 import { AppButton } from '@/components/common/AppButton';
 import { AppCard } from '@/components/common/AppCard';
 import { AppHeader } from '@/components/common/AppHeader';
+import { SkeletonScreen } from '@/components/common/Skeleton';
 import { Screen } from '@/components/common/Screen';
 import { AppColors, Fonts } from '@/constants/theme';
 import { useDriver } from '@/contexts/DriverContext';
 
 export default function DriverPassengersScreen() {
-  const { passengers } = useDriver();
+  const { passengers, isLoading } = useDriver();
   const [checked, setChecked] = useState<Record<string, boolean>>(
     passengers.reduce((acc, passenger) => {
       acc[passenger.uid] = false;
@@ -41,6 +42,14 @@ export default function DriverPassengersScreen() {
   };
 
   const boardedCount = passengers.filter((passenger) => checked[passenger.uid]).length;
+
+  if (isLoading) {
+    return (
+      <Screen scroll contentStyle={styles.content}>
+        <SkeletonScreen cards={4} />
+      </Screen>
+    );
+  }
 
   return (
     <Screen scroll contentStyle={styles.content}>

@@ -5,9 +5,10 @@ import { useRouter } from 'expo-router';
 import { AppButton } from '@/components/common/AppButton';
 import { AppCard } from '@/components/common/AppCard';
 import { AppHeader } from '@/components/common/AppHeader';
+import { SkeletonScreen } from '@/components/common/Skeleton';
 import { Screen } from '@/components/common/Screen';
 import { useToast } from '@/components/common/Toast';
-import { AppColors, Fonts } from '@/constants/theme';
+import { AppColors } from '@/constants/theme';
 import { useDriver } from '@/contexts/DriverContext';
 
 export default function DriverEditProfileScreen() {
@@ -55,6 +56,14 @@ export default function DriverEditProfileScreen() {
       showToast('Unable to update driver profile.', 'error');
     }
   };
+
+  if (isLoading && !driver) {
+    return (
+      <Screen scroll contentStyle={styles.content}>
+        <SkeletonScreen cards={3} />
+      </Screen>
+    );
+  }
 
   return (
     <Screen scroll contentStyle={styles.content}>

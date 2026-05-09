@@ -6,6 +6,7 @@ import { useRouter } from 'expo-router';
 import { AppButton } from '@/components/common/AppButton';
 import { AppCard } from '@/components/common/AppCard';
 import { AppHeader } from '@/components/common/AppHeader';
+import { SkeletonScreen } from '@/components/common/Skeleton';
 import { Screen } from '@/components/common/Screen';
 import { AppColors, Fonts } from '@/constants/theme';
 import { usePassenger } from '@/contexts/PassengerContext';
@@ -13,10 +14,18 @@ import { faqs } from '@/data/appData';
 
 export default function PassengerSettingsScreen() {
   const router = useRouter();
-  const { passenger } = usePassenger();
+  const { passenger, isLoading } = usePassenger();
   const [pushNotifications, setPushNotifications] = useState(true);
   const [shareLocation, setShareLocation] = useState(true);
   const [expanded, setExpanded] = useState<number | null>(null);
+
+  if (isLoading) {
+    return (
+      <Screen scroll contentStyle={styles.content}>
+        <SkeletonScreen cards={4} />
+      </Screen>
+    );
+  }
 
   return (
     <Screen scroll contentStyle={styles.content}>

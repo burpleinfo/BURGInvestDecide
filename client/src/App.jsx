@@ -1,5 +1,6 @@
 import ResetPasswordPage from './pages/ResetPasswordPage';
 import ForgotPasswordPage from './pages/ForgotPasswordPage';
+import { useEffect } from 'react'
 import Navbar from './widgets/Navbar/Navbar';
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { SearchProvider } from './contexts/SearchContext';
@@ -29,6 +30,8 @@ import { DirectorAuthProvider } from './contexts/DirectorAuthContext';
 import DirectorDashboard from './director/DirectorDashboard';
 import DirectorSigninPage from './pages/DirectorSigninPage';
 import RequireDirector from './routes/RequireDirector';
+import { firebaseAuth } from './services/firebaseClient'
+import notifications from './services/notifications'
 
 function AppContent() {
   const location = useLocation();
@@ -37,6 +40,32 @@ function AppContent() {
   const isDirectorPage = location.pathname.startsWith('/director');
   const showNavbar = location.pathname !== "/signin" && location.pathname !== "/signup" && location.pathname !== "/register" && location.pathname !== "/forgot-password" && location.pathname !== "/reset-password" && location.pathname !== "/team/akash" && !location.pathname.startsWith("/ridesafe") && !isAdminPage && !isDirectorPage;
   const showCookieConsent = location.pathname !== "/team/akash" && !isAdminPage && !isDirectorPage;
+  
+  // Register web push token for signed-in users (web only)
+  useEffect(() => {
+    const tryRegister = async () => {
+      try {
+        const user = firebaseAuth.currentUser
+        if (user) {
+          const res = await notifications.requestWebPushPermissionAndSave()
+          if (res.ok) console.log('[Notifications] Web FCM token saved')
+          else console.log('[Notifications] Not registered:', res.reason)
+        }
+      } catch (e) {
+        console.warn('[Notifications] registration error', e.message)
+      }
+    }
+
+    // Listen for auth changes to register after login
+    const unregister = firebaseAuth.onIdTokenChanged((user) => {
+      if (user) tryRegister()
+    })
+
+    // Try immediate registration if already signed in
+    tryRegister()
+
+    return () => unregister()
+  }, [])
   
   return (
     <>

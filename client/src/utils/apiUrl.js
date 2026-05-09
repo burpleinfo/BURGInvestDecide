@@ -1,4 +1,4 @@
-const DEFAULT_LOCAL_SERVER_ORIGIN = "http://localhost:5000";
+const DEFAULT_LOCAL_SERVER_ORIGIN = "http://localhost:8000";
 const DEFAULT_PRODUCTION_SERVER_ORIGIN = "https://server-x989.onrender.com";
 const DEFAULT_RIDESAFE_LOCAL_ORIGIN = "http://localhost:8000";
 const DEFAULT_RIDESAFE_PRODUCTION_ORIGIN = "https://server-x989.onrender.com";

@@ -6,6 +6,7 @@ import { useRouter } from 'expo-router';
 import { AppButton } from '@/components/common/AppButton';
 import { AppCard } from '@/components/common/AppCard';
 import { AppHeader } from '@/components/common/AppHeader';
+import { SkeletonScreen } from '@/components/common/Skeleton';
 import { Screen } from '@/components/common/Screen';
 import { AppColors, Fonts } from '@/constants/theme';
 import { usePassenger } from '@/contexts/PassengerContext';
@@ -28,7 +29,16 @@ const PICKUP_POINT = BUS_ROUTE[0];
 
 export default function PassengerTrackingScreen() {
   const router = useRouter();
-  const { passenger, route } = usePassenger();
+  const { passenger, route, isLoading } = usePassenger();
+
+  if (isLoading) {
+    return (
+      <Screen scroll contentStyle={styles.content}>
+        <SkeletonScreen cards={3} />
+      </Screen>
+    );
+  }
+
   const routeCoordinates = (route?.stops || [])
     .filter((stop) => typeof stop.lat === 'number' && typeof stop.lng === 'number')
     .map((stop) => ({ latitude: stop.lat as number, longitude: stop.lng as number }));

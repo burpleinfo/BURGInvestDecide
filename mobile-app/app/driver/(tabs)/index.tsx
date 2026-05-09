@@ -1,11 +1,12 @@
 import { useState } from 'react';
-import { Modal, Pressable, StyleSheet, Text, View, ActivityIndicator } from 'react-native';
+import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
 import MapView, { Marker, Polyline, PROVIDER_GOOGLE } from 'react-native-maps';
 import { Ionicons } from '@expo/vector-icons';
 
 import { AppButton } from '@/components/common/AppButton';
 import { AppCard } from '@/components/common/AppCard';
 import { AppHeader } from '@/components/common/AppHeader';
+import { SkeletonScreen } from '@/components/common/Skeleton';
 import { Screen } from '@/components/common/Screen';
 import { useToast } from '@/components/common/Toast';
 import { AppColors, Fonts } from '@/constants/theme';
@@ -43,9 +44,8 @@ export default function DriverDashboardScreen() {
 
   if (isLoading) {
     return (
-      <Screen contentStyle={styles.loadingContainer}>
-        <ActivityIndicator size="large" color={AppColors.teal} />
-        <Text style={styles.loadingText}>Loading driver details...</Text>
+      <Screen scroll contentStyle={styles.content}>
+        <SkeletonScreen cards={4} />
       </Screen>
     );
   }
@@ -179,17 +179,6 @@ const styles = StyleSheet.create({
   content: {
     paddingBottom: 90,
     gap: 16,
-  },
-  loadingContainer: {
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingBottom: 90,
-  },
-  loadingText: {
-    marginTop: 12,
-    fontSize: 14,
-    color: AppColors.muted,
-    fontFamily: Fonts.rounded,
   },
   avatar: {
     width: 44,

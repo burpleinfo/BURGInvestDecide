@@ -6,7 +6,7 @@ import { auth as firebaseAuth } from '@/services/firebase';
  * without depending on third-party HTTP clients.
  */
 
-const API_BASE_URL = Constants.expoConfig?.extra?.apiBaseUrl || 'http://localhost:8000/api';
+const API_BASE_URL = Constants.expoConfig?.extra?.apiBaseUrl || 'http://localhost:8000';
 
 console.log(`[API Service] Initialized with base URL: ${API_BASE_URL}`);
 

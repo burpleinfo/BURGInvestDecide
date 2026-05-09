@@ -5,8 +5,8 @@ const dotenv = require('dotenv')
 const path   = require('path')
 const fs     = require('fs')
 
-// Fix 1 — correct path (1 level up only)
-dotenv.config({ path: path.join(__dirname, '..', '.env') })
+// Load the shared server .env from the server root.
+dotenv.config({ path: path.join(__dirname, '..', '..', '.env') })
 
 function loadServiceAccount() {
     const rawServiceAccount = process.env.FIREBASE_SERVICE_ACCOUNT

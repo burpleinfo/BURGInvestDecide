@@ -377,26 +377,32 @@ const AdminDashboard = () => {
 
     setLoadState({ loading: true, error: '' });
 
-    try {
-      const [profileResult, snapshotResult] = await Promise.allSettled([
-        getAdminProfile(token),
-        fetchAdminSnapshot(token)
-      ]);
+    const [profileResult, snapshotResult] = await Promise.allSettled([
+      getAdminProfile(token),
+      fetchAdminSnapshot(token)
+    ]);
 
-      if (snapshotResult.status === 'rejected') {
-        throw snapshotResult.reason;
-      }
+    let hadAnySuccess = false;
 
+    if (snapshotResult.status === 'fulfilled' && snapshotResult.value) {
       setDashboardData(snapshotResult.value);
-      if (profileResult.status === 'fulfilled') {
-        setAdminProfile(profileResult.value.user || null);
-      }
       setLastUpdate(new Date());
       setUseLiveData(true);
-    } catch (error) {
+      hadAnySuccess = true;
+    } else {
+      // keep previous dashboardData if available; record error
+      setLoadState((prev) => ({ ...prev, error: snapshotResult.reason?.message || 'Failed to load snapshot.' }));
+    }
+
+    if (profileResult.status === 'fulfilled' && profileResult.value) {
+      setAdminProfile(profileResult.value.user || null);
+      hadAnySuccess = true;
+    } else {
+      setLoadState((prev) => ({ ...prev, error: prev.error || profileResult.reason?.message || 'Failed to load profile.' }));
+    }
+
+    if (!hadAnySuccess) {
       setUseLiveData(false);
-      setLoadState({ loading: false, error: error?.message || 'Failed to load admin data.' });
-      return;
     }
 
     setLoadState((prev) => ({ ...prev, loading: false }));
@@ -592,12 +598,32 @@ const AdminDashboard = () => {
     };
   }, [adminProfile, buses, drivers, liveLocations, passengers, revenue, routes, sosAlerts]);
 
-  const institutions = useMemo(() => (
-    useLiveData ? [derivedInstitution] : fallbackInstitutions
-  ), [derivedInstitution, useLiveData]);
+  const institutions = useMemo(() => {
+    if (adminToken && loadState.loading) return [];
+    return useLiveData ? [derivedInstitution] : fallbackInstitutions;
+  }, [derivedInstitution, useLiveData, adminToken, loadState.loading]);
+
+  const showAdminLoading = Boolean(adminToken && loadState.loading);
 
   const institution = useMemo(() => {
-    return institutions.find((item) => item.id === institutionId) || institutions[0];
+    const found = institutions.find((item) => item.id === institutionId);
+    const loadingInstitution = {
+      id: '',
+      name: 'Loading...',
+      city: '',
+      adminName: 'Loading',
+      contactEmail: '',
+      stats: { vehicles: 0, routes: 0, drivers: 0, passengers: 0, alerts: 0, onTime: '0/0 buses live' },
+      vehicles: [],
+      routes: [],
+      passengers: [],
+      staff: [],
+      alerts: [],
+      finance: { feesCollected: 'INR 0.00', feesOutstanding: 'N/A', busEmi: 'N/A', busRent: 'N/A', salaries: 'N/A', payoutsDue: 'N/A' },
+      medical: []
+    };
+
+    return found || institutions[0] || loadingInstitution;
   }, [institutionId, institutions]);
 
   const liveVehicles = useMemo(() => institution?.vehicles || [], [institution]);
@@ -947,6 +973,11 @@ const AdminDashboard = () => {
 
   return (
     <div className="admin-shell min-h-screen">
+      {showAdminLoading && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-white/90">
+          <div className="rounded-lg bg-[#EFF3FA] px-6 py-4 text-[#1C3A77] shadow-lg">Loading admin data...</div>
+        </div>
+      )}
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@500;600;700&family=Roboto:wght@400;500;700&display=swap');
 

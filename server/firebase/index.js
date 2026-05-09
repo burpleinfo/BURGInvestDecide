@@ -23,10 +23,19 @@ const configuredOrigins = (process.env.CORS_ORIGIN || '')
 const defaultOrigins = [
     'http://localhost:5173',
     'http://localhost:3000',
-    'https://burgridesafe-eight.vercel.app'
+    'https://burgridesafe-eight.vercel.app',
+    'https://burgridesafe-vrmh.onrender.com'
 ]
 
 const allowedOrigins = configuredOrigins.length > 0 ? configuredOrigins : defaultOrigins
+
+// In development, ensure common local dev origins are always allowed
+if (process.env.NODE_ENV !== 'production') {
+    const devFallbacks = ['http://localhost:5173', 'http://localhost:3000']
+    devFallbacks.forEach((o) => {
+        if (!allowedOrigins.includes(o)) allowedOrigins.push(o)
+    })
+}
 
 const corsOptions = {
     credentials: true,
@@ -110,4 +119,5 @@ startLiveLocationsSocket(server)
 
 server.listen(PORT, () => {
     console.log(`🚌 RIDESAFE server running on port ${PORT}`)
+    console.log(`CORS allowed origins: ${allowedOrigins.join(', ')}`)
 })

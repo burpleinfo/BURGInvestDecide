@@ -5,6 +5,7 @@ import { useState, useEffect } from 'react';
 import 'react-native-reanimated';
 
 import { SplashScreen } from '@/components/SplashScreen';
+import { NotificationPermissionPrompt } from '@/components/NotificationPermissionPrompt';
 import { ToastProvider } from '@/components/common/Toast';
 import { AuthProvider } from '@/contexts/AuthContext';
 import { DriverProvider } from '@/contexts/DriverContext';
@@ -22,6 +23,7 @@ export default function RootLayout() {
         <DriverProvider>
           <PassengerProvider>
             <ToastProvider>
+              <NotificationPermissionPrompt />
               <Stack screenOptions={{ headerShown: false }}>
                 <Stack.Screen name="index" />
                 <Stack.Screen name="login" />

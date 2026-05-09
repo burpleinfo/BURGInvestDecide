@@ -3,6 +3,8 @@ import { signInWithEmailAndPassword, signOut, onAuthStateChanged } from 'firebas
 
 import { auth as firebaseAuth } from '@/services/firebase';
 import { fetchAppProfile } from '@/services/profileStore';
+import { registerAndSavePushToken } from '@/services/notifications';
+import * as SecureStore from 'expo-secure-store';
 
 /**
  * Auth User Interface
@@ -28,6 +30,8 @@ interface AuthContextType {
 
 // Create context
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
+
+const STORAGE_KEY = 'ridesafe_auth_user_v1';
 
 /**
  * Auth Context Provider Component
@@ -58,6 +62,35 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
+  const syncPushToken = useCallback(async () => {
+    try {
+      const result = await registerAndSavePushToken();
+      if (!result.ok && result.reason !== 'web-not-supported' && result.reason !== 'expo-go-not-supported') {
+        console.log('[AuthContext] Push token sync skipped:', result.reason);
+      }
+    } catch (error) {
+      console.warn('[AuthContext] push token sync failed', error);
+    }
+  }, []);
+
+  // hydrate from local storage immediately so app can show cached user while Firebase verifies
+  useEffect(() => {
+    let mounted = true;
+    (async () => {
+      try {
+        const raw = await SecureStore.getItemAsync(STORAGE_KEY);
+        if (!raw) return;
+        const cached = JSON.parse(raw);
+        if (mounted && cached?.id) {
+          setUser(cached);
+        }
+      } catch (err) {
+        console.warn('[AuthContext] failed to read cached user', err);
+      }
+    })();
+    return () => { mounted = false; };
+  }, []);
+
   /**
    * Login user
    */
@@ -68,6 +101,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const credential = await signInWithEmailAndPassword(firebaseAuth, email, password);
       const userData = await hydrateUserFromBackend(credential.user);
       setUser(userData);
+      try {
+        await SecureStore.setItemAsync(STORAGE_KEY, JSON.stringify(userData));
+      } catch (err) {
+        console.warn('[AuthContext] failed to persist user', err);
+      }
+      await syncPushToken();
       return userData;
     } catch (err: any) {
       const errorMessage = err.response?.data?.error || err.response?.data?.message || err.message || 'Login failed';
@@ -87,6 +126,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       await signOut(firebaseAuth);
       setUser(null);
+      try {
+        await SecureStore.deleteItemAsync(STORAGE_KEY);
+      } catch (err) {
+        console.warn('[AuthContext] failed to remove cached user', err);
+      }
     } catch (err: any) {
       const errorMessage = err.response?.data?.error || err.response?.data?.message || err.message || 'Logout failed';
       setError(errorMessage);
@@ -105,11 +149,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const firebaseUser = firebaseAuth.currentUser;
       if (!firebaseUser) {
         setUser(null);
+        try { await SecureStore.deleteItemAsync(STORAGE_KEY); } catch {}
         return;
       }
 
       const userData = await hydrateUserFromBackend(firebaseUser);
       setUser(userData);
+      try {
+        await SecureStore.setItemAsync(STORAGE_KEY, JSON.stringify(userData));
+      } catch (err) {
+        console.warn('[AuthContext] failed to persist user on getCurrentUser', err);
+      }
+      await syncPushToken();
     } catch (err: any) {
       console.error('Failed to get current user:', err);
       setUser(null);
@@ -123,11 +174,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       try {
         if (!firebaseUser) {
           setUser(null);
+          try { await SecureStore.deleteItemAsync(STORAGE_KEY); } catch {}
           return;
         }
 
         const userData = await hydrateUserFromBackend(firebaseUser);
         setUser(userData);
+        try { await SecureStore.setItemAsync(STORAGE_KEY, JSON.stringify(userData)); } catch (err) { console.warn('[AuthContext] failed to persist user from onAuthStateChanged', err); }
+        await syncPushToken();
       } catch (err) {
         console.error('Failed to hydrate auth state:', err);
         setUser(null);
