@@ -1,13 +1,13 @@
 // config/firebase.js
 
-const admin          = require('firebase-admin')
-const dotenv         = require('dotenv')
-const path           = require('path')
-const fs             = require('fs')
+const admin = require('firebase-admin')
+const dotenv = require('dotenv')
+const path   = require('path')
+const fs     = require('fs')
 
-dotenv.config({ path: path.join(__dirname, '..', '..', '.env') })
+// Fix 1 — correct path (1 level up only)
+dotenv.config({ path: path.join(__dirname, '..', '.env') })
 
-// Load service account from ENV first, then fallback to local key file for dev.
 function loadServiceAccount() {
     const rawServiceAccount = process.env.FIREBASE_SERVICE_ACCOUNT
 
@@ -19,22 +19,23 @@ function loadServiceAccount() {
         }
     }
 
-    const localServiceAccountPath = path.join(__dirname, '..', 'serviceAccountkey.json')
+    // Fix 2 — capital K in Key
+    const localServiceAccountPath = path.join(__dirname, '..', 'serviceAccountKey.json')
     if (fs.existsSync(localServiceAccountPath)) {
         return require(localServiceAccountPath)
     }
 
-    throw new Error('Firebase credentials missing. Set FIREBASE_SERVICE_ACCOUNT or add server/firebase/serviceAccountkey.json.')
+    throw new Error('Firebase credentials missing. Set FIREBASE_SERVICE_ACCOUNT or add serviceAccountKey.json.')
 }
 
 const serviceAccount = loadServiceAccount()
 
-// Fix private key issue
 if (serviceAccount.private_key) {
     serviceAccount.private_key = serviceAccount.private_key.replace(/\\n/g, '\n')
 }
 
-// Initialize Firebase app (only once)
+console.log('[Firebase] DB URL:', process.env.FIREBASE_REALTIME_DB_URL)
+
 if (!admin.apps.length) {
     admin.initializeApp({
         credential:  admin.credential.cert(serviceAccount),
@@ -42,10 +43,9 @@ if (!admin.apps.length) {
     })
 }
 
-// Export all Firebase clients
-const firestoreDb  = admin.firestore()   // Main database
-const realtimeDb   = admin.database()    // Live GPS location
-const firebaseAuth = admin.auth()        // User authentication
-const fcm          = admin.messaging()   // Push notifications
+const firestoreDb  = admin.firestore()
+const realtimeDb   = admin.database()
+const firebaseAuth = admin.auth()
+const fcm          = admin.messaging()
 
 module.exports = { admin, firestoreDb, realtimeDb, firebaseAuth, fcm }

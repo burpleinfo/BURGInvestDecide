@@ -30,14 +30,11 @@
 // ════════════════════════════════════════════════════
 // SYSTEM DESIGN #3 — Notification Flow
 // ════════════════════════════════════════════════════
-// markBoarded()  → FCM to parent/guardian
-// markDropped()  → FCM to parent/guardian
+// markBoarded()  → FCM to parent with bus + stop info
+// markDropped()  → FCM to parent with stop info
 // triggerSOS()   → FCM to ALL admins immediately
-// shareETA()     → FCM to passenger on that stop
-//
-// Failed notification:
-//   If fcmToken is null → skip, log warning
-//   If FCM send fails   → log error, don't crash
+// shareETA()     → FCM to parents at that stop
+// endTrip()      → clears live location from Realtime DB
 // ════════════════════════════════════════════════════
 
 const { firestoreDb, realtimeDb } = require('../config/firebase')
@@ -50,7 +47,6 @@ const getMyTrip = async (req, res) => {
     try {
         const driverUid = req.user.uid
 
-        // Get driver profile
         const driverDoc = await firestoreDb
             .collection('drivers').doc(driverUid).get()
 
@@ -60,7 +56,6 @@ const getMyTrip = async (req, res) => {
 
         const busId = driverDoc.data().busId
 
-        // Get active trip for this bus
         const tripsSnap = await firestoreDb
             .collection('trips')
             .where('busId',  '==', busId)
@@ -74,7 +69,6 @@ const getMyTrip = async (req, res) => {
         const tripDoc  = tripsSnap.docs[0]
         const tripData = tripDoc.data()
 
-        // Get all passengers on this bus
         const passengersSnap = await firestoreDb
             .collection('passengers')
             .where('busId', '==', busId)
@@ -86,12 +80,12 @@ const getMyTrip = async (req, res) => {
         }))
 
         res.json({
-            tripId:          tripDoc.id,
+            tripId:            tripDoc.id,
             busId,
             passengers,
-            totalPassengers: passengers.length,
-            boardedCount:    tripData.boardedPassengers?.length || 0,
-            droppedCount:    tripData.droppedPassengers?.length || 0,
+            totalPassengers:   passengers.length,
+            boardedCount:      tripData.boardedPassengers?.length || 0,
+            droppedCount:      tripData.droppedPassengers?.length || 0,
             boardedPassengers: tripData.boardedPassengers || [],
             droppedPassengers: tripData.droppedPassengers || []
         })
@@ -106,6 +100,10 @@ const getMyTrip = async (req, res) => {
 const updateLocation = async (req, res) => {
     try {
         const { busId, lat, lng, speed = 0 } = req.body
+
+        if (!busId || !lat || !lng) {
+            return res.status(400).json({ error: 'busId, lat and lng are required' })
+        }
 
         await realtimeDb.ref(`/liveLocations/${busId}`).set({
             lat,
@@ -125,26 +123,51 @@ const updateLocation = async (req, res) => {
 // ── Mark Passenger Boarded (System Design #3) ─────
 const markBoarded = async (req, res) => {
     try {
-        const { studentId }  = req.params
-        const { tripId }     = req.body
+        const { studentId }        = req.params
+        const { tripId, stopName } = req.body
+
+        if (!tripId) {
+            return res.status(400).json({ error: 'tripId is required' })
+        }
 
         // Update trip in Firestore
         await firestoreDb.collection('trips').doc(tripId).update({
             boardedPassengers: FieldValue.arrayUnion(studentId)
         })
 
-        // Get passenger info for notification
+        // Get passenger details
         const passengerDoc = await firestoreDb
             .collection('passengers').doc(studentId).get()
-        const passenger    = passengerDoc.data()
 
-        // Send FCM to parent/guardian
+        if (!passengerDoc.exists) {
+            return res.status(404).json({ error: 'Passenger not found' })
+        }
+
+        const passenger = passengerDoc.data()
+
+        // Get bus number for notification
+        const driverDoc = await firestoreDb
+            .collection('drivers').doc(req.user.uid).get()
+        const busId     = driverDoc.data().busId
+
+        const busDoc    = await firestoreDb
+            .collection('buses').doc(busId).get()
+        const busNumber = busDoc.exists ? busDoc.data().busNumber : ''
+
+        // Notify parent with bus + stop details
         await fcmService.notifyBoarded(
             passenger.parentUid,
-            passenger.name
+            passenger.name,
+            busNumber,
+            stopName || 'the stop'
         )
 
-        res.json({ message: `${passenger.name} marked as boarded. Parent notified.` })
+        res.json({
+            message: `${passenger.name} marked as boarded. Parent notified.`,
+            studentName: passenger.name,
+            busNumber,
+            stopName: stopName || 'the stop'
+        })
 
     } catch (error) {
         res.status(500).json({ error: error.message })
@@ -155,23 +178,40 @@ const markBoarded = async (req, res) => {
 // ── Mark Passenger Dropped (System Design #3) ─────
 const markDropped = async (req, res) => {
     try {
-        const { studentId } = req.params
-        const { tripId }    = req.body
+        const { studentId }        = req.params
+        const { tripId, stopName } = req.body
 
+        if (!tripId) {
+            return res.status(400).json({ error: 'tripId is required' })
+        }
+
+        // Update trip in Firestore
         await firestoreDb.collection('trips').doc(tripId).update({
             droppedPassengers: FieldValue.arrayUnion(studentId)
         })
 
+        // Get passenger details
         const passengerDoc = await firestoreDb
             .collection('passengers').doc(studentId).get()
-        const passenger    = passengerDoc.data()
 
+        if (!passengerDoc.exists) {
+            return res.status(404).json({ error: 'Passenger not found' })
+        }
+
+        const passenger = passengerDoc.data()
+
+        // Notify parent with stop details
         await fcmService.notifyDropped(
             passenger.parentUid,
-            passenger.name
+            passenger.name,
+            stopName || 'their stop'
         )
 
-        res.json({ message: `${passenger.name} marked as dropped. Parent notified.` })
+        res.json({
+            message:     `${passenger.name} marked as dropped. Parent notified.`,
+            studentName: passenger.name,
+            stopName:    stopName || 'their stop'
+        })
 
     } catch (error) {
         res.status(500).json({ error: error.message })
@@ -182,7 +222,11 @@ const markDropped = async (req, res) => {
 // ── Mark All Boarded ──────────────────────────────
 const markAllBoarded = async (req, res) => {
     try {
-        const { tripId, busId } = req.body
+        const { tripId, busId, stopName } = req.body
+
+        if (!tripId || !busId) {
+            return res.status(400).json({ error: 'tripId and busId are required' })
+        }
 
         const passengersSnap = await firestoreDb
             .collection('passengers')
@@ -191,11 +235,32 @@ const markAllBoarded = async (req, res) => {
 
         const allIds = passengersSnap.docs.map(d => d.id)
 
+        // Update trip
         await firestoreDb.collection('trips').doc(tripId).update({
             boardedPassengers: allIds
         })
 
-        res.json({ message: `All ${allIds.length} passengers marked as boarded` })
+        // Get bus number
+        const busDoc    = await firestoreDb.collection('buses').doc(busId).get()
+        const busNumber = busDoc.exists ? busDoc.data().busNumber : ''
+
+        // Notify all parents
+        const notifyPromises = passengersSnap.docs.map(d => {
+            const passenger = d.data()
+            return fcmService.notifyBoarded(
+                passenger.parentUid,
+                passenger.name,
+                busNumber,
+                stopName || 'the stop'
+            )
+        })
+
+        await Promise.all(notifyPromises)
+
+        res.json({
+            message: `All ${allIds.length} passengers marked as boarded. Parents notified.`,
+            count:   allIds.length
+        })
 
     } catch (error) {
         res.status(500).json({ error: error.message })
@@ -208,6 +273,10 @@ const completeStop = async (req, res) => {
     try {
         const { stopId } = req.params
         const { tripId } = req.body
+
+        if (!tripId) {
+            return res.status(400).json({ error: 'tripId is required' })
+        }
 
         await firestoreDb.collection('trips').doc(tripId).update({
             completedStops: FieldValue.arrayUnion(stopId)
@@ -224,8 +293,12 @@ const completeStop = async (req, res) => {
 // ── End Trip ──────────────────────────────────────
 const endTrip = async (req, res) => {
     try {
-        const { tripId }    = req.params
-        const { busId }     = req.body
+        const { tripId } = req.params
+        const { busId }  = req.body
+
+        if (!busId) {
+            return res.status(400).json({ error: 'busId is required' })
+        }
 
         // Mark trip completed in Firestore
         await firestoreDb.collection('trips').doc(tripId).update({
@@ -234,6 +307,7 @@ const endTrip = async (req, res) => {
         })
 
         // Clear live location from Realtime DB (System Design #1)
+        // This removes the bus marker from all maps immediately
         await realtimeDb.ref(`/liveLocations/${busId}`).remove()
 
         res.json({ message: 'Trip completed successfully' })
@@ -244,11 +318,56 @@ const endTrip = async (req, res) => {
 }
 
 
+// ── SOS Alert (System Design #3) ──────────────────
+const triggerSOS = async (req, res) => {
+    try {
+        const { busId, message, lat, lng } = req.body
+        const driverUid                    = req.user.uid
 
-// ── Share ETA ─────────────────────────────────────
+        if (!busId) {
+            return res.status(400).json({ error: 'busId is required' })
+        }
+
+        // Save SOS alert to Firestore
+        const alertRef = await firestoreDb.collection('sosAlerts').add({
+            busId,
+            driverUid,
+            message:   message || 'SOS Alert triggered',
+            lat:       lat || null,
+            lng:       lng || null,
+            status:    'active',
+            createdAt: new Date().toISOString()
+        })
+
+        // Get all admin UIDs and notify immediately
+        const adminsSnap = await firestoreDb
+            .collection('users')
+            .where('role', '==', 'admin')
+            .get()
+
+        const adminUids = adminsSnap.docs.map(d => d.id)
+        await fcmService.notifySOS(adminUids, busId, message)
+
+        res.json({
+            message: 'SOS alert sent to all admins',
+            alertId: alertRef.id,
+            notifiedAdmins: adminUids.length
+        })
+
+    } catch (error) {
+        res.status(500).json({ error: error.message })
+    }
+}
+
+
+// ── Share ETA (System Design #3) ──────────────────
 const shareETA = async (req, res) => {
     try {
-        const { busId, stopId, etaMinutes } = req.body
+        const { busId, stopId, stopName, etaMinutes } = req.body
+
+        if (!busId || !stopId || !etaMinutes) {
+            return res.status(400).json({ error: 'busId, stopId and etaMinutes are required' })
+        }
 
         // Get all passengers at this stop
         const passengersSnap = await firestoreDb
@@ -257,10 +376,23 @@ const shareETA = async (req, res) => {
             .where('stopId', '==', stopId)
             .get()
 
-        const parentUids = passengersSnap.docs.map(d => d.data().parentUid)
-        await fcmService.notifyETA(parentUids, etaMinutes, stopId)
+        if (passengersSnap.empty) {
+            return res.json({ message: 'No passengers at this stop' })
+        }
 
-        res.json({ message: `ETA of ${etaMinutes} mins shared with ${parentUids.length} parents` })
+        const parentUids = passengersSnap.docs.map(d => d.data().parentUid)
+
+        await fcmService.notifyETA(
+            parentUids,
+            etaMinutes,
+            stopName || stopId
+        )
+
+        res.json({
+            message:          `ETA of ${etaMinutes} mins shared`,
+            notifiedParents:  parentUids.length,
+            stopName:         stopName || stopId
+        })
 
     } catch (error) {
         res.status(500).json({ error: error.message })
@@ -275,15 +407,24 @@ const getPassengers = async (req, res) => {
 
         const driverDoc = await firestoreDb
             .collection('drivers').doc(driverUid).get()
-        const busId     = driverDoc.data().busId
 
-        const snap = await firestoreDb
+        if (!driverDoc.exists) {
+            return res.status(404).json({ error: 'Driver profile not found' })
+        }
+
+        const busId = driverDoc.data().busId
+
+        const snap       = await firestoreDb
             .collection('passengers')
             .where('busId', '==', busId)
             .get()
 
         const passengers = snap.docs.map(d => ({ id: d.id, ...d.data() }))
-        res.json({ passengers })
+
+        res.json({
+            passengers,
+            total: passengers.length
+        })
 
     } catch (error) {
         res.status(500).json({ error: error.message })
@@ -299,6 +440,7 @@ module.exports = {
     markAllBoarded,
     completeStop,
     endTrip,
+    triggerSOS,
     shareETA,
     getPassengers
 }

@@ -15,34 +15,33 @@
 //  SOS triggered           Driver       All Admins
 //  Bus delayed             Admin        All passengers on bus
 //  ETA shared              Driver       Parents at that stop
-//  Broadcast alert         Admin        All drivers / passengers / all
+//  Broadcast alert         Admin        All drivers/passengers/all
 //  Trip started            Admin        Driver of that bus
-//
-// NOTIFICATION DELIVERY FLOW:
-//
-//   Controller calls fcmService.notifyXxx()
-//         ↓
-//   fcmService fetches FCM token from Firestore
-//   (token was saved when user logged in on mobile)
-//         ↓
-//   fcmService calls Firebase admin.messaging().send()
-//         ↓
-//   Firebase pushes notification to device
 //
 // FAILED NOTIFICATION HANDLING:
 //   If fcmToken is null    → skip silently, log warning
-//   If token is invalid    → log error, remove bad token
+//   If token is invalid    → remove bad token from Firestore
 //   If send fails          → log error, never crash request
-//   Always wrap in try/catch so one bad token
-//   never blocks the main operation
-//
-// MULTICAST (multiple devices at once):
-//   Used for: broadcast, delay alerts, SOS to all admins
-//   Firebase supports up to 500 tokens per multicast call
-//   If more than 500 → split into batches of 500
 // ════════════════════════════════════════════════════
 
 const { fcm, firestoreDb } = require('../config/firebase')
+
+
+// ── Helper: Remove invalid token from Firestore ────
+const removeInvalidToken = async (token) => {
+    try {
+        const snap = await firestoreDb
+            .collection('users')
+            .where('fcmToken', '==', token)
+            .get()
+        for (const doc of snap.docs) {
+            await doc.ref.update({ fcmToken: null })
+            console.warn(`[FCM] Removed invalid token for user ${doc.id}`)
+        }
+    } catch (error) {
+        console.error('[FCM] Failed to remove invalid token:', error.message)
+    }
+}
 
 
 // ── Helper: Get FCM token for a single user ────────
@@ -84,18 +83,34 @@ const sendToOne = async (token, title, body, data = {}) => {
             notification: { title, body },
             data,
             token,
-            android: { priority: 'high' },
+            android: {
+                priority: 'high',
+                notification: {
+                    sound:       'default',
+                    clickAction: 'FLUTTER_NOTIFICATION_CLICK'
+                }
+            },
             apns: {
                 payload: {
-                    aps: { sound: 'default' }
+                    aps: {
+                        sound: 'default',
+                        badge: 1
+                    }
                 }
             }
         }
+
         const response = await fcm.send(message)
-        console.log(`[FCM] Sent successfully → ${response}`)
+        console.log(`[FCM] ✅ Sent successfully → ${response}`)
         return { success: true }
+
     } catch (error) {
-        console.error(`[FCM] Send failed:`, error.message)
+        // Remove invalid/expired tokens automatically
+        if (error.code === 'messaging/invalid-registration-token' ||
+            error.code === 'messaging/registration-token-not-registered') {
+            await removeInvalidToken(token)
+        }
+        console.error(`[FCM] ❌ Send failed:`, error.message)
         return { success: false, error: error.message }
     }
 }
@@ -109,33 +124,34 @@ const sendToMany = async (tokens, title, body, data = {}) => {
     }
 
     // Split into batches of 500 (Firebase limit)
-    const batches     = []
-    const batchSize   = 500
-
-    for (let i = 0; i < tokens.length; i += batchSize) {
-        batches.push(tokens.slice(i, i + batchSize))
-    }
-
+    const batchSize  = 500
     let successCount = 0
     let failureCount = 0
 
-    for (const batch of batches) {
+    for (let i = 0; i < tokens.length; i += batchSize) {
+        const batch = tokens.slice(i, i + batchSize)
         try {
             const message = {
                 notification: { title, body },
                 data,
                 tokens: batch,
-                android: { priority: 'high' },
+                android: {
+                    priority: 'high',
+                    notification: { sound: 'default' }
+                },
                 apns: {
                     payload: {
-                        aps: { sound: 'default' }
+                        aps: { sound: 'default', badge: 1 }
                     }
                 }
             }
-            const response = await fcm.sendEachForMulticast(message)
-            successCount  += response.successCount
-            failureCount  += response.failureCount
-            console.log(`[FCM] Batch sent → Success: ${response.successCount} Failed: ${response.failureCount}`)
+
+            const response  = await fcm.sendEachForMulticast(message)
+            successCount   += response.successCount
+            failureCount   += response.failureCount
+
+            console.log(`[FCM] Batch sent → ✅ ${response.successCount} ❌ ${response.failureCount}`)
+
         } catch (error) {
             console.error('[FCM] Batch send failed:', error.message)
             failureCount += batch.length
@@ -146,35 +162,39 @@ const sendToMany = async (tokens, title, body, data = {}) => {
 }
 
 
-// ══════════════════════════════════════════════
+// ══════════════════════════════════════════════════
 // NOTIFICATION FUNCTIONS
-// ══════════════════════════════════════════════
+// ══════════════════════════════════════════════════
 
 
 // ── 1. Passenger Boarded → Notify Parent ──────────
-const notifyBoarded = async (parentUid, passengerName) => {
+const notifyBoarded = async (parentUid, passengerName, busNumber = '', stopName = '') => {
     const token = await getToken(parentUid)
-    if (!token) return
+    if (!token) return { success: false, reason: 'No FCM token' }
 
-    await sendToOne(
+    return await sendToOne(
         token,
-        'RIDESAFE 🚌 — Boarded',
-        `${passengerName} has boarded the bus and is on the way!`,
-        { type: 'boarded', passengerName }
+        'RIDESAFE 🚌 — Student Boarded',
+        busNumber
+            ? `${passengerName} has boarded ${busNumber} at ${stopName} and is on the way!`
+            : `${passengerName} has boarded the bus and is on the way!`,
+        { type: 'boarded', passengerName, busNumber, stopName }
     )
 }
 
 
 // ── 2. Passenger Dropped → Notify Parent ──────────
-const notifyDropped = async (parentUid, passengerName) => {
+const notifyDropped = async (parentUid, passengerName, stopName = '') => {
     const token = await getToken(parentUid)
-    if (!token) return
+    if (!token) return { success: false, reason: 'No FCM token' }
 
-    await sendToOne(
+    return await sendToOne(
         token,
         'RIDESAFE 🏠 — Dropped Safely',
-        `${passengerName} has been safely dropped at the stop!`,
-        { type: 'dropped', passengerName }
+        stopName
+            ? `${passengerName} has been safely dropped at ${stopName}!`
+            : `${passengerName} has been safely dropped at the stop!`,
+        { type: 'dropped', passengerName, stopName }
     )
 }
 
@@ -183,7 +203,7 @@ const notifyDropped = async (parentUid, passengerName) => {
 const notifySOS = async (adminUids, busId, message) => {
     const tokens = await getTokens(adminUids)
 
-    await sendToMany(
+    return await sendToMany(
         tokens,
         '🚨 SOS ALERT — RIDESAFE',
         `Bus ${busId}: ${message || 'Driver triggered SOS. Immediate attention required.'}`,
@@ -196,7 +216,7 @@ const notifySOS = async (adminUids, busId, message) => {
 const notifyDelay = async (passengerUids, busId, delayMinutes, reason) => {
     const tokens = await getTokens(passengerUids)
 
-    await sendToMany(
+    return await sendToMany(
         tokens,
         'RIDESAFE ⏱️ — Bus Delayed',
         `Bus ${busId} is delayed by ${delayMinutes} minutes. ${reason || ''}`.trim(),
@@ -209,7 +229,7 @@ const notifyDelay = async (passengerUids, busId, delayMinutes, reason) => {
 const notifyETA = async (parentUids, etaMinutes, stopName) => {
     const tokens = await getTokens(parentUids)
 
-    await sendToMany(
+    return await sendToMany(
         tokens,
         'RIDESAFE 📍 — Bus ETA Update',
         `Bus arriving at ${stopName} in approximately ${etaMinutes} minutes.`,
@@ -228,9 +248,9 @@ const broadcastToUsers = async (uids, title, message) => {
 // ── 7. Trip Started → Notify Driver ───────────────
 const notifyTripStarted = async (driverUid, busNumber, routeName) => {
     const token = await getToken(driverUid)
-    if (!token) return
+    if (!token) return { success: false, reason: 'No FCM token' }
 
-    await sendToOne(
+    return await sendToOne(
         token,
         'RIDESAFE 🟢 — Trip Started',
         `Your trip for Bus ${busNumber} on ${routeName} has been started.`,
