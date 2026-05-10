@@ -167,6 +167,19 @@ const createDriver = async (req, res) => {
             createdAt: new Date().toISOString()
         })
 
+        await fcmService.notifyAssignment(user.uid, {
+            role: 'driver',
+            name,
+            assignedBusId: bus.id,
+            assignedBusNumber: bus.busNumber || null,
+            assignedRouteId: route?.routeId || bus.routeId || null,
+            assignedRouteName: route?.routeName || null,
+            assignedLocationId,
+            assignedLocationName
+        }).catch((error) => {
+            console.warn('[adminController] driver assignment notification failed:', error.message)
+        })
+
         await firestoreDb.collection('drivers').doc(user.uid).set({
             uid: user.uid, name, phone, licenseNo,
             busId,
@@ -255,6 +268,19 @@ const createPassenger = async (req, res) => {
             assignedLocationName,
             createdBy: scope.adminUid,
             createdAt: new Date().toISOString()
+        })
+
+        await fcmService.notifyAssignment(user.uid, {
+            role: 'passenger',
+            name,
+            assignedBusId: bus.id,
+            assignedBusNumber: bus.busNumber || null,
+            assignedRouteId: route?.routeId || bus.routeId || null,
+            assignedRouteName: route?.routeName || null,
+            assignedLocationId,
+            assignedLocationName
+        }).catch((error) => {
+            console.warn('[adminController] passenger assignment notification failed:', error.message)
         })
 
         await firestoreDb.collection('passengers').doc(user.uid).set({
@@ -711,7 +737,11 @@ const broadcastAlert = async (req, res) => {
             .map(d => ({ id: d.id, ...d.data() }))
             .filter(user => targetRole === 'all' || user.role === targetRole)
             .map(user => user.id)
-        const result   = await fcmService.broadcastToUsers(uids, title, message)
+        const result   = await fcmService.broadcastToUsers(uids, title, message, {
+            targetRole: targetRole || 'all',
+            institutionId: scope.institutionId || '',
+            institutionName: scope.institutionName || ''
+        })
 
         res.json({ message: 'Broadcast sent', ...result })
 

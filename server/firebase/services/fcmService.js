@@ -239,9 +239,12 @@ const notifyETA = async (parentUids, etaMinutes, stopName) => {
 
 
 // ── 6. Broadcast → All Drivers / Passengers / All ─
-const broadcastToUsers = async (uids, title, message) => {
+const broadcastToUsers = async (uids, title, message, data = {}) => {
     const tokens = await getTokens(uids)
-    return await sendToMany(tokens, title, message, { type: 'broadcast' })
+    return await sendToMany(tokens, title, message, {
+        type: 'broadcast',
+        ...data
+    })
 }
 
 
@@ -259,6 +262,44 @@ const notifyTripStarted = async (driverUid, busNumber, routeName) => {
 }
 
 
+// ── 8. Assignment Created → Notify Assigned User ──
+const notifyAssignment = async (uid, assignment = {}) => {
+    const token = await getToken(uid)
+    if (!token) return { success: false, reason: 'No FCM token' }
+
+    const {
+        role = 'user',
+        name = 'User',
+        assignedBusId = '',
+        assignedBusNumber = '',
+        assignedRouteId = '',
+        assignedRouteName = '',
+        assignedLocationId = '',
+        assignedLocationName = ''
+    } = assignment
+
+    const title = role === 'driver'
+        ? 'RIDESAFE 🚌 — Driver Assigned'
+        : 'RIDESAFE 🎫 — Passenger Assigned'
+
+    const body = assignedBusNumber
+        ? `${name} is assigned to bus ${assignedBusNumber}${assignedLocationName ? ` at ${assignedLocationName}` : ''}.`
+        : `${name} assignment has been updated.`
+
+    return await sendToOne(token, title, body, {
+        type: 'assignment',
+        role,
+        name,
+        assignedBusId,
+        assignedBusNumber,
+        assignedRouteId,
+        assignedRouteName,
+        assignedLocationId,
+        assignedLocationName
+    })
+}
+
+
 module.exports = {
     notifyBoarded,
     notifyDropped,
@@ -266,5 +307,6 @@ module.exports = {
     notifyDelay,
     notifyETA,
     broadcastToUsers,
-    notifyTripStarted
+    notifyTripStarted,
+    notifyAssignment
 }

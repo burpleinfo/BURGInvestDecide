@@ -6,21 +6,33 @@ const fcmService = require('../services/fcmService')
 
 async function run() {
   try {
-    const uid = 'test-web-user'
-    const testToken = 'TEST_DEVICE_TOKEN_123'
+    const uid = process.argv[2]
+    const fcmToken = process.argv[3]
+
+    if (!uid || !fcmToken) {
+      console.error('[testFcmSend] Missing arguments!')
+      console.log('[testFcmSend] Usage: node testFcmSend.js <uid> <fcmToken>')
+      console.log('[testFcmSend] Example:')
+      console.log('  node testFcmSend.js XRcCKbX470XdQdNs4DubwMS8bIv1 "dTHQOX4CRUupJhHV46k_X4:APA91b..."')
+      process.exit(1)
+    }
 
     await firestoreDb.collection('users').doc(uid).set({
-      uid,
-      name: 'Test Web User',
-      email: 'test@example.com',
-      role: 'passenger',
-      fcmToken: testToken,
-      createdAt: new Date().toISOString()
+      fcmToken,
     }, { merge: true })
 
-    console.log('[testFcmSend] Test user written with token:', testToken)
+    console.log('[testFcmSend] Updated user token for:', uid)
+    console.log('[testFcmSend] Token:', fcmToken)
 
-    const result = await fcmService.notifyBoarded(uid, 'Test Student', 'TESTBUS', 'Test Stop')
+    const userDoc = await firestoreDb.collection('users').doc(uid).get()
+    const userData = userDoc.data() || {}
+
+    const result = await fcmService.notifyBoarded(
+      uid,
+      userData.name || 'Driver',
+      userData.assignedBusNumber || userData.busNumber || '',
+      userData.assignedLocationName || userData.assignedRouteName || ''
+    )
 
     console.log('[testFcmSend] notifyBoarded result:', result)
   } catch (error) {
