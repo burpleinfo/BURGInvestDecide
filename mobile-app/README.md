@@ -110,6 +110,25 @@ If you use EAS:
 npx eas build --profile development --platform android
 ```
 
+## Required environment variables for token saving
+
+To let the Android build save FCM tokens, provide a reachable backend URL at build time.
+
+Example `.env` values:
+
+```bash
+EXPO_PUBLIC_API_BASE_URL=https://your-backend-domain.com
+EXPO_PUBLIC_SERVER_URL=https://your-backend-domain.com
+EXPO_PUBLIC_FIREBASE_API_KEY=...
+EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN=...
+EXPO_PUBLIC_FIREBASE_PROJECT_ID=...
+EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET=...
+EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=...
+EXPO_PUBLIC_FIREBASE_APP_ID=...
+```
+
+If `EXPO_PUBLIC_API_BASE_URL` is missing, the app now fails fast instead of trying `localhost` on a device.
+
 ## Reset starter scaffold (destructive)
 
 ```bash

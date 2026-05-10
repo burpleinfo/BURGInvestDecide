@@ -6,11 +6,19 @@ import { auth as firebaseAuth } from '@/services/firebase';
  * without depending on third-party HTTP clients.
  */
 
-const API_BASE_URL = Constants.expoConfig?.extra?.apiBaseUrl || 'http://localhost:8000';
+const API_BASE_URL = Constants.expoConfig?.extra?.apiBaseUrl || '';
 
-console.log(`[API Service] Initialized with base URL: ${API_BASE_URL}`);
+console.log(`[API Service] Initialized with base URL: ${API_BASE_URL || '(missing)'}`);
+
+if (!Constants.expoConfig?.extra?.apiBaseUrl) {
+  console.error('[API Service] Missing apiBaseUrl. Set EXPO_PUBLIC_API_BASE_URL (or VITE_API_BASE_URL) to your reachable backend URL before building the app.');
+}
 
 const buildUrl = (path, params) => {
+  if (!API_BASE_URL) {
+    throw new Error('Missing API base URL. Set EXPO_PUBLIC_API_BASE_URL (or VITE_API_BASE_URL) before building the app.');
+  }
+
   const normalizedBase = API_BASE_URL.endsWith('/') ? API_BASE_URL.slice(0, -1) : API_BASE_URL;
   const normalizedPath = path.startsWith('/') ? path : `/${path}`;
   const url = new URL(`${normalizedBase}${normalizedPath}`);

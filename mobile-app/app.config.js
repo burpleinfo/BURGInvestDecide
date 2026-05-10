@@ -9,7 +9,11 @@ dotenv.config({ path: path.resolve(__dirname, '.env.local') });
 
 const googleMapsApiKey = process.env.GOOGLE_MAPS_API_KEY || process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY;
 const serverUrl = process.env.EXPO_PUBLIC_SERVER_URL || process.env.VITE_SERVER_URL || 'http://localhost:8000';
-const apiBaseUrl = process.env.EXPO_PUBLIC_API_BASE_URL || process.env.VITE_API_BASE_URL || 'http://localhost:8000';
+const apiBaseUrl = process.env.EXPO_PUBLIC_API_BASE_URL || process.env.VITE_API_BASE_URL || '';
+
+if (!apiBaseUrl) {
+  console.warn('[mobile-app] EXPO_PUBLIC_API_BASE_URL is not set. The app will not be able to save FCM tokens until a real backend URL is provided.');
+}
 
 const firebaseConfig = {
   apiKey: process.env.EXPO_PUBLIC_FIREBASE_API_KEY || process.env.VITE_FIREBASE_API_KEY,
