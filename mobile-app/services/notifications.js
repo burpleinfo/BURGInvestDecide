@@ -14,8 +14,10 @@ import * as api from './api'
 export const saveFcmTokenToServer = async (token) => {
   if (!token) return { ok: false, reason: 'no-token' }
   try {
-    await api.auth.saveFcmToken(token)
-    return { ok: true }
+    const res = await api.auth.saveFcmToken(token)
+    console.log('[Mobile Notifications] saveFcmToken response:', res)
+    if (res?.ok) return { ok: true }
+    return { ok: false, reason: res?.data || 'unknown-response' }
   } catch (error) {
     console.error('[Mobile Notifications] Failed to save token', error)
     return { ok: false, reason: error.message }

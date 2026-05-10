@@ -58,9 +58,15 @@ export function NotificationPermissionPrompt() {
   const handleAllow = async () => {
     setBusy(true);
     try {
-      await registerAndSavePushToken();
+      const result = await registerAndSavePushToken();
+      if (result.ok) {
+        await dismissPrompt();
+      } else {
+        console.warn('[NotificationPermissionPrompt] token registration failed:', result.reason);
+      }
+    } catch (error) {
+      console.warn('[NotificationPermissionPrompt] token registration threw:', error);
     } finally {
-      await dismissPrompt();
       setBusy(false);
     }
   };
