@@ -98,19 +98,7 @@ export function PassengerProvider({ children }: { children: ReactNode }) {
       const errorMessage = err.response?.data?.error || err.response?.data?.message || err.message || 'Failed to fetch passenger details';
       console.warn('[PassengerContext] Firestore profile unavailable:', errorMessage);
       setError(errorMessage);
-      setPassenger((prev) => prev ? prev : {
-        id: passengerId,
-        uid: passengerId,
-        role: 'passenger',
-        name: 'Passenger',
-        email: '',
-        phone: '',
-        busId: '',
-        busNumber: 'BUS-000',
-        route: 'Assigned Route',
-        status: 'active',
-        burgId: `BURG-${passengerId.slice(0, 6).toUpperCase()}`,
-      });
+      setPassenger((prev) => (prev ? prev : null));
     } finally {
       setIsLoading(false);
     }

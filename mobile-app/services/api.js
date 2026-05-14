@@ -88,19 +88,34 @@ export const auth = {
 };
 
 export const driver = {
-  getProfile: (driverId) => apiClient.get(`/driver/${driverId}`),
-  updateProfile: (driverId, data) => apiClient.put(`/driver/${driverId}`, data),
-  getActiveRides: (driverId) => apiClient.get(`/driver/${driverId}/rides/active`),
-  completeRide: (rideId, data) => apiClient.post(`/rides/${rideId}/complete`, data),
-  updateLocation: (driverId, coordinates) => apiClient.post(`/driver/${driverId}/location`, coordinates),
+  getMyTrip: () => apiClient.get('/driver/my-trip'),
+  getPassengers: () => apiClient.get('/driver/passengers'),
+  markBoarded: (studentId, payload) => apiClient.post(`/driver/mark-boarded/${studentId}`, payload),
+  markAllBoarded: (payload) => apiClient.post('/driver/mark-all-boarded', payload),
+  markDropped: (studentId, payload) => apiClient.post(`/driver/mark-dropped/${studentId}`, payload),
+  completeStop: (stopId, payload) => apiClient.post(`/driver/complete-stop/${stopId}`, payload),
+  shareEta: (payload) => apiClient.post('/driver/share-eta', payload),
+  updateLocation: (payload) => apiClient.post('/driver/update-location', payload),
+  endTrip: (tripId, payload) => apiClient.post(`/driver/end-trip/${tripId}`, payload),
 };
 
 export const passenger = {
-  getProfile: (passengerId) => apiClient.get(`/passenger/${passengerId}`),
-  updateProfile: (passengerId, data) => apiClient.put(`/passenger/${passengerId}`, data),
-  requestRide: (rideData) => apiClient.post('/rides/request', rideData),
-  getRideHistory: (passengerId) => apiClient.get(`/passenger/${passengerId}/rides/history`),
-  cancelRide: (rideId) => apiClient.post(`/rides/${rideId}/cancel`),
+  getProfile: () => apiClient.get('/passenger/me'),
+  getBurgId: () => apiClient.get('/passenger/burg-id'),
+  getQrCode: () => apiClient.get('/passenger/qr-code'),
+  scanQr: (payload) => apiClient.post('/passenger/scan-qr', payload),
+  getLiveLocation: (busId) => apiClient.get(`/passenger/live-location/${busId}`),
+  getEta: (busId, params) => apiClient.get(`/passenger/eta/${busId}`, { params }),
+  getTripStatus: () => apiClient.get('/passenger/trip-status'),
+  getNearestStop: (params) => apiClient.get('/passenger/nearest-stop', { params }),
+  getDriverInfo: (busId) => apiClient.get(`/passenger/driver-info/${busId}`),
+};
+
+export const payment = {
+  getFare: (busId) => apiClient.get(`/payment/fare/${busId}`),
+  pay: (payload) => apiClient.post('/payment/pay', payload),
+  history: () => apiClient.get('/payment/history'),
+  receipt: (paymentId) => apiClient.get(`/payment/receipt/${paymentId}`),
 };
 
 export const rides = {

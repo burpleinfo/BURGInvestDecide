@@ -1,22 +1,55 @@
-import { StyleSheet, Text, View } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import { useEffect, useState } from 'react';
+import { ActivityIndicator, Image, StyleSheet, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 
 import { AppButton } from '@/components/common/AppButton';
 import { AppColors, Fonts } from '@/constants/theme';
+import { passenger as passengerApi } from '@/services/api';
 
 export default function PassengerScanScreen() {
   const router = useRouter();
+  const [qrCode, setQrCode] = useState('');
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    let mounted = true;
+
+    const loadQrCode = async () => {
+      setIsLoading(true);
+      setError('');
+      try {
+        const response = await passengerApi.getQrCode();
+        if (!mounted) return;
+        setQrCode(response?.data?.qrCode || '');
+      } catch (err) {
+        if (!mounted) return;
+        setError(err?.message || 'Failed to load QR code');
+      } finally {
+        if (mounted) {
+          setIsLoading(false);
+        }
+      }
+    };
+
+    loadQrCode();
+    return () => { mounted = false; };
+  }, []);
 
   return (
     <View style={styles.container}>
-      <View style={styles.cameraMock}>
-        <Ionicons name="camera" size={56} color={AppColors.card} />
-        <Text style={styles.cameraText}>Camera preview</Text>
+      <View style={styles.qrCard}>
+        {isLoading ? (
+          <ActivityIndicator color={AppColors.teal} />
+        ) : qrCode ? (
+          <Image source={{ uri: qrCode }} style={styles.qrImage} />
+        ) : (
+          <Text style={styles.qrError}>{error || 'QR code unavailable'}</Text>
+        )}
       </View>
-      <Text style={styles.title}>Scan bus QR</Text>
+      <Text style={styles.title}>Show this QR to your driver</Text>
       <Text style={styles.subtitle}>
-        Align the QR inside the frame to check in with your bus.
+        Your driver will scan this code to mark you onboarded.
       </Text>
       <AppButton title="Back to Home" onPress={() => router.back()} />
     </View>
@@ -31,17 +64,21 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     gap: 16,
   },
-  cameraMock: {
-    height: 320,
+  qrCard: {
+    height: 280,
     borderRadius: 24,
-    backgroundColor: AppColors.ink,
+    backgroundColor: AppColors.surface,
     alignItems: 'center',
     justifyContent: 'center',
     gap: 8,
   },
-  cameraText: {
-    color: AppColors.card,
-    opacity: 0.7,
+  qrImage: {
+    width: 220,
+    height: 220,
+  },
+  qrError: {
+    color: AppColors.muted,
+    fontSize: 12,
   },
   title: {
     fontFamily: Fonts.rounded,

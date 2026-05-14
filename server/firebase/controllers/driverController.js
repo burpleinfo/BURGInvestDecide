@@ -30,7 +30,7 @@
 // ════════════════════════════════════════════════════
 // SYSTEM DESIGN #3 — Notification Flow
 // ════════════════════════════════════════════════════
-// markBoarded()  → FCM to parent with bus + stop info
+// markBoarded()  → FCM to passenger with bus + stop info
 // markDropped()  → FCM to parent with stop info
 // triggerSOS()   → FCM to ALL admins immediately
 // shareETA()     → FCM to parents at that stop
@@ -130,20 +130,32 @@ const markBoarded = async (req, res) => {
             return res.status(400).json({ error: 'tripId is required' })
         }
 
-        // Update trip in Firestore
-        await firestoreDb.collection('trips').doc(tripId).update({
-            boardedPassengers: FieldValue.arrayUnion(studentId)
-        })
-
-        // Get passenger details
-        const passengerDoc = await firestoreDb
+        // Get passenger details by doc id first, then fallback to uid lookup
+        let passengerDoc = await firestoreDb
             .collection('passengers').doc(studentId).get()
+
+        if (!passengerDoc.exists) {
+            const passengerByUidSnap = await firestoreDb
+                .collection('passengers')
+                .where('uid', '==', studentId)
+                .limit(1)
+                .get()
+            if (!passengerByUidSnap.empty) {
+                passengerDoc = passengerByUidSnap.docs[0]
+            }
+        }
 
         if (!passengerDoc.exists) {
             return res.status(404).json({ error: 'Passenger not found' })
         }
 
         const passenger = passengerDoc.data()
+        const passengerUid = passenger?.uid || studentId
+
+        // Store canonical auth UID in trip so passenger trip-status works reliably
+        await firestoreDb.collection('trips').doc(tripId).update({
+            boardedPassengers: FieldValue.arrayUnion(passengerUid)
+        })
 
         // Get bus number for notification
         const driverDoc = await firestoreDb
@@ -154,19 +166,22 @@ const markBoarded = async (req, res) => {
             .collection('buses').doc(busId).get()
         const busNumber = busDoc.exists ? busDoc.data().busNumber : ''
 
-        // Notify parent with bus + stop details
-        await fcmService.notifyBoarded(
-            passenger.parentUid,
+        // Notify passenger with bus + stop details
+        const notifyResult = await fcmService.notifyBoarded(
+            passengerUid,
             passenger.name,
             busNumber,
             stopName || 'the stop'
         )
 
         res.json({
-            message: `${passenger.name} marked as boarded. Parent notified.`,
+            message: `${passenger.name} marked as boarded. Passenger notified.`,
             studentName: passenger.name,
+            passengerUid,
             busNumber,
-            stopName: stopName || 'the stop'
+            stopName: stopName || 'the stop',
+            notificationSent: !!notifyResult?.success,
+            notificationReason: notifyResult?.success ? null : (notifyResult?.reason || notifyResult?.error || 'send-failed')
         })
 
     } catch (error) {
@@ -233,7 +248,10 @@ const markAllBoarded = async (req, res) => {
             .where('busId', '==', busId)
             .get()
 
-        const allIds = passengersSnap.docs.map(d => d.id)
+        const allIds = passengersSnap.docs.map((d) => {
+            const data = d.data() || {}
+            return data.uid || d.id
+        })
 
         // Update trip
         await firestoreDb.collection('trips').doc(tripId).update({
@@ -244,22 +262,25 @@ const markAllBoarded = async (req, res) => {
         const busDoc    = await firestoreDb.collection('buses').doc(busId).get()
         const busNumber = busDoc.exists ? busDoc.data().busNumber : ''
 
-        // Notify all parents
+        // Notify all passengers
         const notifyPromises = passengersSnap.docs.map(d => {
             const passenger = d.data()
             return fcmService.notifyBoarded(
-                passenger.parentUid,
+                passenger?.uid || d.id,
                 passenger.name,
                 busNumber,
                 stopName || 'the stop'
             )
         })
 
-        await Promise.all(notifyPromises)
+        const notifyResults = await Promise.all(notifyPromises)
+        const notifiedCount = notifyResults.filter(r => r?.success).length
 
         res.json({
-            message: `All ${allIds.length} passengers marked as boarded. Parents notified.`,
-            count:   allIds.length
+            message: `All ${allIds.length} passengers marked as boarded. Passengers notified.`,
+            count:   allIds.length,
+            notificationSentCount: notifiedCount,
+            notificationFailedCount: allIds.length - notifiedCount
         })
 
     } catch (error) {

@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useEffect, useState, useCallback, ReactNode } from 'react';
-import { signInWithEmailAndPassword, signOut, onAuthStateChanged } from 'firebase/auth';
+import { signInWithEmailAndPassword, signOut, onAuthStateChanged, getIdTokenResult } from 'firebase/auth';
 
 import { auth as firebaseAuth } from '@/services/firebase';
 import { fetchAppProfile } from '@/services/profileStore';
@@ -22,8 +22,9 @@ export interface AuthUser {
 interface AuthContextType {
   user: AuthUser | null;
   isLoading: boolean;
+  isReady: boolean;
   error: string | null;
-  login: (email: string, password: string) => Promise<AuthUser>;
+  login: (email: string, password: string, roleHint?: AuthUser['role']) => Promise<AuthUser>;
   logout: () => Promise<void>;
   getCurrentUser: () => Promise<void>;
 }
@@ -39,11 +40,12 @@ const STORAGE_KEY = 'ridesafe_auth_user_v1';
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [isReady, setIsReady] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const hydrateUserFromBackend = useCallback(async (firebaseUser) => {
+  const hydrateUserFromBackend = useCallback(async (firebaseUser, roleHint?: AuthUser['role']) => {
     try {
-      const profile = await fetchAppProfile(firebaseUser);
+      const profile = await fetchAppProfile(firebaseUser, roleHint);
 
       return {
         id: profile.uid,
@@ -53,11 +55,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       };
     } catch (err: any) {
       console.warn('[AuthContext] Firestore profile unavailable, using Firebase data:', err?.message);
+      let resolvedRole: AuthUser['role'] = roleHint || 'driver';
+      try {
+        const tokenResult = await getIdTokenResult(firebaseUser, true);
+        const claimRole = tokenResult?.claims?.role;
+        if (claimRole === 'driver' || claimRole === 'passenger' || claimRole === 'admin') {
+          resolvedRole = claimRole;
+        }
+      } catch (tokenError) {
+        console.warn('[AuthContext] Failed to resolve role claims:', tokenError);
+      }
       return {
         id: firebaseUser.uid,
         email: firebaseUser.email || '',
         name: firebaseUser.displayName || 'User',
-        role: 'driver',
+        role: resolvedRole,
       };
     }
   }, []);
@@ -94,12 +106,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   /**
    * Login user
    */
-  const login = useCallback(async (email: string, password: string): Promise<AuthUser> => {
+  const login = useCallback(async (email: string, password: string, roleHint?: AuthUser['role']): Promise<AuthUser> => {
     setIsLoading(true);
     setError(null);
     try {
       const credential = await signInWithEmailAndPassword(firebaseAuth, email, password);
-      const userData = await hydrateUserFromBackend(credential.user);
+      const userData = await hydrateUserFromBackend(credential.user, roleHint);
       setUser(userData);
       try {
         await SecureStore.setItemAsync(STORAGE_KEY, JSON.stringify(userData));
@@ -185,6 +197,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       } catch (err) {
         console.error('Failed to hydrate auth state:', err);
         setUser(null);
+      } finally {
+        setIsReady(true);
       }
     });
 
@@ -194,6 +208,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const value: AuthContextType = {
     user,
     isLoading,
+    isReady,
     error,
     login,
     logout,

@@ -12,22 +12,6 @@ import { useToast } from '@/components/common/Toast';
 import { AppColors, Fonts } from '@/constants/theme';
 import { useDriver } from '@/contexts/DriverContext';
 
-const DRIVER_REGION = {
-  latitude: 37.7749,
-  longitude: -122.4194,
-  latitudeDelta: 0.02,
-  longitudeDelta: 0.02,
-};
-
-const DRIVER_ROUTE = [
-  { latitude: 37.7820, longitude: -122.4325 },
-  { latitude: 37.7764, longitude: -122.4250 },
-  { latitude: 37.7710, longitude: -122.4172 },
-  { latitude: 37.7685, longitude: -122.4098 },
-];
-
-const DRIVER_BUS = DRIVER_ROUTE[2];
-
 export default function DriverDashboardScreen() {
   const { showToast } = useToast();
   const { driver, route, passengers, isLoading } = useDriver();
@@ -57,8 +41,15 @@ export default function DriverDashboardScreen() {
   const mapCoordinates = routeStops
     .filter((stop) => typeof stop.lat === 'number' && typeof stop.lng === 'number')
     .map((stop) => ({ latitude: stop.lat as number, longitude: stop.lng as number }));
-  const mapPath = mapCoordinates.length >= 2 ? mapCoordinates : DRIVER_ROUTE;
-  const busCoordinate = mapPath[Math.min(1, mapPath.length - 1)] || DRIVER_BUS;
+  const mapPath = mapCoordinates.length >= 2 ? mapCoordinates : [];
+  const mapRegion = mapCoordinates.length
+    ? {
+        latitude: mapCoordinates[0].latitude,
+        longitude: mapCoordinates[0].longitude,
+        latitudeDelta: 0.02,
+        longitudeDelta: 0.02,
+      }
+    : null;
 
   return (
     <Screen scroll contentStyle={styles.content}>
@@ -97,20 +88,25 @@ export default function DriverDashboardScreen() {
         </View>
 
         <View style={styles.mapCard}>
-          <MapView style={styles.map} provider={PROVIDER_GOOGLE} initialRegion={DRIVER_REGION}>
-            <Polyline coordinates={mapPath} strokeColor={AppColors.teal} strokeWidth={4} />
-            <Marker coordinate={mapPath[0]} title="Route start" pinColor={AppColors.teal} />
-            <Marker coordinate={busCoordinate} title="Bus" pinColor={AppColors.orange} />
-          </MapView>
-          <View style={styles.speedBadge}>
-            <Ionicons name="speedometer" size={14} color={AppColors.teal} />
-            <Text style={styles.speedText}>28 mph</Text>
-          </View>
+          {mapRegion ? (
+            <MapView style={styles.map} provider={PROVIDER_GOOGLE} initialRegion={mapRegion}>
+              {mapPath.length >= 2 ? (
+                <Polyline coordinates={mapPath} strokeColor={AppColors.teal} strokeWidth={4} />
+              ) : null}
+              {mapCoordinates.map((point, index) => (
+                <Marker key={`${point.latitude}-${point.longitude}-${index}`} coordinate={point} title="Stop" pinColor={AppColors.teal} />
+              ))}
+            </MapView>
+          ) : (
+            <View style={styles.mapPlaceholder}>
+              <Text style={styles.mapPlaceholderText}>Route coordinates not available yet.</Text>
+            </View>
+          )}
         </View>
 
         <View style={styles.gpsRow}>
-          <Ionicons name="checkmark-circle" size={16} color={AppColors.green} />
-          <Text style={styles.gpsText}>GPS shared with passengers</Text>
+          <Ionicons name={driver?.status === 'active' ? 'checkmark-circle' : 'alert-circle'} size={16} color={driver?.status === 'active' ? AppColors.green : AppColors.orange} />
+          <Text style={styles.gpsText}>{driver?.status === 'active' ? 'GPS shared with passengers' : 'GPS updates paused'}</Text>
         </View>
       </AppCard>
 
@@ -244,6 +240,16 @@ const styles = StyleSheet.create({
   speedText: {
     fontSize: 12,
     color: AppColors.text,
+  },
+  mapPlaceholder: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: AppColors.surface,
+  },
+  mapPlaceholderText: {
+    color: AppColors.muted,
+    fontSize: 12,
   },
   gpsRow: {
     marginTop: 10,

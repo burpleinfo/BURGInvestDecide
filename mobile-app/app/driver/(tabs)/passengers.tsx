@@ -8,42 +8,118 @@ import { AppHeader } from '@/components/common/AppHeader';
 import { SkeletonScreen } from '@/components/common/Skeleton';
 import { Screen } from '@/components/common/Screen';
 import { AppColors, Fonts } from '@/constants/theme';
+import { useToast } from '@/components/common/Toast';
 import { useDriver } from '@/contexts/DriverContext';
+import { driver as driverApi } from '@/services/api';
 
 export default function DriverPassengersScreen() {
-  const { passengers, isLoading } = useDriver();
-  const [checked, setChecked] = useState<Record<string, boolean>>(
-    passengers.reduce((acc, passenger) => {
-      acc[passenger.uid] = false;
-      return acc;
-    }, {} as Record<string, boolean>)
-  );
+  const { showToast } = useToast();
+  const { driver, isLoading } = useDriver();
+  const [passengers, setPassengers] = useState([]);
+  const [checked, setChecked] = useState<Record<string, boolean>>({});
+  const [tripId, setTripId] = useState('');
+  const [busId, setBusId] = useState('');
+  const [isFetching, setIsFetching] = useState(false);
 
   useEffect(() => {
-    setChecked((prev) => {
-      const next: Record<string, boolean> = {};
-      passengers.forEach((passenger) => {
-        next[passenger.uid] = prev[passenger.uid] || false;
-      });
-      return next;
-    });
-  }, [passengers]);
+    let mounted = true;
 
-  const togglePassenger = (uid: string) => {
-    setChecked((prev) => ({ ...prev, [uid]: !prev[uid] }));
+    const normalizePassenger = (raw) => ({
+      ...raw,
+      uid: raw?.uid || raw?.id,
+      id: raw?.id || raw?.uid,
+    });
+
+    const loadPassengers = async () => {
+      setIsFetching(true);
+      try {
+        const tripResponse = await driverApi.getMyTrip();
+        const tripData = tripResponse?.data || {};
+
+        if (mounted && tripData?.tripId) {
+          setTripId(tripData.tripId);
+          setBusId(tripData.busId || driver?.busId || '');
+          const nextPassengers = Array.isArray(tripData.passengers)
+            ? tripData.passengers.map(normalizePassenger)
+            : [];
+          setPassengers(nextPassengers);
+
+          const nextChecked: Record<string, boolean> = {};
+          (tripData.boardedPassengers || []).forEach((uid) => {
+            nextChecked[uid] = true;
+          });
+          setChecked(nextChecked);
+          return;
+        }
+
+        const passengersResponse = await driverApi.getPassengers();
+        if (!mounted) return;
+        setTripId('');
+        const nextPassengers = Array.isArray(passengersResponse?.data?.passengers)
+          ? passengersResponse.data.passengers.map(normalizePassenger)
+          : [];
+        setPassengers(nextPassengers);
+        setChecked({});
+        setBusId(driver?.busId || '');
+      } catch (error) {
+        if (!mounted) return;
+        setPassengers([]);
+        setChecked({});
+        setTripId('');
+        setBusId(driver?.busId || '');
+        showToast(error?.message || 'Failed to load passengers', 'error');
+      } finally {
+        if (mounted) {
+          setIsFetching(false);
+        }
+      }
+    };
+
+    loadPassengers();
+    return () => { mounted = false; };
+  }, [driver?.busId, showToast]);
+
+  const togglePassenger = async (uid: string, stopName?: string) => {
+    if (checked[uid]) {
+      return;
+    }
+
+    if (!tripId) {
+      showToast('Start a trip to mark passengers as boarded.', 'error');
+      return;
+    }
+
+    try {
+      await driverApi.markBoarded(uid, { tripId, stopName: stopName || 'the stop' });
+      setChecked((prev) => ({ ...prev, [uid]: true }));
+      showToast('Passenger marked as boarded.', 'success');
+    } catch (error) {
+      showToast(error?.message || 'Failed to mark passenger', 'error');
+    }
   };
 
-  const markAll = () => {
-    const next: Record<string, boolean> = {};
-    passengers.forEach((passenger) => {
-      next[passenger.uid] = true;
-    });
-    setChecked(next);
+  const markAll = async () => {
+    if (!tripId || !busId) {
+      showToast('Start a trip to mark all passengers.', 'error');
+      return;
+    }
+
+    try {
+      await driverApi.markAllBoarded({ tripId, busId, stopName: 'the stop' });
+      const next: Record<string, boolean> = {};
+      passengers.forEach((passenger) => {
+        next[passenger.uid] = true;
+      });
+      setChecked(next);
+      showToast('All passengers marked as boarded.', 'success');
+    } catch (error) {
+      showToast(error?.message || 'Failed to mark all passengers', 'error');
+    }
   };
 
   const boardedCount = passengers.filter((passenger) => checked[passenger.uid]).length;
 
-  if (isLoading) {
+  if (isLoading || isFetching) {
     return (
       <Screen scroll contentStyle={styles.content}>
         <SkeletonScreen cards={4} />
@@ -81,7 +157,7 @@ export default function DriverPassengersScreen() {
                   {checked[passenger.uid] ? 'Boarded' : 'Absent'}
                 </Text>
               </View>
-              <Pressable onPress={() => togglePassenger(passenger.uid)}>
+              <Pressable onPress={() => togglePassenger(passenger.uid, passenger.pickupStop)}>
                 <Ionicons
                   name={checked[passenger.uid] ? 'checkbox' : 'square-outline'}
                   size={26}

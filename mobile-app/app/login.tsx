@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -5,9 +6,27 @@ import { useRouter } from 'expo-router';
 
 import { AppButton } from '@/components/common/AppButton';
 import { AppColors, Fonts } from '@/constants/theme';
+import { useAuth } from '@/contexts/AuthContext';
 
 export default function LoginScreen() {
   const router = useRouter();
+  const { user } = useAuth();
+
+  useEffect(() => {
+    if (!user) return;
+
+    if (user.role === 'driver') {
+      router.replace('/driver');
+      return;
+    }
+
+    if (user.role === 'passenger') {
+      router.replace('/passenger');
+      return;
+    }
+
+    router.replace('/driver');
+  }, [router, user]);
 
   return (
     <SafeAreaView style={styles.container} edges={['top', 'left', 'right']}>

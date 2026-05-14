@@ -302,7 +302,7 @@ const AdminDashboard = () => {
   const { addToast } = useToast();
   const { adminUser, idToken, signOutAdmin } = useAdminAuth();
   const adminToken = idToken || '';
-  const [useLiveData, setUseLiveData] = useState(false);
+  const [useLiveData, setUseLiveData] = useState(true);
   const [liveSocketState, setLiveSocketState] = useState({ connected: false, error: '' });
   const [loadState, setLoadState] = useState({ loading: false, error: '' });
   const [adminProfile, setAdminProfile] = useState(null);
@@ -315,7 +315,7 @@ const AdminDashboard = () => {
     sosAlerts: [],
     revenue: { totalRevenue: '0.00', totalPayments: 0 }
   });
-  const [institutionId, setInstitutionId] = useState(fallbackInstitutions[0].id);
+  const [institutionId, setInstitutionId] = useState('');
   const [lastUpdate, setLastUpdate] = useState(new Date());
   const [mapStatus, setMapStatus] = useState({ status: 'idle', error: '' });
   const [actionPanel, setActionPanel] = useState('');
@@ -600,7 +600,8 @@ const AdminDashboard = () => {
 
   const institutions = useMemo(() => {
     if (adminToken && loadState.loading) return [];
-    return useLiveData ? [derivedInstitution] : fallbackInstitutions;
+    if (!useLiveData) return [];
+    return derivedInstitution ? [derivedInstitution] : [];
   }, [derivedInstitution, useLiveData, adminToken, loadState.loading]);
 
   const showAdminLoading = Boolean(adminToken && loadState.loading);

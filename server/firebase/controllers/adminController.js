@@ -130,6 +130,40 @@ const getRouteForBus = async (scope, bus) => {
     }
 }
 
+const incrementInstitutionCount = async (institutionId, field, delta) => {
+    if (!institutionId || !field || !Number.isFinite(delta) || delta === 0) {
+        return
+    }
+
+    await firestoreDb
+        .collection('institutions')
+        .doc(institutionId)
+        .set({ [field]: FieldValue.increment(delta) }, { merge: true })
+}
+
+const touchInstitutionMetadata = async (institutionId, collectionName, delta = 0) => {
+    if (!institutionId || !collectionName) {
+        return
+    }
+
+    const metadataRef = firestoreDb
+        .collection('institutions')
+        .doc(institutionId)
+        .collection(collectionName)
+        .doc('_metadata')
+
+    const update = {
+        isMetadata: true,
+        lastUpdated: new Date().toISOString()
+    }
+
+    if (Number.isFinite(delta) && delta !== 0) {
+        update.totalCount = FieldValue.increment(delta)
+    }
+
+    await metadataRef.set(update, { merge: true })
+}
+
 
 // ── Create Driver ─────────────────────────────────
 const createDriver = async (req, res) => {
@@ -137,6 +171,8 @@ const createDriver = async (req, res) => {
         const { email, password, name, phone, licenseNo, busId, institutionId, institutionName } = req.body
         const scope = await getAdminScope(req)
         const effectiveScope = resolveEffectiveScope(scope, institutionId, institutionName)
+
+        if (!ensureInstitutionScope(res, effectiveScope)) return
 
         const bus = await assertBusInScope(effectiveScope, busId, res)
         if (!bus) return
@@ -217,6 +253,9 @@ const createDriver = async (req, res) => {
                 status: 'active'
             })
 
+        await incrementInstitutionCount(effectiveScope.institutionId, 'driverCount', 1)
+        await touchInstitutionMetadata(effectiveScope.institutionId, 'drivers', 1)
+
         await firestoreDb.collection('buses').doc(busId).update({
             driverId: user.uid
         })
@@ -235,6 +274,8 @@ const createPassenger = async (req, res) => {
         const { email, password, name, phone, busId, stopId, parentPhone, institutionId, institutionName } = req.body
         const scope = await getAdminScope(req)
         const effectiveScope = resolveEffectiveScope(scope, institutionId, institutionName)
+
+        if (!ensureInstitutionScope(res, effectiveScope)) return
 
         const bus = await assertBusInScope(effectiveScope, busId, res)
         if (!bus) return
@@ -320,6 +361,9 @@ const createPassenger = async (req, res) => {
                 status: 'active'
             })
 
+        await incrementInstitutionCount(effectiveScope.institutionId, 'passengerCount', 1)
+        await touchInstitutionMetadata(effectiveScope.institutionId, 'passengers', 1)
+
         res.status(201).json({ message: `Passenger ${name} created`, uid: user.uid, burgId })
 
     } catch (error) {
@@ -360,6 +404,9 @@ const deleteUser = async (req, res) => {
                 .collection('drivers')
                 .doc(uid)
                 .delete()
+
+            await incrementInstitutionCount(userData.institutionId, 'driverCount', -1)
+            await touchInstitutionMetadata(userData.institutionId, 'drivers', -1)
         }
         if (role === 'passenger') {
             await firestoreDb.collection('passengers').doc(uid).delete()
@@ -370,6 +417,9 @@ const deleteUser = async (req, res) => {
                 .collection('passengers')
                 .doc(uid)
                 .delete()
+
+            await incrementInstitutionCount(userData.institutionId, 'passengerCount', -1)
+            await touchInstitutionMetadata(userData.institutionId, 'passengers', -1)
         }
 
         res.json({ message: `User ${uid} deleted` })
@@ -409,21 +459,38 @@ const getAllPassengers = async (req, res) => {
 // ── Add Bus ───────────────────────────────────────
 const addBus = async (req, res) => {
     try {
-        const { busNumber, capacity, routeId, fare } = req.body
+        const { busNumber, capacity, routeId, fare, institutionId, institutionName } = req.body
         const scope = await getAdminScope(req)
-        if (!ensureInstitutionScope(res, scope)) return
+        const effectiveScope = resolveEffectiveScope(scope, institutionId, institutionName)
+        if (!ensureInstitutionScope(res, effectiveScope)) return
 
-        await assertRouteInScope(scope, routeId, res)
+        if (routeId) {
+            const route = await assertRouteInScope(effectiveScope, routeId, res)
+            if (!route) return
+        }
 
-        const ref = await firestoreDb.collection('buses').add({
+        const createdAt = new Date().toISOString()
+        const busPayload = {
             busNumber, capacity, routeId,
             fare:      fare || 15.00,
             driverId:  null,
-            institutionId: scope.institutionId,
-            institutionName: scope.institutionName || null,
+            institutionId: effectiveScope.institutionId,
+            institutionName: effectiveScope.institutionName || null,
             createdBy: scope.adminUid,
-            createdAt: new Date().toISOString()
-        })
+            createdAt
+        }
+
+        const ref = await firestoreDb.collection('buses').add(busPayload)
+
+        await firestoreDb
+            .collection('institutions')
+            .doc(effectiveScope.institutionId)
+            .collection('buses')
+            .doc(ref.id)
+            .set({ id: ref.id, ...busPayload })
+
+        await incrementInstitutionCount(effectiveScope.institutionId, 'busCount', 1)
+        await touchInstitutionMetadata(effectiveScope.institutionId, 'buses', 1)
 
         res.status(201).json({ message: `Bus ${busNumber} added`, busId: ref.id })
 
@@ -465,6 +532,18 @@ const updateBus = async (req, res) => {
         }
 
         await busRef.update(updatePayload)
+
+        if (updatePayload.institutionId) {
+            await firestoreDb
+                .collection('institutions')
+                .doc(updatePayload.institutionId)
+                .collection('buses')
+                .doc(busId)
+                .set({ id: busId, ...busData, ...updatePayload }, { merge: true })
+
+            await touchInstitutionMetadata(updatePayload.institutionId, 'buses')
+        }
+
         res.json({ message: `Bus ${busId} updated` })
     } catch (error) {
         res.status(500).json({ error: error.message })
@@ -492,6 +571,19 @@ const deleteBus = async (req, res) => {
         }
 
         await busRef.delete()
+
+        const institutionId = busData.institutionId || scope.institutionId
+        if (institutionId) {
+            await firestoreDb
+                .collection('institutions')
+                .doc(institutionId)
+                .collection('buses')
+                .doc(busId)
+                .delete()
+
+            await incrementInstitutionCount(institutionId, 'busCount', -1)
+            await touchInstitutionMetadata(institutionId, 'buses', -1)
+        }
         res.json({ message: `Bus ${busId} deleted` })
     } catch (error) {
         res.status(500).json({ error: error.message })
@@ -515,17 +607,31 @@ const getAllBuses = async (req, res) => {
 // ── Add Route ─────────────────────────────────────
 const addRoute = async (req, res) => {
     try {
-        const { name, stops } = req.body
+        const { name, stops, institutionId, institutionName } = req.body
         const scope = await getAdminScope(req)
-        if (!ensureInstitutionScope(res, scope)) return
+        const effectiveScope = resolveEffectiveScope(scope, institutionId, institutionName)
+        if (!ensureInstitutionScope(res, effectiveScope)) return
 
-        const ref = await firestoreDb.collection('routes').add({
+        const createdAt = new Date().toISOString()
+        const routePayload = {
             name, stops,
-            institutionId: scope.institutionId,
-            institutionName: scope.institutionName || null,
+            institutionId: effectiveScope.institutionId,
+            institutionName: effectiveScope.institutionName || null,
             createdBy: scope.adminUid,
-            createdAt: new Date().toISOString()
-        })
+            createdAt
+        }
+
+        const ref = await firestoreDb.collection('routes').add(routePayload)
+
+        await firestoreDb
+            .collection('institutions')
+            .doc(effectiveScope.institutionId)
+            .collection('routes')
+            .doc(ref.id)
+            .set({ id: ref.id, ...routePayload })
+
+        await incrementInstitutionCount(effectiveScope.institutionId, 'routeCount', 1)
+        await touchInstitutionMetadata(effectiveScope.institutionId, 'routes', 1)
 
         res.status(201).json({ message: `Route ${name} created`, routeId: ref.id })
 
@@ -562,6 +668,18 @@ const updateRoute = async (req, res) => {
         }
 
         await routeRef.update(updatePayload)
+
+        if (updatePayload.institutionId) {
+            await firestoreDb
+                .collection('institutions')
+                .doc(updatePayload.institutionId)
+                .collection('routes')
+                .doc(routeId)
+                .set({ id: routeId, ...routeData, ...updatePayload }, { merge: true })
+
+            await touchInstitutionMetadata(updatePayload.institutionId, 'routes')
+        }
+
         res.json({ message: `Route ${routeId} updated` })
     } catch (error) {
         res.status(500).json({ error: error.message })

@@ -229,8 +229,6 @@ const saveFcmToken = async (req, res) => {
         const { fcmToken } = req.body
         const uid          = req.user.uid
 
-        console.log('[authController] saveFcmToken request:', { uid, fcmToken })
-
         // Use set with merge so token is stored even if the users doc was not created
         await firestoreDb.collection('users').doc(uid).set({ fcmToken }, { merge: true })
 

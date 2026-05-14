@@ -119,5 +119,4 @@ startLiveLocationsSocket(server)
 
 server.listen(PORT, () => {
     console.log(`🚌 RIDESAFE server running on port ${PORT}`)
-    console.log(`CORS allowed origins: ${allowedOrigins.join(', ')}`)
 })

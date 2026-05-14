@@ -1,4 +1,4 @@
-import { Pressable, StyleSheet, Switch, Text, View } from 'react-native';
+import { StyleSheet, Switch, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useState } from 'react';
 import { useRouter } from 'expo-router';
@@ -10,14 +10,12 @@ import { SkeletonScreen } from '@/components/common/Skeleton';
 import { Screen } from '@/components/common/Screen';
 import { AppColors, Fonts } from '@/constants/theme';
 import { usePassenger } from '@/contexts/PassengerContext';
-import { faqs } from '@/data/appData';
 
 export default function PassengerSettingsScreen() {
   const router = useRouter();
   const { passenger, isLoading } = usePassenger();
   const [pushNotifications, setPushNotifications] = useState(true);
   const [shareLocation, setShareLocation] = useState(true);
-  const [expanded, setExpanded] = useState<number | null>(null);
 
   if (isLoading) {
     return (
@@ -72,31 +70,15 @@ export default function PassengerSettingsScreen() {
       <AppCard>
         <Text style={styles.sectionTitle}>Support</Text>
         <View style={styles.supportRow}>
-          <Ionicons name="call" size={18} color={AppColors.card} />
-          <Text style={styles.supportText}>+1-555-0100</Text>
-          <Text style={styles.supportLabel}>Contact support</Text>
+          <Ionicons name="alert-circle" size={18} color={AppColors.card} />
+          <Text style={styles.supportText}>Support contact not configured</Text>
         </View>
         <AppButton title="Report a problem" variant="secondary" />
       </AppCard>
 
       <AppCard>
         <Text style={styles.sectionTitle}>FAQs</Text>
-        {faqs.map((faq, index) => (
-          <Pressable
-            key={faq.question}
-            style={styles.faqCard}
-            onPress={() => setExpanded(expanded === index ? null : index)}>
-            <View style={styles.faqHeader}>
-              <Text style={styles.faqQuestion}>{faq.question}</Text>
-              <Ionicons
-                name={expanded === index ? 'chevron-up' : 'chevron-down'}
-                size={16}
-                color={AppColors.muted}
-              />
-            </View>
-            {expanded === index ? <Text style={styles.faqAnswer}>{faq.answer}</Text> : null}
-          </Pressable>
-        ))}
+        <Text style={styles.faqAnswer}>No FAQs available yet.</Text>
       </AppCard>
 
       <AppButton

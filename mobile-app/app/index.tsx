@@ -4,9 +4,11 @@ import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 
 import { AppColors, Fonts } from '@/constants/theme';
+import { useAuth } from '@/contexts/AuthContext';
 
 export default function SplashScreen() {
   const router = useRouter();
+  const { user, isReady } = useAuth();
   const scale = useRef(new Animated.Value(0.85)).current;
   const opacity = useRef(new Animated.Value(0)).current;
 
@@ -24,12 +26,22 @@ export default function SplashScreen() {
       }),
     ]).start();
 
+    if (!isReady) {
+      return;
+    }
+
+    const nextRoute = user
+      ? user.role === 'driver'
+        ? '/driver'
+        : '/passenger'
+      : '/login';
+
     const timer = setTimeout(() => {
-      router.replace('/login');
+      router.replace(nextRoute);
     }, 2000);
 
     return () => clearTimeout(timer);
-  }, [opacity, router, scale]);
+  }, [isReady, opacity, router, scale, user]);
 
   return (
     <View style={styles.container}>

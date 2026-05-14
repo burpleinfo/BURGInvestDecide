@@ -54,7 +54,6 @@ const getToken = async (uid) => {
         }
         const token = doc.data().fcmToken
         if (!token) {
-            console.warn(`[FCM] No FCM token for user ${uid}`)
             return null
         }
         return token
@@ -167,17 +166,19 @@ const sendToMany = async (tokens, title, body, data = {}) => {
 // ══════════════════════════════════════════════════
 
 
-// ── 1. Passenger Boarded → Notify Parent ──────────
-const notifyBoarded = async (parentUid, passengerName, busNumber = '', stopName = '') => {
-    const token = await getToken(parentUid)
+// ── 1. Passenger Boarded → Notify Passenger ───────
+const notifyBoarded = async (passengerUid, passengerName, busNumber = '', stopName = '') => {
+    const token = await getToken(passengerUid)
     if (!token) return { success: false, reason: 'No FCM token' }
+
+    const message = passengerName
+        ? `${passengerName}, you are onboarded. Have a safe journey.`
+        : 'You are onboarded. Have a safe journey.'
 
     return await sendToOne(
         token,
-        'RIDESAFE 🚌 — Student Boarded',
-        busNumber
-            ? `${passengerName} has boarded ${busNumber} at ${stopName} and is on the way!`
-            : `${passengerName} has boarded the bus and is on the way!`,
+        'RIDESAFE 🚌 — Boarding Confirmed',
+        message,
         { type: 'boarded', passengerName, busNumber, stopName }
     )
 }

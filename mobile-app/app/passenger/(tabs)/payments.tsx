@@ -1,6 +1,6 @@
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 import { AppButton } from '@/components/common/AppButton';
 import { AppCard } from '@/components/common/AppCard';
@@ -8,7 +8,8 @@ import { AppHeader } from '@/components/common/AppHeader';
 import { Screen } from '@/components/common/Screen';
 import { useToast } from '@/components/common/Toast';
 import { AppColors, Fonts } from '@/constants/theme';
-import { paymentHistory } from '@/data/appData';
+import { usePassenger } from '@/contexts/PassengerContext';
+import { payment as paymentApi } from '@/services/api';
 
 const paymentTabs = ['Pay Now', 'Payment History'] as const;
 const methods = ['Card', 'UPI', 'Net Banking'] as const;
@@ -19,8 +20,71 @@ type PaymentMethod = (typeof methods)[number];
 
 export default function PassengerPaymentsScreen() {
   const { showToast } = useToast();
+  const { passenger } = usePassenger();
   const [activeTab, setActiveTab] = useState<PaymentTab>('Pay Now');
   const [method, setMethod] = useState<PaymentMethod>('Card');
+  const [fare, setFare] = useState(0);
+  const [history, setHistory] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
+
+  const fareLabel = useMemo(() => (fare ? `$${fare.toFixed(2)}` : '—'), [fare]);
+
+  useEffect(() => {
+    let mounted = true;
+
+    const loadPayments = async () => {
+      if (!passenger?.busId) {
+        setHistory([]);
+        setFare(0);
+        return;
+      }
+
+      setIsLoading(true);
+      setError('');
+      try {
+        const [fareRes, historyRes] = await Promise.all([
+          paymentApi.getFare(passenger.busId),
+          paymentApi.history(),
+        ]);
+
+        if (!mounted) return;
+
+        setFare(Number(fareRes?.data?.fare || 0));
+        setHistory(Array.isArray(historyRes?.data?.payments) ? historyRes.data.payments : []);
+      } catch (err) {
+        if (!mounted) return;
+        setError(err?.message || 'Failed to load payments');
+      } finally {
+        if (mounted) {
+          setIsLoading(false);
+        }
+      }
+    };
+
+    loadPayments();
+    return () => { mounted = false; };
+  }, [passenger?.busId]);
+
+  const handlePay = async () => {
+    if (!passenger?.busId) {
+      showToast('Assign a bus before making payments.', 'error');
+      return;
+    }
+
+    try {
+      const methodValue = method === 'Card' ? 'card' : method === 'UPI' ? 'upi' : 'netbanking';
+      await paymentApi.pay({
+        busId: passenger.busId,
+        amount: fare || 0,
+        method: methodValue,
+        details: methodValue,
+      });
+      showToast('Payment successful', 'success');
+    } catch (err) {
+      showToast(err?.message || 'Payment failed', 'error');
+    }
+  };
 
   return (
     <Screen scroll contentStyle={styles.content}>
@@ -42,11 +106,11 @@ export default function PassengerPaymentsScreen() {
           <AppCard>
             <View style={styles.amountRow}>
               <Text style={styles.amountLabel}>Fare</Text>
-              <Text style={styles.amountValue}>$15.00</Text>
+              <Text style={styles.amountValue}>{fareLabel}</Text>
             </View>
             <View style={styles.amountRow}>
               <Text style={styles.amountLabel}>Total Due</Text>
-              <Text style={styles.amountTotal}>$15.00</Text>
+              <Text style={styles.amountTotal}>{fareLabel}</Text>
             </View>
           </AppCard>
 
@@ -102,24 +166,36 @@ export default function PassengerPaymentsScreen() {
           </AppCard>
 
           <AppButton
-            title="Pay $15.00"
-            onPress={() => showToast('Payment successful', 'success')}
+            title={fare ? `Pay ${fareLabel}` : 'Pay'}
+            onPress={handlePay}
           />
         </View>
       ) : (
         <View style={{ gap: 12 }}>
-          {paymentHistory.map((payment) => (
-            <AppCard key={payment.route}>
+          {isLoading ? (
+            <AppCard>
+              <Text style={styles.historyRoute}>Loading payments...</Text>
+            </AppCard>
+          ) : error ? (
+            <AppCard>
+              <Text style={styles.historyRoute}>{error}</Text>
+            </AppCard>
+          ) : history.length === 0 ? (
+            <AppCard>
+              <Text style={styles.historyRoute}>No payments yet.</Text>
+            </AppCard>
+          ) : history.map((payment) => (
+            <AppCard key={payment.id}>
               <View style={styles.historyHeader}>
-                <Text style={styles.historyRoute}>{payment.route}</Text>
+                <Text style={styles.historyRoute}>{payment.method || 'Payment'}</Text>
                 <View style={styles.paidBadge}>
                   <Ionicons name="checkmark-circle" size={14} color={AppColors.green} />
-                  <Text style={styles.paidText}>{payment.status}</Text>
+                  <Text style={styles.paidText}>{payment.status || 'Paid'}</Text>
                 </View>
               </View>
               <View style={styles.amountRow}>
-                <Text style={styles.amountLabel}>{payment.date}</Text>
-                <Text style={styles.amountValue}>{payment.amount}</Text>
+                <Text style={styles.amountLabel}>{payment.createdAt || '—'}</Text>
+                <Text style={styles.amountValue}>${Number(payment.amount || 0).toFixed(2)}</Text>
               </View>
             </AppCard>
           ))}

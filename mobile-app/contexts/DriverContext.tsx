@@ -119,21 +119,7 @@ export function DriverProvider({ children }: { children: ReactNode }) {
       const errorMessage = err.response?.data?.error || err.response?.data?.message || err.message || 'Failed to fetch driver details';
       console.warn('[DriverContext] Firestore profile unavailable:', errorMessage);
       setError(errorMessage);
-      setDriver((prev) => prev ? prev : {
-        id: driverId,
-        uid: driverId,
-        role: 'driver',
-        name: 'Driver',
-        email: '',
-        phone: '',
-        busId: '',
-        busNumber: 'BUS-000',
-        busType: 'School Bus',
-        route: 'Assigned Route',
-        status: 'active',
-        licenseNumber: 'N/A',
-        licenseExpiry: 'N/A',
-      });
+      setDriver((prev) => (prev ? prev : null));
     } finally {
       setIsLoading(false);
     }
@@ -246,7 +232,15 @@ export function DriverProvider({ children }: { children: ReactNode }) {
     const unsubPassengers = subscribeToInstitutionPassengers(
       driver.institutionId,
       (nextPassengers) => {
-        setPassengers(nextPassengers);
+        if (!driver?.busId) {
+          setPassengers(nextPassengers);
+          return;
+        }
+
+        const filtered = nextPassengers.filter((passenger) =>
+          passenger.busNumber === driver.busNumber
+        );
+        setPassengers(filtered);
       },
       (listenerError) => {
         console.warn('[DriverContext] Passenger listener error:', listenerError.message);

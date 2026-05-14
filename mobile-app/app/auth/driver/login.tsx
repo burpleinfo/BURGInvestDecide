@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { KeyboardAvoidingView, Platform, StyleSheet, Text, TextInput, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
@@ -11,11 +11,27 @@ import { useAuth } from '@/contexts/AuthContext';
 export default function DriverLoginScreen() {
   const router = useRouter();
   const { showToast } = useToast();
-  const { login, isLoading } = useAuth();
+  const { login, isLoading, user } = useAuth();
   
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+
+  useEffect(() => {
+    if (!user) return;
+
+    if (user.role === 'driver') {
+      router.replace('/driver');
+      return;
+    }
+
+    if (user.role === 'passenger') {
+      router.replace('/passenger');
+      return;
+    }
+
+    router.replace('/login');
+  }, [router, user]);
 
   const handleSubmit = async () => {
     if (!email || !password) {
@@ -24,7 +40,7 @@ export default function DriverLoginScreen() {
     }
 
     try {
-      await login(email, password);
+      await login(email, password, 'driver');
       showToast('Welcome back, driver!', 'success');
       
       router.replace('/driver');

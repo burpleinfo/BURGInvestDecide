@@ -27,11 +27,11 @@ const firebaseConfig = {
 
 const iosConfig = { supportsTablet: true };
 const androidConfig = {
-  adaptiveIcon: {
+    adaptiveIcon: {
     backgroundColor: '#EBF0F6',
-    foregroundImage: './assets/images/android-icon-foreground.png',
+    foregroundImage: './assets/images/burglogo.jpg',
     backgroundImage: './assets/images/android-icon-background.png',
-    monochromeImage: './assets/images/android-icon-monochrome.png',
+    monochromeImage: './assets/images/burglogo.jpg',
   },
   edgeToEdgeEnabled: true,
   predictiveBackGestureEnabled: false,
@@ -56,7 +56,7 @@ module.exports = {
     slug: 'mobile-app',
     version: '1.0.0',
     orientation: 'portrait',
-    icon: './assets/images/icon.png',
+    icon: './assets/images/burglogo.jpg',
     scheme: 'mobileapp',
     userInterfaceStyle: 'automatic',
     newArchEnabled: true,
@@ -64,14 +64,14 @@ module.exports = {
     android: androidConfig,
     web: {
       output: 'static',
-      favicon: './assets/images/favicon.png',
+      favicon: './assets/images/burglogo.jpg',
     },
     plugins: [
       'expo-router',
       [
         'expo-splash-screen',
         {
-          image: './assets/images/splash-icon.png',
+          image: './assets/images/burglogo.jpg',
           imageWidth: 200,
           resizeMode: 'contain',
           backgroundColor: '#EBF0F6',
